@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div id="main">
+
+	<!-- Post -->
+		<article class="post text-center">
+			
+			{% if current_user.is_authenticated %}
+				<p>You are logged in...</p>
+				<a href="/logout">Log Out</a>
+			{% else %}
+				{% if login_failed == 'true' %}
+				<p><font color="red">Your Username and/or Password is incorrect. Please try again.</font></p>
+				{% endif %}
+				
+				<div class="col-lg-6 center">
+				<form method="POST" action="/">
+					<!--<h3>USERNAME</h3>-->
+				    <p class="input-group input-group-lg">
+				    	<span class="input-group-addon" id="username-addon1"><i class="fa fa-user"></i></span>
+				    	<input type="text" name="username" class="form-control" placeholder="Username" aria-describedby="username-addon1" />
+				    </p>
+				    <!--<h3>PASSWORD</h3>-->
+					<p class="input-group input-group-lg">
+						<span class="input-group-addon" id="password-addon1"><i class="fa fa-key"></i></span>
+						<input type="password" name="password" class="form-control" placeholder="Password" aria-describedby="password-addon1" /></p>
+					<div class="text-center"><input type="submit" value="Sign In" name="submit" class="button" /></div>
+				</form>
+				</div>
+			{% endif %}
+		</article>
+		
+</div>
+{% endblock %}
