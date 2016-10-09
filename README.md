@@ -1,9 +1,9 @@
 # M-VU: MURIDAE VISULIZATION UTILITY
 
-Modules:
-Postgresql
-Flask
-Flask_Login
-Flask-SocketIO
-python-psycopg2
-postgresql-contrib-9.3
+<b>Modules:</b><br/>
+Postgresql<br/>
+Flask<br/>
+Flask_Login<br/>
+Flask-SocketIO<br/>
+python-psycopg2<br/>
+postgresql-contrib-9.3<br/>
