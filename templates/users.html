@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block menulink %}
+<nav class="main">
+	<ul>
+		<li class="menu">
+			<a class="fa-bars" href="#menu">Menu</a>
+		</li>
+	</ul>
+</nav>
+{% endblock %}
+{% block flyoutmenu %}
+<section id="menu">
+
+	 <!--Links -->
+		<section>
+			<div class="slidelinks">
+				<ul>
+					<li><a href="/maps"><i class="fa fa-map-o fa-2x"></i></a></li>
+					<li><a href="/data"><i class="fa fa-database fa-2x"></i></a></li>
+					<li><a href="/users"><i class="fa fa-user fa-2x"></i></a></li>
+				</ul>
+		  </div>
+		</section>
+</section>
+{% endblock %}
+{% block content %}
+
+<div id="main">
+
+	<!-- Post -->
+		<article class="post">
+		    <header>
+		      <div class="title">
+		          <h2>Manage Users</h2>
+		    </header>
+		        
+		    <div class="table-wrapper">
+				<table>
+					<thead>
+						<tr>
+							<th>Username</th>
+							<th>Password</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Admin</td>
+							<td>admin1234</td>
+							<td><a href="#" class="button">DELETE</a></td>
+						</tr>
+						<tr>
+							<td>SeanWalsh</td>
+							<td>123456</td>
+							<td><a href="#" class="button">DELETE</a></td>
+						</tr>
+						<tr>
+							<td>JustinRice</td>
+							<td>P@ssword3145</td>
+							<td><a href="#" class="button">DELETE</a></td>
+						</tr>
+						<tr>
+							<td>ShaneChamberlain</td>
+							<td>MyVoiceIsMyPassport</td>
+							<td><a href="#" class="button">DELETE</a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+		</article>
+	
+	
+		
+</div>
+
+{% endblock %}

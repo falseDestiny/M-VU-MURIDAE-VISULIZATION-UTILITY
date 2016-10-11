@@ -1,0 +1,128 @@
+{% extends "layout.html" %}
+
+{% block menulink %}
+<nav class="main">
+	<ul>
+		<li class="menu">
+			<a class="fa-bars" href="#menu">Menu</a>
+		</li>
+	</ul>
+</nav>
+{% endblock %}
+{% block flyoutmenu %}
+<section id="menu">
+
+	 <!--Links -->
+		<section>
+			<div class="slidelinks">
+				<ul>
+					<li><a href="/maps"><i class="fa fa-map-o fa-2x"></i></a></li>
+					<li><a href="/data"><i class="fa fa-database fa-2x"></i></a></li>
+					<li><a href="/users"><i class="fa fa-user fa-2x"></i></a></li>
+				</ul>
+		  </div>
+			
+			<div class="12u$">
+				<div class="select-wrapper">
+					<select name="demo-category" id="demo-category">
+						<option value="">- Select Data Set -</option>
+						<option value="1">09-12-16-ADMIN</option>
+						<option value="1">09-14-16-ADMIN</option>
+						<option value="1">09-16-16-SEAN</option>
+					</select>
+				</div>
+			</div>
+			<br>
+			
+			<div class="6u 12u$(small)">
+				<input type="checkbox" id="demo-copy" name="demo-copy">
+				<label for="demo-copy">041940A1C3</label>
+				
+				<input type="checkbox" id="demo-copy" name="demo-copy">
+				<label for="demo-copy">041940C822</label>
+				
+				<input type="checkbox" id="demo-copy" name="demo-copy">
+				<label for="demo-copy">041940844</label>
+				
+				<input type="checkbox" id="demo-copy" name="demo-copy">
+				<label for="demo-copy">041940CE89</label>
+				
+				<input type="checkbox" id="demo-copy" name="demo-copy">
+				<label for="demo-copy">0418CC1D10</label>
+				
+				<input type="checkbox" id="demo-copy" name="demo-copy">
+				<label for="demo-copy">0419DE0483</label>
+				
+				<input type="checkbox" id="demo-copy" name="demo-copy">
+				<label for="demo-copy">0419CC1EF1</label>
+				
+				<input type="checkbox" id="demo-copy" name="demo-copy">
+				<label for="demo-copy">041840C844</label>
+			</div>
+			
+			<a href="#" class="button fit">SHOW VECTOR MAP</a>
+			
+			<a href="#" class="button fit">SHOW HEAT MAP</a>
+			
+		</section>
+
+</section>
+{% endblock %}
+{% block content %}
+
+<div id="main">
+
+	<!-- Post -->
+		<article class="post">
+		    <header>
+		      <div class="title">
+		          <h2>MAPS</h2>
+		    </header>
+		        
+		    <div id="heatmapArea" class="heatmap"></div>
+
+		</article>
+	
+	
+		
+</div>
+
+{% endblock %}
+{% block heatmap %}
+  <script src="static/assets/js/heatmap.min.js"></script>
+
+  <script type="text/javascript">
+      // minimal heatmap instance configuration
+    var heatmapInstance = h337.create({
+      // only container is required, the rest will be defaults
+      container: document.querySelector('.heatmap')
+    });
+    
+    // now generate some random data
+    var points = [];
+    var max = 0;
+    var width = 1000;
+    var height = 400;
+    var len = 200;
+    
+    while (len--) {
+      var val = Math.floor(Math.random()*100);
+      max = Math.max(max, val);
+      var point = {
+        x: Math.floor(Math.random()*width),
+        y: Math.floor(Math.random()*height),
+        value: val
+      };
+      points.push(point);
+    }
+    // heatmap data format
+    var data = { 
+      max: max, 
+      data: points 
+    };
+    // if you have a set of datapoints always use setData instead of addData
+    // for data initialization
+    heatmapInstance.setData(data);
+  
+  </script>
+{% endblock %}

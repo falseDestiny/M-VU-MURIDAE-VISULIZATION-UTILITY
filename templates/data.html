@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+
+{% block menulink %}
+<nav class="main">
+	<ul>
+		<li class="menu">
+			<a class="fa-bars" href="#menu">Menu</a>
+		</li>
+	</ul>
+</nav>
+{% endblock %}
+{% block flyoutmenu %}
+<section id="menu">
+
+	 <!--Links -->
+		<section>
+			<div class="slidelinks">
+				<ul>
+					<li><a href="/maps"><i class="fa fa-map-o fa-2x"></i></a></li>
+					<li><a href="/data"><i class="fa fa-database fa-2x"></i></a></li>
+					<li><a href="/users"><i class="fa fa-user fa-2x"></i></a></li>
+				</ul>
+		  </div>
+			
+			<a href="#" class="button fit">UPLOAD DATA</a>
+			
+			<div class="12u$">
+				<div class="select-wrapper">
+					<select name="demo-category" id="demo-category">
+						<option value="">- Select Data Set -</option>
+						<option value="1">09-12-16-ADMIN</option>
+						<option value="1">09-14-16-ADMIN</option>
+						<option value="1">09-16-16-SEAN</option>
+					</select>
+				</div>
+			</div>
+			<br>
+			<a href="#" class="button fit">LOAD DATA SET</a>
+			
+			<a href="#" class="button fit">DELETE DATA SET</a>
+			
+		</section>
+
+</section>
+{% endblock %}
+{% block content %}
+
+<div id="main">
+
+	<!-- Post -->
+		<article class="post">
+		    <header>
+		      <div class="title">
+		          <h2>DATA</h2>
+		    </header>
+		        
+		    <div class="table-wrapper">
+				<table>
+					<thead>
+						<tr>
+							<th>column 1</th>
+							<th>column 2</th>
+							<th>column 3</th>
+							<th>column 4</th>
+							<th>column 5</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>46213.321654621</td>
+							<td>041940A1C3</td>
+							<td>unknown</td>
+							<td>RFID3</td>
+							<td>513</td>
+						</tr>
+						<tr>
+							<td>46213.321654621</td>
+							<td>041940A1C3</td>
+							<td>unknown</td>
+							<td>RFID3</td>
+							<td>513</td>
+						</tr>
+						<tr>
+							<td>46213.321654621</td>
+							<td>041940A1C3</td>
+							<td>unknown</td>
+							<td>RFID3</td>
+							<td>513</td>
+						</tr>
+						<tr>
+							<td>46213.321654621</td>
+							<td>041940A1C3</td>
+							<td>unknown</td>
+							<td>RFID3</td>
+							<td>513</td>
+						</tr>
+						<tr>
+							<td>46213.321654621</td>
+							<td>041940A1C3</td>
+							<td>unknown</td>
+							<td>RFID3</td>
+							<td>513</td>
+						</tr>
+						<tr>
+							<td>46213.321654621</td>
+							<td>041940A1C3</td>
+							<td>unknown</td>
+							<td>RFID3</td>
+							<td>513</td>
+						</tr>
+						<tr>
+							<td>46213.321654621</td>
+							<td>041940A1C3</td>
+							<td>unknown</td>
+							<td>RFID3</td>
+							<td>513</td>
+						</tr>
+						<tr>
+							<td>46213.321654621</td>
+							<td>041940A1C3</td>
+							<td>unknown</td>
+							<td>RFID3</td>
+							<td>513</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+		</article>
+	
+	
+		
+</div>
+
+{% endblock %}
