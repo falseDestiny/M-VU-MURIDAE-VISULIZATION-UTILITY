@@ -3,3 +3,32 @@
     margin-left: auto;
     margin-right: auto;
 }
+
+div#heatmapArea {
+    width:100%;
+    padding:0;
+    height:500px;
+    cursor:pointer;
+    position:relative;
+}
+
+.slidemenu {
+    border-left: solid 1px rgba(160, 160, 160, 0.3);
+    					height: inherit;
+					line-height: inherit;
+					white-space: nowrap;
+}
+
+.slidelinks ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+.slidelinks ul li {
+	float: left;
+	padding: 30px;
+}
+
+

@@ -71,7 +71,7 @@ def index():
         user.id = usernameinput
         flask_login.login_user(user)
             
-        return redirect(url_for('confirm'))
+        return redirect(url_for('index'))
 
     #login failed
     return render_template('index.html', login_failed = 'true')
@@ -83,6 +83,34 @@ def confirm():
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     return render_template('confirm.html')
+    
+@app.route('/heatmap')
+def heatmap():
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    return render_template('heatmap.html')
+
+@app.route('/maps')
+def maps():
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    return render_template('maps.html')
+    
+@app.route('/data')
+def data():
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    return render_template('data.html')
+
+@app.route('/users')
+def manageusers():
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    return render_template('users.html')
 
 @app.route('/account')
 @flask_login.login_required

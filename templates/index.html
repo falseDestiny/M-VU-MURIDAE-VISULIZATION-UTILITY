@@ -3,13 +3,29 @@
 {% block content %}
 <div id="main">
 
-	<!-- Post -->
-		<article class="post text-center">
+	<!-- OPTIONS -->
 			
-			{% if current_user.is_authenticated %}
-				<p>You are logged in...</p>
-				<a href="/logout">Log Out</a>
-			{% else %}
+		{% if current_user.is_authenticated %}
+		
+			<div class="post text-center selectpost">
+				<a href="/maps"><p><i class="fa fa-map-o fa-3x"></i> <h1>View Maps</h1></p></a>
+			</div>
+			
+			<div class="post text-center selectpost">
+				<a href="/data"><p><i class="fa fa-database fa-3x icons" aria-hidden="true"></i> <h1>Manage Data</h1></p></a>
+			</div>	
+			
+			<div class="post text-center selectpost">
+				<a href="/users"><p><i class="fa fa-user fa-3x icons" aria-hidden="true"></i> <h1>Manage Users</h1></p></a>
+			</div>
+
+			
+		{% else %}
+	
+	<!-- LOGIN BOX -->
+	
+			<article class="post text-center">
+		
 				{% if login_failed == 'true' %}
 				<p><font color="red">Your Username and/or Password is incorrect. Please try again.</font></p>
 				{% endif %}
@@ -28,8 +44,8 @@
 					<div class="text-center"><input type="submit" value="Sign In" name="submit" class="button" /></div>
 				</form>
 				</div>
-			{% endif %}
-		</article>
-		
+			
+			</article>
+		{% endif %}
 </div>
 {% endblock %}

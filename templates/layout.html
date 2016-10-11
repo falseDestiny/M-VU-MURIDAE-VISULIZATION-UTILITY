@@ -38,51 +38,15 @@
 								<li><a href="/logout">Log Out</a></li>
 							</ul>
 						</nav>
-						{% endif %}
 						
-						<nav class="main">
-							<ul>
-								<li class="menu">
-									<a class="fa-bars" href="#menu">Menu</a>
-								</li>
-							</ul>
-						</nav>
+						
+						{% block menulink %}{% endblock %}
+						
+						{% endif %}
 					</header>
 
 				<!-- Menu -->
-					<section id="menu">
-
-						<!-- Links -->
-							<section>
-								<ul class="links">
-									<li>
-										<a href="#">
-											<h3>Lorem ipsum</h3>
-											<p>Feugiat tempus veroeros dolor</p>
-										</a>
-									</li>
-									<li>
-										<a href="#">
-											<h3>Dolor sit amet</h3>
-											<p>Sed vitae justo condimentum</p>
-										</a>
-									</li>
-									<li>
-										<a href="#">
-											<h3>Feugiat veroeros</h3>
-											<p>Phasellus sed ultricies mi congue</p>
-										</a>
-									</li>
-									<li>
-										<a href="#">
-											<h3>Etiam sed consequat</h3>
-											<p>Porta lectus amet ultricies</p>
-										</a>
-									</li>
-								</ul>
-							</section>
-
-					</section>
+				{% block flyoutmenu %}{% endblock %}
 
 				<!-- Main -->
 				{% block content %}{% endblock %}
@@ -122,5 +86,6 @@
 			<!--[if lte IE 8]><script src="static/assets/js/ie/respond.min.js"></script><![endif]-->
 			<script src="static/assets/js/main.js"></script>
 
+			{% block heatmap %}{% endblock %}
 	</body>
 </html>
