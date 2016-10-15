@@ -1,135 +1,196 @@
 {% extends "layout.html" %}
 
-{% block menulink %}
-<nav class="main">
-	<ul>
-		<li class="menu">
-			<a class="fa-bars" href="#menu">Menu</a>
-		</li>
-	</ul>
-</nav>
+{% block bodyTag %}
+<body>
 {% endblock %}
-{% block flyoutmenu %}
-<section id="menu">
 
-	 <!--Links -->
-		<section>
-			<div class="slidelinks">
-				<ul>
-					<li><a href="/maps"><i class="fa fa-map-o fa-2x"></i></a></li>
-					<li><a href="/data"><i class="fa fa-database fa-2x"></i></a></li>
-					<li><a href="/users"><i class="fa fa-user fa-2x"></i></a></li>
-				</ul>
-		  </div>
-			
-			<a href="#" class="button fit">UPLOAD DATA</a>
-			
-			<div class="12u$">
-				<div class="select-wrapper">
-					<select name="demo-category" id="demo-category">
-						<option value="">- Select Data Set -</option>
-						<option value="1">09-12-16-ADMIN</option>
-						<option value="1">09-14-16-ADMIN</option>
-						<option value="1">09-16-16-SEAN</option>
-					</select>
+{% block content %}
+<div class="container pagecontent" onclick="closeLinks()">
+
+	<div class="row">
+
+		<div id="intro" class="col-xs-12 align-center">
+			<a href="/" class="logo pagelogo"><img src="static/images/mlogo.png" alt="" /></a>
+		</div>
+
+		<div class="col-lg-12">
+
+			<!-- CONTENT PANEL -->
+			<div class="col-xs-12 col-md-8 col-lg-9">
+				
+				<div class="panel matchHeight">
+
+					<div class="empty-panel">
+						<h1>MURIDAE<br>VISUALIZATION<br>UTILITY</h1>
+					</div>
+
+
+					<!-- <div class="table-responsive">
+						<table class="table table-hover table-bordered">
+							<thead>
+								<tr>
+									<th>column 1</th>
+									<th>column 2</th>
+									<th>column 3</th>
+									<th>column 4</th>
+									<th>column 5</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>46213.321654621</td>
+									<td>041940A1C3</td>
+									<td>unknown</td>
+									<td>RFID3</td>
+									<td>513</td>
+								</tr>
+								<tr>
+									<td>46213.321654621</td>
+									<td>041940A1C3</td>
+									<td>unknown</td>
+									<td>RFID3</td>
+									<td>513</td>
+								</tr>
+								<tr>
+									<td>46213.321654621</td>
+									<td>041940A1C3</td>
+									<td>unknown</td>
+									<td>RFID3</td>
+									<td>513</td>
+								</tr>
+								<tr>
+									<td>46213.321654621</td>
+									<td>041940A1C3</td>
+									<td>unknown</td>
+									<td>RFID3</td>
+									<td>513</td>
+								</tr>
+								<tr>
+									<td>46213.321654621</td>
+									<td>041940A1C3</td>
+									<td>unknown</td>
+									<td>RFID3</td>
+									<td>513</td>
+								</tr>
+								<tr>
+									<td>46213.321654621</td>
+									<td>041940A1C3</td>
+									<td>unknown</td>
+									<td>RFID3</td>
+									<td>513</td>
+								</tr>
+								<tr>
+									<td>46213.321654621</td>
+									<td>041940A1C3</td>
+									<td>unknown</td>
+									<td>RFID3</td>
+									<td>513</td>
+								</tr>
+								<tr>
+									<td>46213.321654621</td>
+									<td>041940A1C3</td>
+									<td>unknown</td>
+									<td>RFID3</td>
+									<td>513</td>
+								</tr>
+							</tbody>
+						</table>
+					</div> -->
+
+				</div><!-- end .panel -->
+			</div><!-- end content panel -->
+
+			<!-- OPTION PANEL -->
+			<div class="col-xs-12 col-md-4 col-lg-3 align-center">
+				<div class="panel matchHeight">
+
+					<!-- FILE UPLOAD BUTTON -->
+					<div class="btn-flex-submit-block fileupload">
+						<form action="upload" method="post" class="col-xs-12 col-12" colenctype="multipart/form-data">
+
+							<label class="btn btn-block btn-default">
+								Upload Data Set
+								<input type="file" name="file" style="display: none;">
+							</label>									
+							
+							<div class="btn-flex-submit">
+								<input type="text" class="form-control" readonly>
+							</div>
+							
+							<div class="btn-flex-submit">
+								<label class="btn btn-block btn-default">
+									Submit
+									<input type="submit" value="Upload" style="display: none;">
+								</label>
+							</div>
+
+						</form>
+					</div>
+					
+
+					<!-- DATA SELECT DROPDOWN -->
+					<div class="btn-group btn-flex">
+					  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					    Select Data Set <span class="caret"></span>
+					  </button>
+					  <ul class="dropdown-menu bullet pull-center">
+					    <li><input type="radio" id="ID" name="NAME" value="VALUE"><label for="ID">Label 1</label></li>
+					    <li><input type="radio" id="ID2" name="NAME" value="VALUE"><label for="ID2">Label 2</label></li>
+					    <li><input type="radio" id="ID3" name="NAME" value="VALUE"><label for="ID3">Label 3</label></li>
+					    <li><input type="radio" id="ID4" name="NAME" value="VALUE"><label for="ID4">Label 4</label></li>
+					  </ul>
+					</div>
+
+					<!-- LOAD DATA BUTTON -->
+					<div class="btn-group btn-flex">
+						<button type="button" class="btn btn-default">Load Data Set</button>
+					</div>
+
+					<!-- DELETE DATA BUTTON -->
+					<div class="btn-group btn-flex btn-flex-last">
+						<button type="button" class="btn btn-default">Delete Data Set</button>
+					</div>
+
 				</div>
 			</div>
-			<br>
-			<a href="#" class="button fit">LOAD DATA SET</a>
-			
-			<a href="#" class="button fit">DELETE DATA SET</a>
-			
-		</section>
 
-</section>
-{% endblock %}
-{% block content %}
+		</div>
 
-<div id="main">
+	</div>
 
-	<!-- Post -->
-		<article class="post">
-		    <header>
-		      <div class="title">
-		          <h2>DATA</h2>
-		    </header>
-		        
-		    <div class="table-wrapper">
-				<table>
-					<thead>
-						<tr>
-							<th>column 1</th>
-							<th>column 2</th>
-							<th>column 3</th>
-							<th>column 4</th>
-							<th>column 5</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>46213.321654621</td>
-							<td>041940A1C3</td>
-							<td>unknown</td>
-							<td>RFID3</td>
-							<td>513</td>
-						</tr>
-						<tr>
-							<td>46213.321654621</td>
-							<td>041940A1C3</td>
-							<td>unknown</td>
-							<td>RFID3</td>
-							<td>513</td>
-						</tr>
-						<tr>
-							<td>46213.321654621</td>
-							<td>041940A1C3</td>
-							<td>unknown</td>
-							<td>RFID3</td>
-							<td>513</td>
-						</tr>
-						<tr>
-							<td>46213.321654621</td>
-							<td>041940A1C3</td>
-							<td>unknown</td>
-							<td>RFID3</td>
-							<td>513</td>
-						</tr>
-						<tr>
-							<td>46213.321654621</td>
-							<td>041940A1C3</td>
-							<td>unknown</td>
-							<td>RFID3</td>
-							<td>513</td>
-						</tr>
-						<tr>
-							<td>46213.321654621</td>
-							<td>041940A1C3</td>
-							<td>unknown</td>
-							<td>RFID3</td>
-							<td>513</td>
-						</tr>
-						<tr>
-							<td>46213.321654621</td>
-							<td>041940A1C3</td>
-							<td>unknown</td>
-							<td>RFID3</td>
-							<td>513</td>
-						</tr>
-						<tr>
-							<td>46213.321654621</td>
-							<td>041940A1C3</td>
-							<td>unknown</td>
-							<td>RFID3</td>
-							<td>513</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-
-		</article>
-	
-	
-		
 </div>
+
+{% endblock %}
+{% block loadScripts %}
+		
+<script type="text/javascript">
+	$(function() {
+
+		// We can attach the `fileselect` event to all file inputs on the page
+	  	$(document).on('change', ':file', function() {
+	    	var input = $(this),
+	        	numFiles = input.get(0).files ? input.get(0).files.length : 1,
+	        	label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+	    	input.trigger('fileselect', [numFiles, label]);
+	  	});
+
+	  	// We can watch for our custom `fileselect` event like this
+	  	$(document).ready( function() {
+	    	$(':file').on('fileselect', function(event, numFiles, label) {
+
+	        	var input = $(this).parents('.fileupload').find(':text'),
+	            	log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+	          	if( input.length ) {
+	            	input.val(log);
+	          	} else {
+	            	if( log ) alert(log);
+	          	}
+
+	      	});
+	  	});
+	  
+	});
+</script>
 
 {% endblock %}

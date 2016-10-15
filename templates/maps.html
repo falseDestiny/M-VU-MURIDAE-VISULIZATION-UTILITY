@@ -1,128 +1,59 @@
 {% extends "layout.html" %}
 
-{% block menulink %}
-<nav class="main">
-	<ul>
-		<li class="menu">
-			<a class="fa-bars" href="#menu">Menu</a>
-		</li>
-	</ul>
-</nav>
+{% block bodyTag %}
+<body>
 {% endblock %}
-{% block flyoutmenu %}
-<section id="menu">
 
-	 <!--Links -->
-		<section>
-			<div class="slidelinks">
-				<ul>
-					<li><a href="/maps"><i class="fa fa-map-o fa-2x"></i></a></li>
-					<li><a href="/data"><i class="fa fa-database fa-2x"></i></a></li>
-					<li><a href="/users"><i class="fa fa-user fa-2x"></i></a></li>
-				</ul>
-		  </div>
-			
-			<div class="12u$">
-				<div class="select-wrapper">
-					<select name="demo-category" id="demo-category">
-						<option value="">- Select Data Set -</option>
-						<option value="1">09-12-16-ADMIN</option>
-						<option value="1">09-14-16-ADMIN</option>
-						<option value="1">09-16-16-SEAN</option>
-					</select>
-				</div>
-			</div>
-			<br>
-			
-			<div class="6u 12u$(small)">
-				<input type="checkbox" id="demo-copy" name="demo-copy">
-				<label for="demo-copy">041940A1C3</label>
-				
-				<input type="checkbox" id="demo-copy" name="demo-copy">
-				<label for="demo-copy">041940C822</label>
-				
-				<input type="checkbox" id="demo-copy" name="demo-copy">
-				<label for="demo-copy">041940844</label>
-				
-				<input type="checkbox" id="demo-copy" name="demo-copy">
-				<label for="demo-copy">041940CE89</label>
-				
-				<input type="checkbox" id="demo-copy" name="demo-copy">
-				<label for="demo-copy">0418CC1D10</label>
-				
-				<input type="checkbox" id="demo-copy" name="demo-copy">
-				<label for="demo-copy">0419DE0483</label>
-				
-				<input type="checkbox" id="demo-copy" name="demo-copy">
-				<label for="demo-copy">0419CC1EF1</label>
-				
-				<input type="checkbox" id="demo-copy" name="demo-copy">
-				<label for="demo-copy">041840C844</label>
-			</div>
-			
-			<a href="#" class="button fit">SHOW VECTOR MAP</a>
-			
-			<a href="#" class="button fit">SHOW HEAT MAP</a>
-			
-		</section>
-
-</section>
-{% endblock %}
 {% block content %}
+		<div class="container pagecontent" onclick="closeLinks()">
 
-<div id="main">
+			<div class="row">
 
-	<!-- Post -->
-		<article class="post">
-		    <header>
-		      <div class="title">
-		          <h2>MAPS</h2>
-		    </header>
-		        
-		    <div id="heatmapArea" class="heatmap"></div>
+				<div id="intro" class="col-xs-12 align-center">
+					<a href="/" class="logo pagelogo"><img src="static/images/mlogo.png" alt="" /></a>
+				</div>
 
-		</article>
-	
-	
-		
-</div>
+				<div class="col-lg-12">
 
-{% endblock %}
-{% block heatmap %}
-  <script src="static/assets/js/heatmap.min.js"></script>
+					<!-- CONTENT PANEL -->
+					<div class="col-xs-12 col-md-8 col-lg-9 align-center">
+						<div class="panel">
+							Content
+						</div>
+					</div>
 
-  <script type="text/javascript">
-      // minimal heatmap instance configuration
-    var heatmapInstance = h337.create({
-      // only container is required, the rest will be defaults
-      container: document.querySelector('.heatmap')
-    });
-    
-    // now generate some random data
-    var points = [];
-    var max = 0;
-    var width = 1000;
-    var height = 400;
-    var len = 200;
-    
-    while (len--) {
-      var val = Math.floor(Math.random()*100);
-      max = Math.max(max, val);
-      var point = {
-        x: Math.floor(Math.random()*width),
-        y: Math.floor(Math.random()*height),
-        value: val
-      };
-      points.push(point);
-    }
-    // heatmap data format
-    var data = { 
-      max: max, 
-      data: points 
-    };
-    // if you have a set of datapoints always use setData instead of addData
-    // for data initialization
-    heatmapInstance.setData(data);
-  
-  </script>
+					<!-- OPTION PANEL -->
+					<div class="col-xs-12 col-md-4 col-lg-3 align-center">
+						<div class="panel">
+
+							<!-- Single button -->
+							<div class="btn-group btn-flex">
+							  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							    Select Data Set <span class="caret"></span>
+							  </button>
+							  <ul class="dropdown-menu bullet pull-center">
+							    <li><input type="radio" id="ID" name="NAME" value="VALUE"><label for="ID">Label 1</label></li>
+							    <li><input type="radio" id="ID2" name="NAME" value="VALUE"><label for="ID2">Label 2</label></li>
+							    <li><input type="radio" id="ID3" name="NAME" value="VALUE"><label for="ID3">Label 3</label></li>
+							    <li><input type="radio" id="ID4" name="NAME" value="VALUE"><label for="ID4">Label 4</label></li>
+							  </ul>
+							</div>
+
+							<div class="btn-group btn-flex">
+								<button type="button" class="btn btn-default">Display Heat Map</button>
+							</div>
+
+							<div class="btn-group btn-flex btn-flex-last">
+								<button type="button" class="btn btn-default">Display Vector Map</button>
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
 {% endblock %}

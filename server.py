@@ -51,12 +51,16 @@ def logout():
 # the page to go to if a login is required and no one is loged in.
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    return render_template('index.html', login_failed = 'true')
+    return render_template('login.html', login_failed = 'true', currentpage='login')
     
 @app.route('/', methods=['GET', 'POST']) #handle login
 def index():
     if request.method == 'GET':
-        return render_template('index.html', login_failed='false')
+        if current_user.is_authenticated:
+            return render_template('index.html', login_failed='false', currentpage='home')
+        else:
+            return render_template('login.html', login_failed='false', currentpage='login')
+            
     #attempt login
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -74,52 +78,31 @@ def index():
         return redirect(url_for('index'))
 
     #login failed
-    return render_template('index.html', login_failed = 'true')
-    
-@app.route('/confirm')
-@flask_login.login_required
-def confirm():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    return render_template('confirm.html')
-    
-@app.route('/heatmap')
-def heatmap():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    return render_template('heatmap.html')
+    return render_template('login.html', login_failed = 'true', currentpage='login')
 
 @app.route('/maps')
+@flask_login.login_required
 def maps():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    return render_template('maps.html')
+    return render_template('maps.html', currentpage='maps')
     
 @app.route('/data')
+@flask_login.login_required
 def data():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    return render_template('data.html')
+    return render_template('data.html', currentpage='data')
 
 @app.route('/users')
+@flask_login.login_required
 def manageusers():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    return render_template('users.html')
-
-@app.route('/account')
-@flask_login.login_required
-def account():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    return render_template('account.html', currentpage = 'account')
-
+    return render_template('users.html', currentpage='users')
     
 @socketio.on('connect', namespace='/archives')
 def makeConnection(): 

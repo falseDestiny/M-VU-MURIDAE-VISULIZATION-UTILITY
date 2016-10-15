@@ -1,51 +1,51 @@
 {% extends "layout.html" %}
 
+{% block bodyTag %}
+<body>
+{% endblock %}
+
 {% block content %}
-<div id="main">
+<div class="container maincontent" onclick="closeLinks()">
 
-	<!-- OPTIONS -->
-			
-		{% if current_user.is_authenticated %}
-		
-			<div class="post text-center selectpost">
-				<a href="/maps"><p><i class="fa fa-map-o fa-3x"></i> <h1>View Maps</h1></p></a>
-			</div>
-			
-			<div class="post text-center selectpost">
-				<a href="/data"><p><i class="fa fa-database fa-3x icons" aria-hidden="true"></i> <h1>Manage Data</h1></p></a>
-			</div>	
-			
-			<div class="post text-center selectpost">
-				<a href="/users"><p><i class="fa fa-user fa-3x icons" aria-hidden="true"></i> <h1>Manage Users</h1></p></a>
+	<div class="row">
+
+		<div id="intro" class="col-xs-12 col-md-12 col-lg-4">
+			<a href="/" class="logo"><img src="static/images/mlogo.png" alt="" /></a>
+			<header>
+				<h2>MURIDAE VISUALIZATION UTILITY</h2>
+				<p>Clever tag line goes here</p>
+			</header>
+		</div>
+
+		<div class="col-lg-8">
+
+			<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 align-center panelbutton">
+				<a href="/maps">
+					<div class="panel main-panel-button main-panel-size">
+						<p><i class="fa fa-map-o fa-3x"></i> <h1>View Maps</h1></p>
+					</div>
+				</a>
 			</div>
 
-			
-		{% else %}
-	
-	<!-- LOGIN BOX -->
-	
-			<article class="post text-center">
-		
-				{% if login_failed == 'true' %}
-				<p><font color="red">Your Username and/or Password is incorrect. Please try again.</font></p>
-				{% endif %}
-				
-				<div class="col-lg-6 center">
-				<form method="POST" action="/">
-					<!--<h3>USERNAME</h3>-->
-				    <p class="input-group input-group-lg">
-				    	<span class="input-group-addon" id="username-addon1"><i class="fa fa-user"></i></span>
-				    	<input type="text" name="username" class="form-control" placeholder="Username" aria-describedby="username-addon1" />
-				    </p>
-				    <!--<h3>PASSWORD</h3>-->
-					<p class="input-group input-group-lg">
-						<span class="input-group-addon" id="password-addon1"><i class="fa fa-key"></i></span>
-						<input type="password" name="password" class="form-control" placeholder="Password" aria-describedby="password-addon1" /></p>
-					<div class="text-center"><input type="submit" value="Sign In" name="submit" class="button" /></div>
-				</form>
-				</div>
-			
-			</article>
-		{% endif %}
+			<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 align-center panelbutton">
+				<a href="/data">
+					<div class="panel main-panel-button main-panel-size">
+						<p><i class="fa fa-database fa-3x"></i> <h1>Manage Data</h1></p>
+					</div>
+				</a>
+			</div>
+
+			<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 align-center panelbutton">
+				<a href="/users">
+					<div class="panel main-panel-button main-panel-size">
+						<p><i class="fa fa-user fa-3x"></i> <h1>Manage Users</h1></p>
+					</div>
+				</a>
+			</div>
+
+		</div>
+
+	</div>
+
 </div>
 {% endblock %}

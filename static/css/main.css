@@ -1,0 +1,608 @@
+@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");
+@import url("https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700|Raleway:400,800,900");
+
+/*
+	Custom CSS for M-VU: Muridae Visualization Utility
+*/
+
+/************************************/
+/*				BASIC 				*/
+/************************************/
+
+@media screen and (max-width: 480px) {
+
+	html, body {
+		min-width: 320px;
+	}
+}
+
+body {
+	background: #f4f4f4;
+}
+
+body, input, select, textarea {
+	color: #646464;
+	font-family: "Source Sans Pro", Helvetica, Sans-serif;
+	font-size: 14pt;
+	font-weight: 400;
+	line-height: 1.75;
+}
+
+	/* Change font size based on screen size */
+	@media screen and (max-width: 1680px) {
+
+		body, input, select, textarea {
+			font-size: 12pt;
+		}
+
+	}
+
+	@media screen and (max-width: 1280px) {
+
+		body, input, select, textarea {
+			font-size: 12pt;
+		}
+
+	}
+
+	@media screen and (max-width: 980px) {
+
+		body, input, select, textarea {
+			font-size: 12pt;
+		}
+
+	}
+
+	@media screen and (max-width: 736px) {
+
+		body, input, select, textarea {
+			font-size: 12pt;
+		}
+
+	}
+
+	@media screen and (max-width: 480px) {
+
+		body, input, select, textarea {
+			font-size: 12pt;
+		}
+
+	}
+
+/* reset h1 */
+h1 {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+
+/* links */
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #2ebaae !important;
+}
+
+/* text */
+strong, b {
+	color: #3c3b3b;
+	font-weight: 700;
+}
+
+em, i {
+	font-style: italic;
+}
+
+p {
+	margin: 0 0 2em 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	color: #3c3b3b;
+	font-family: "Raleway", Helvetica, Sans-serif;
+	font-weight: 800;
+	letter-spacing: 0.25em;
+	line-height: 1.65;
+	margin: 0 0 1em 0;
+	text-transform: uppercase;
+}
+
+h2 {
+	font-size: 1.1em;
+}
+
+h3 {
+	font-size: 0.9em;
+}
+
+h4 {
+	font-size: 0.7em;
+}
+
+h5 {
+	font-size: 0.7em;
+}
+
+h6 {
+	font-size: 0.7em;
+}
+
+sub {
+	font-size: 0.8em;
+	position: relative;
+	top: 0.5em;
+}
+
+sup {
+	font-size: 0.8em;
+	position: relative;
+	top: -0.5em;
+}
+
+blockquote {
+	border-left: solid 4px rgba(160, 160, 160, 0.3);
+	font-style: italic;
+	margin: 0 0 2em 0;
+	padding: 0.5em 0 0.5em 2em;
+}
+
+code {
+	background: rgba(160, 160, 160, 0.075);
+	border: solid 1px rgba(160, 160, 160, 0.3);
+	font-family: "Courier New", monospace;
+	font-size: 0.9em;
+	margin: 0 0.25em;
+	padding: 0.25em 0.65em;
+}
+
+pre {
+	-webkit-overflow-scrolling: touch;
+	font-family: "Courier New", monospace;
+	font-size: 0.9em;
+	margin: 0 0 2em 0;
+}
+
+	pre code {
+		display: block;
+		line-height: 1.75em;
+		padding: 1em 1.5em;
+		overflow-x: auto;
+	}
+
+hr {
+	border: 0;
+	border-bottom: solid 1px rgba(160, 160, 160, 0.3);
+	margin: 2em 0;
+}
+
+	hr.major {
+		margin: 3em 0;
+	}
+
+.align-left {
+	text-align: left;
+}
+
+.align-center {
+	text-align: center;
+}
+
+.align-right {
+	text-align: right;
+}
+
+/************************************/
+/*				BUTTON 				*/
+/************************************/
+/*see line 1696 for template info*/
+
+/************************************/
+/*				FORMS 				*/
+/************************************/
+/*see line 1833 for template info*/
+
+/************************************/
+/*				POSTS 				*/
+/************************************/
+
+
+/************************************/
+/*				HEADER 				*/
+/************************************/
+
+.maincontent {
+	margin-top: 8em;
+}
+
+.pagecontent {
+	margin-top: 5em;
+}
+
+#header {
+	display: -moz-flex;
+	display: -webkit-flex;
+	display: -ms-flex;
+	display: flex;
+	-moz-justify-content: space-between;
+	-webkit-justify-content: space-between;
+	-ms-justify-content: space-between;
+	justify-content: space-between;
+	background-color: #444;
+	height: 3.5em;
+	left: 0;
+	line-height: 3.5em;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 10000;
+}
+
+#header a {
+	color: #f4f4f4;
+	text-decoration: none;
+}
+
+#header strong, b {
+	color: #f4f4f4;
+}
+
+#header ul {
+	list-style: none;
+	margin: 0;
+	padding-left: 0;
+}
+
+#header ul li {
+	display: inline-block;
+	padding-left: 0;
+}
+
+#header h1 {
+	height: inherit;
+	line-height: inherit;
+	padding: 0 0 0 1.5em;
+	white-space: nowrap;
+}
+
+#header h1 a {
+	font-size: 0.7em !important;
+}
+
+@media screen and (max-width: 980px) {
+
+	.maincontent {
+		margin-top: 6em;
+	}
+
+	#header .longname {
+		display: none;
+	}
+}
+
+/* logout display */
+#header .logout {
+	-moz-flex: 1;
+	-webkit-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
+	border-left: solid 2px rgb(244, 244, 244);
+	height: inherit;
+	line-height: inherit;
+	margin-left: 1.5em;
+	overflow: hidden;
+	padding-left: 1.5em;
+}
+
+#header .logout ul li {
+	border-left: solid 1px rgb(244, 244, 244);
+	line-height: 1;
+	margin-left: 1em;
+	padding-left: 1em;
+}
+
+#header .logout ul li:first-child {
+	border-left: 0;
+	margin-left: 0;
+	padding-left: 0;
+	text-transform: lowercase;
+}
+
+#header .logout ul li a {
+	border-bottom: 0;
+	font-family: "Raleway", Helvetica, sans-serif;
+	font-size: 0.7em;
+	font-weight: 400;
+	letter-spacing: 0.25em;
+	text-transform: uppercase;
+}
+
+
+/************************************/
+/*				LAYOUT 				*/
+/************************************/
+
+#intro .logo, #loginlogo .logo {
+	border-bottom: 0;
+	display: inline-block;
+	margin: 0 0 1em 0;
+	overflow: hidden;
+	position: relative;
+	width: 7em;
+}
+
+#intro .logo.pagelogo, #loginlogo .logo.pagelogo {
+	opacity: 0.3;
+}
+
+#intro .logo:before, #loginlogo .logo:before {
+	display: block;
+	height: 100%;
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+
+#intro .logo img, #loginlogo .logo img {
+	display: block;
+	margin-left: -0.25em;
+	width: 7.5em;
+}
+
+#intro header h2 {
+	font-size: 2em;
+	font-weight: 900;
+}
+
+#loginlogo header h3 {
+	font-size: 1.5em;
+	font-weight: 400;
+}
+
+#loginlogo {
+	text-align: center;
+}
+
+#intro header p {
+	font-size: 1.2em;
+}
+
+@media screen and (max-width: 1200px) {
+
+	#intro {
+		margin: 0 0 0 0;
+		text-align: center;
+	}
+}
+
+@media (min-width: 1400px) {
+	.container {
+		width: 1370px;
+	}
+}
+
+
+/* Panels */
+.main-panel-button {
+	margin-right: -5px;
+	margin-left: -5px;
+}
+
+.main-panel-button:hover {
+	border: solid 2px rgb(46, 186, 174);
+	background-color: rgba(68, 68, 68, 0.3);
+}
+
+.panelbutton a {
+	text-decoration: none;
+}
+
+.panelbutton a:hover h1 {
+	color: #ffffff !important;
+}
+
+@media (min-width: 1200px) {
+	.main-panel-size {
+		padding-top: 80px;
+		padding-bottom: 100px;
+	}
+}
+
+@media (max-width: 1199px) {
+	.main-panel-size {
+		padding-top: 50px;
+		padding-bottom: 50px;
+	}
+}
+
+@media (max-width: 600px) {
+	.main-panel-size {
+		padding-top: 30px;
+		padding-bottom: 10px;
+	}
+}
+
+/* FOOTER */
+.footer {
+	text-align: center;
+}
+
+.footer p {
+	margin: 0;
+	color: #aaaaaa;
+	font-family: "Raleway", Helvetica, sans-serif;
+	font-size: 0.7em;
+	font-weight: 400;
+	letter-spacing: 0.25em;
+	text-transform: uppercase;
+}
+
+/* Options */
+
+.btn-flex {
+	padding: 15px 15px 0 15px;
+	display: flex;
+	align-items: stretch;
+	align-content: stretch;
+}
+
+.btn-flex-submit-block {
+	padding: 15px 0 0 0;
+}
+
+.btn-flex-submit {
+	padding-top: 0;
+}
+
+.btn-flex-last {
+	padding: 15px;
+}
+
+.btn-flex .btn:first-child {
+	flex-grow: 1;
+	text-align: center;
+}
+
+/* PAGELINKS */
+
+/* Remove margins and padding from the list, and add a black background color */
+#pagelinks {
+	margin-right: 30px;
+}
+
+#pagelinks ul.topnav {
+    list-style-type: none;
+    margin: 0 0 0 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #444;
+}
+
+/* Float the list items side by side */
+#pagelinks ul.topnav li {
+	float: left;
+}
+
+/* Style the links inside the list items */
+#pagelinks ul.topnav li a {
+    display: inline-block;
+    text-align: center;
+    padding: 0px 16px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+#pagelinks ul.topnav li a.active {
+	background-color: #555;
+	color: #2ebaae; 
+}
+
+/* Change background color of links on hover */
+#pagelinks ul.topnav li a:hover {
+	background-color: #555;
+}
+
+/* Hide the list item that contains the link that should open and close the topnav on small screens */
+#pagelinks ul.topnav li.topnavicon {
+	display: none;
+}
+
+/* When the screen is less than 680 pixels wide, hide all list items, except for the first one ("Home"). Show the list item that contains the link to open and close the topnav (li.icon) */
+@media screen and (max-width:680px) {
+
+	#pagelinks {
+		margin-right: 0px;
+	}
+
+	#pagelinks ul.topnav li {
+		display: none;
+	}
+  
+  	#pagelinks ul.topnav li.topnavicon {
+    	float: right;
+    	display: inline-block;
+  	}
+}
+
+/* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens */
+@media screen and (max-width:680px) {
+  
+  	#pagelinks ul.topnav.responsive {
+  		position: relative;
+  	}
+  
+  	#pagelinks ul.topnav.responsive li.topnavicon {
+    	position: relative;
+    	right: 0;
+    	top: 0;
+  	}
+  
+  	#pagelinks ul.topnav.responsive li {
+    	float: none;
+    	display: inline;
+  	}
+  
+  	#pagelinks ul.topnav.responsive li a {
+    	display: block;
+    	text-align: center;
+  	}
+
+  	#pagelinks ul.topnav.responsive li.topnavicon a {
+    	text-align: right;
+  	}
+}
+
+/* EMPTY PANEL */
+
+.empty-panel h1 {
+	font-size: 1.8em;
+	opacity: 0.2;
+	text-align: center;
+	padding-top: 60px;
+}
+
+@media screen and (max-width: 600px) {
+	.empty-panel h1 {
+		font-size: 1.2em;
+		padding-top: 40px;
+		padding-bottom: 30px;
+	}
+}
+
+/* used with matchHeight.js */
+@media only screen and (max-width : 767px) {
+  .panels {
+    height: auto !important;
+  } 
+}
+
+.usertable > tbody > tr > td {
+	border-top: 0px;
+	vertical-align: middle;
+	text-align: center;
+}
+
+body.loginpage {
+	background-color: #444;
+}
+
+.loginbox {
+	padding: 30px 0;
+}
+
+.loginbar {
+	padding-bottom: 5px;
+}
+
+.failedlogin {
+	color: #ff0000;
+	text-align: center;
+	font-size: 0.8em;
+	padding-bottom: 10px;
+}

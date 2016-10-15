@@ -1,77 +1,91 @@
 {% extends "layout.html" %}
-{% block menulink %}
-<nav class="main">
-	<ul>
-		<li class="menu">
-			<a class="fa-bars" href="#menu">Menu</a>
-		</li>
-	</ul>
-</nav>
-{% endblock %}
-{% block flyoutmenu %}
-<section id="menu">
 
-	 <!--Links -->
-		<section>
-			<div class="slidelinks">
-				<ul>
-					<li><a href="/maps"><i class="fa fa-map-o fa-2x"></i></a></li>
-					<li><a href="/data"><i class="fa fa-database fa-2x"></i></a></li>
-					<li><a href="/users"><i class="fa fa-user fa-2x"></i></a></li>
-				</ul>
-		  </div>
-		</section>
-</section>
+{% block bodyTag %}
+<body>
 {% endblock %}
+
 {% block content %}
+<div class="container pagecontent" onclick="closeLinks()">
 
-<div id="main">
+	<div class="row">
 
-	<!-- Post -->
-		<article class="post">
-		    <header>
-		      <div class="title">
-		          <h2>Manage Users</h2>
-		    </header>
-		        
-		    <div class="table-wrapper">
-				<table>
-					<thead>
-						<tr>
-							<th>Username</th>
-							<th>Password</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>Admin</td>
-							<td>admin1234</td>
-							<td><a href="#" class="button">DELETE</a></td>
-						</tr>
-						<tr>
-							<td>SeanWalsh</td>
-							<td>123456</td>
-							<td><a href="#" class="button">DELETE</a></td>
-						</tr>
-						<tr>
-							<td>JustinRice</td>
-							<td>P@ssword3145</td>
-							<td><a href="#" class="button">DELETE</a></td>
-						</tr>
-						<tr>
-							<td>ShaneChamberlain</td>
-							<td>MyVoiceIsMyPassport</td>
-							<td><a href="#" class="button">DELETE</a></td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+		<div id="intro" class="col-xs-12 align-center">
+			<a href="/" class="logo pagelogo"><img src="static/images/mlogo.png" alt="" /></a>
+		</div>
 
-		</article>
-	
-	
-		
+		<div class="col-lg-12">
+
+			<!-- CONTENT PANEL -->
+			<div class="col-xs-12 col-md-8 col-md-offset-2">
+				
+				<div class="panel clearfix">
+
+					<!-- <div class="empty-panel">
+						<h1>MURIDAE<br>VISUALIZATION<br>UTILITY</h1>
+					</div>
+-->					
+						
+						<div class="col-sm-8 col-sm-offset-2 table-responsive">
+							
+
+							<table class="table table-hover usertable">
+ 							<tbody>
+ 								<tr>
+	 								<td class="col-xs-4">ADMIN</td>
+	 								<td class="col-xs-4">
+	 									<button class="btn btn-default" type="button" data-toggle="collapse" data-target="#userOne" aria-expanded="false" aria-controls="collapseExample">
+											Change Password
+										</button>
+	 								</td>
+	 								<td class="col-xs-4">
+	 									<button class="btn btn-default" type="button">
+											DELETE
+										</button>
+	 								</td>
+ 								</tr>
+								</tbody>
+							</table>
+							
+						
+							<div class="collapse" id="userOne">
+							<div class="well">
+								Password changing stuff goes here
+							</div>
+						</div>
+
+							<table class="table table-hover usertable">
+ 							<tbody>
+ 								<tr>
+	 								<td class="col-xs-4">Sean</td>
+	 								<td class="col-xs-4">
+	 									<button class="btn btn-default" type="button" data-toggle="collapse" data-target="#userTwo" aria-expanded="false" aria-controls="collapseExample">
+											Change Password
+										</button>
+	 								</td>
+	 								<td class="col-xs-4 align-center">
+	 									<button class="btn btn-default" type="button">
+											DELETE
+										</button>
+	 								</td>
+ 								</tr>
+								</tbody>
+							</table>
+							
+						
+							<div class="collapse" id="userTwo">
+							<div class="well">
+								Password changing stuff goes here
+							</div>
+						</div>
+					</div>
+
+				</div><!-- end .panel -->
+			</div><!-- end content panel -->
+
+		</div>
+
+	</div>
+
 </div>
 
 {% endblock %}
