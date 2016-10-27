@@ -2,9 +2,9 @@ import psycopg2
 import psycopg2.extras
 import os, uuid, re
 from flask import Flask, render_template, request, redirect, url_for, session, Markup, json
-import flask.ext.login as flask_login
+import flask_login
 from flask_login import current_user
-from flask.ext.socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit
 
 
 app = Flask(__name__)
@@ -70,7 +70,6 @@ def index():
    
     cur.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(%s) AND password = crypt(%s, password);", (usernameinput, passwordinput))
     if cur.fetchone():
-        print("TESTING")
         user = User()
         user.id = usernameinput
         flask_login.login_user(user)
