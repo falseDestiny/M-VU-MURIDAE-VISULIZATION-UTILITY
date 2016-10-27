@@ -1,7 +1,7 @@
 import psycopg2
 import psycopg2.extras
 import os, uuid, re
-from flask import Flask, render_template, request, redirect, url_for, session, Markup
+from flask import Flask, render_template, request, redirect, url_for, session, Markup, json
 import flask.ext.login as flask_login
 from flask_login import current_user
 from flask.ext.socketio import SocketIO, emit
@@ -104,9 +104,42 @@ def manageusers():
     
     return render_template('users.html', currentpage='users')
     
-@socketio.on('connect', namespace='/archives')
+@socketio.on('connect', namespace='/heatmap')
 def makeConnection(): 
     print('connected')
+
+@socketio.on('getMouseData', namespace='/heatmap')
+def returnHeatmapData():
+    
+    mouseheatdata = {'mouse1': {
+        '1': 1003, 
+        '2': 2040,
+        '3': 5032,
+        '4': 230,
+        '5': 2013,
+        '6': 2345,
+        '7': 6433,
+        '8': 993,
+        '9': 2036,
+        '10': 1008,
+        '11': 987,
+        '12': 3378,
+        '13': 7692,
+        '14': 746,
+        '15': 6154,
+        '16': 7466,
+        '17': 2987,
+        '18': 3680,
+        '19': 4568,
+        '20': 879,
+        '21': 6543,
+        '22': 2013,
+        '23': 8971,
+        '24': 635,
+        '25': 5009
+    }}
+    
+    emit('mouseData', json.dumps(mouseheatdata))
 
 
 if __name__ == '__main__':

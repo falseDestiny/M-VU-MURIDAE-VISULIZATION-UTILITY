@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block bodyTag %}
-<body>
+<body ng-controller="HeatmapController">
 {% endblock %}
 
 {% block content %}
@@ -18,7 +18,7 @@
 					<!-- CONTENT PANEL -->
 					<div class="col-xs-12 col-md-8 col-lg-9 align-center">
 						<div class="panel">
-							<img src="static/images/mapexample.png" style='width:100%;' alt="heatmap example" />
+							<canvas id="testmap"></canvas>
 						</div>
 					</div>
 
@@ -40,7 +40,7 @@
 							</div>
 
 							<div class="btn-group btn-flex">
-								<button type="button" class="btn btn-default">Display Heat Map</button>
+								<button type="button" class="btn btn-default" ng-click="grabData()">Display Heat Map</button>
 							</div>
 
 							<div class="btn-group btn-flex btn-flex-last">
@@ -56,4 +56,9 @@
 
 		</div>
 
+{% endblock %}
+
+{% block loadScripts %}
+<script type="text/javascript" src="/static/js/rainbowvis.js"></script>
+<script type="text/javascript" src="/static/js/heatmap.js"></script>
 {% endblock %}
