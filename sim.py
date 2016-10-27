@@ -9,10 +9,11 @@ class Simulation:
             newMouse.setUp(data[mouse])
             self.mice.append(newMouse)
 
-    def updateAll(self, time):
+    def tickAll(self):
         for mouse in self.mice:
-            mouse.update(time)
-        self.keepTime(time)
+            if not mouse.isDone():
+                mouse.tick()
+        self.totalTime += 1
 
     def getAllPaths(self):
         paths = {}
@@ -36,9 +37,6 @@ class Simulation:
         if (not self.isDone()):
             self.totalTime += time
 
-    def oneStep(self, time):
+    def runFullSim(self):
         while not self.isDone():
-            self.updateAll(time)
-
-    def getTotalTime(self):
-        return self.totalTime
+            self.tickAll()

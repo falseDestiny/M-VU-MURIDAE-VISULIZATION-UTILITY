@@ -4,6 +4,18 @@ from parse import Parser
 from sim import Simulation
 
 #----- Main
+
+parser = Parser("sampledata.csv")
+simulation = Simulation()
+simulation.setUp(parser.getData())
+print("Running ...")
+simulation.runFullSim()
+print(simulation.getAllPaths())
+print(simulation.getAllHeatData())
+
+
+
+'''
 print('This is a test!')
 parser = Parser("sampledata.csv")
 simulation = Simulation()
@@ -39,4 +51,4 @@ while not done:
 
 #for key in parser.getData().keys():
 #   print(key)
-
+'''
