@@ -15,7 +15,7 @@ CREATE ROLE owner LOGIN PASSWORD '41PubBNmfQhmfCNy';
 -- ------------------------------------------------------------
 
 --
--- Table structure for users
+-- Table structure
 --
 
 DROP TABLE IF EXISTS users;
@@ -60,8 +60,8 @@ CREATE TABLE subjectmap(
 --
 -- GRANT PERMISSIONS
 --
-GRANT select, update, insert ON users TO owner;
-GRANT select, usage ON users_userid_seq TO owner;
+GRANT select, update, insert ON users, datasets, subject, dataline, subjectmap TO owner;
+GRANT select, usage ON users_userid_seq, datasets_datasetID_seq, dataline_datalineID_seq TO owner;
 
 -- ------------------------------------------------------------
 
