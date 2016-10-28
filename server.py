@@ -1,14 +1,22 @@
 import psycopg2
 import psycopg2.extras
 import os, uuid, re
-from flask import Flask, render_template, request, redirect, url_for, session, Markup, json
+from flask import Flask, render_template, request, redirect, url_for, session, Markup, json, send_from_directory
 import flask_login
 from flask_login import current_user
 from flask_socketio import SocketIO, emit
+from werkzeug import secure_filename
 
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24).encode('hex')
+
+# This is the path to the upload directory, In cloud9 it sends the file to a folder named uploads
+# Not needed since a parser will be used
+# app.config['UPLOAD_FOLDER'] = 'uploads/'
+
+# Only files containing these extensions will be accepted
+app.config['ALLOWED_EXTENSIONS'] = set(['xls', 'xlsx', 'csv', 'xlsm', 'xlt', 'xml'])
 
 socketio = SocketIO(app)
 
@@ -102,7 +110,43 @@ def manageusers():
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     return render_template('users.html', currentpage='users')
-    
+
+################################################################################
+############################ File Upload Functions #############################
+################################################################################
+
+# For a given file, return whether it's an allowed type or not
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    file = request.files['file']
+    # Check if the file is one of the allowed types/extensions
+    if file and allowed_file(file.filename):
+        # Remove unsupported chars from filename
+        filename = secure_filename(file.filename)
+        
+        print('filename: ' + file.filename) # this is a test line, it should print the filename to the console...
+        
+        # The variable called file stores the file, this could be sent to the parser rather than being saved
+        # Nothing withing this if statement is needed for parsing purposes. I am leaving it to show
+        # functionality if you want to test it.
+        # Move the file form the temporal folder to the upload folder
+        
+        # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) # remove this line if we are not saving the file
+        
+        return render_template('index.html')
+        # Will return to index page if incorrect file format is uploaded
+    else: 
+        return render_template('index.html')
+
+
+################################################################################
+################################## SOCKET IO ###################################
+################################################################################
+
 @socketio.on('connect', namespace='/heatmap')
 def makeConnection(): 
     print('connected')

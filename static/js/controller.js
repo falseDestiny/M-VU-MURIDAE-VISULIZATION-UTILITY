@@ -27,8 +27,9 @@ HeatmapApp.controller('HeatmapController', function($scope){
         
         sampleChart = null;
         sampleChart = new heatmap('testmap', $scope.testdata.mouse1, {
-            stroke: false,
-            radius: 0
+            stroke: true,
+            radius: 15,
+            rows: 7 // 6 rows of data + top row for food square
         });
     });
 });
