@@ -32,4 +32,8 @@ HeatmapApp.controller('HeatmapController', function($scope){
             rows: 7 // 6 rows of data + top row for food square
         });
     });
+    
+    socket.on('testUpload', function(){
+        console.log('I made it.');
+    });
 });

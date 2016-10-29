@@ -29,8 +29,12 @@ CREATE TABLE users (
 DROP TABLE IF EXISTS datasets;
 CREATE TABLE datasets (
     datasetID SERIAL NOT NULL PRIMARY KEY,
-    uploadDate date NOT NULL,
+    uploadDate timestamp default current_timestamp,
     userid SERIAL REFERENCES users,
+    heatData json NOT NULL,
+    vectorData json NOT NULL,
+    locationMap json NOT NULL,
+    datasetName text NOT NULL,
     UNIQUE (datasetID)
 );
 
