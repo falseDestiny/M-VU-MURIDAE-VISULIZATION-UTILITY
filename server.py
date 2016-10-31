@@ -154,35 +154,54 @@ def makeConnection():
 @socketio.on('getMouseData', namespace='/heatmap')
 def returnHeatmapData():
     
-    mouseheatdata = {'mouse1': {
-        '1': 1003, 
-        '2': 2040,
-        '3': 5032,
-        '4': 230,
-        '5': 2013,
-        '6': 2345,
-        '7': 6433,
-        '8': 993,
-        '9': 2036,
-        '10': 1008,
-        '11': 987,
-        '12': 3378,
-        '13': 7692,
-        '14': 746,
-        '15': 6154,
-        '16': 7466,
-        '17': 2987,
-        '18': 3680,
-        '19': 4568,
-        '20': 879,
-        '21': 6543,
-        '22': 2013,
-        '23': 8971,
-        '24': 635,
-        '25': 5009
-    }}
+    sampleDataStructure = {
+        'mouse1': {
+            'mouseid': '041940A041',
+            'dataset': {
+                'RFID1': 1003, 
+                'RFID2': 2040,
+                'RFID3': 5032,
+                'RFID4': 230,
+                'RFID5': 2013,
+                'RFID6': 2345,
+                'RFID7': 6433,
+                'RFID8': 993,
+                'RFID9': 2036,
+                'RFID10': 1008,
+                'RFID11': 987,
+                'RFID12': 3378,
+                'RFID13': 7692,
+                'RFID14': 746,
+                'RFID15': 6154,
+                'RFID16': 7466,
+                'RFID17': 2987,
+                'RFID18': 3680,
+                'RFID19': 4568,
+                'RFID20': 879,
+                'RFID21': 6543,
+                'RFID22': 2013,
+                'RFID23': 8971,
+                'RFID24': 635,
+                'RFID25': 5009 
+            },
+            'mapping': {
+                '0': 'null', '1': 'RFID25', '2': 'null', '3': 'null',
+                '4': 'RFID24', '5': 'RFID23', '6': 'RFID22', '7': 'RFID21',
+                '8': 'RFID20', '9': 'RFID19', '10': 'RFID18', '11': 'RFID17',
+                '12': 'RFID16', '13': 'RFID15', '14': 'RFID14', '15': 'RFID13',
+                '16': 'RFID12', '17': 'RFID11', '18': 'RFID10', '19': 'RFID9',
+                '20': 'RFID8', '21': 'RFID7', '22': 'RFID6', '23': 'RFID5',
+                '24': 'RFID4', '25': 'RFID3', '26': 'RFID2', '27': 'RFID1'
+            }
+        }
+    }
     
-    emit('mouseData', json.dumps(mouseheatdata))
+    mouse = 'mouse1'
+    
+    emit('mouseData', { 
+        'heatdata': json.dumps(sampleDataStructure), 
+        'mouseId': mouse 
+    })
 
 
 if __name__ == '__main__':

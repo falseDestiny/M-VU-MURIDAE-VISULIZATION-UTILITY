@@ -606,3 +606,23 @@ body.loginpage {
 	font-size: 0.8em;
 	padding-bottom: 10px;
 }
+
+/* CANVAS Layering */
+
+#canvasContainer {
+	position: relative;
+}
+
+.canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
+#heatmap {
+	z-index: 0;
+}
+
+#vectormap {
+	z-index: 1;
+}
