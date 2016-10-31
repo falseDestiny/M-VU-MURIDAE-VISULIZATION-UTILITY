@@ -565,6 +565,7 @@ hr {
 	opacity: 0.2;
 	text-align: center;
 	padding-top: 60px;
+	padding-bottom: 50px;
 }
 
 @media screen and (max-width: 600px) {
