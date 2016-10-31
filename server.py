@@ -109,12 +109,18 @@ def index():
     if cur.fetchone():
         user = User()
         user.id = usernameinput
-        flask_login.login_user(user, remember=True)
-            
-        return redirect(url_for('index'))
+        flask_login.login_user(user)
+        
+        cur.execute("SELECT admin FROM users WHERE LOWER(username) = LOWER(%s) AND password = crypt(%s, password);", (usernameinput, passwordinput))
+        admin = cur.fetchall()
+        for row in admin:
+            print "   xxx   xxx   xxx", admin[0]
+        session["admin"]=admin[0]    
+        return render_template('index.html', login_failed='false', currentpage='login', admin=session["admin"])
 
     #login failed
     return render_template('login.html', login_failed = 'true', currentpage='login')
+
 
 @app.route('/maps')
 @flask_login.login_required
@@ -122,7 +128,7 @@ def maps():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    return render_template('maps.html', currentpage='maps')
+    return render_template('maps.html', currentpage='maps', admin=session["admin"])
     
 @app.route('/data')
 @flask_login.login_required
@@ -130,15 +136,19 @@ def data():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     otherDataSets = getAllDataSets()
-    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets())
+    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
 
-@app.route('/users')
+@app.route('/users', methods=['GET', 'POST'])
 @flask_login.login_required
 def manageusers():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    return render_template('users.html', currentpage='users')
+    cur.execute("SELECT * FROM users")
+    userdata = cur.fetchall()
+    session["userdata"]=userdata
+    
+    return render_template('users.html', currentpage='users', userdata=userdata, admin=session["admin"])
 
 ################################################################################
 ############################ File Upload Functions #############################
