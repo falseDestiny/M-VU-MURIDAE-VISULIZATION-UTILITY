@@ -17,8 +17,10 @@ class Parser:
     # Each subject in the data file serves as a key to this dictionary
     # Each key points to a list of dictionaries
     # (Each data line is a dictionary itself, contained in this list)
-    def openFile(self, fileName):
-        dataFile = open(fileName)
+    def openFile(self, dataFile):
+        metaInfo = {}
+        listofLocs = []
+        
         data = {}
         linecount = 0
         for line in dataFile:
@@ -40,6 +42,10 @@ class Parser:
             mouseID = cleanText(lineSplit[1].strip())
             label = cleanText(lineSplit[2].strip())
             location = cleanText(lineSplit[3].strip())
+            if len(location) < 6:
+                location = "RFID0" + location[4];
+            
+            
             duration = cleanText(lineSplit[4].strip())
             # Build a dictionary for this line
             line = {"timeStamp":timeStamp, 
@@ -47,15 +53,22 @@ class Parser:
                 "location":location,
                 "duration":duration
             }
+            if location not in listofLocs:
+                listofLocs.append(location)
             # Add a new mouse if this mouseID isn't already in the data
             if (mouseID not in data.keys()):
                 data[mouseID] = []
             # Add this data line to this particular subject
             data[mouseID].append(line)
-        return data
+        metaInfo["data"] = data
+        listofLocs.sort();
+        metaInfo["locations"] = listofLocs
+        metaInfo["filename"] = dataFile.filename
+        return metaInfo
 
-    def __init__(self, fileName):
-        self.data = self.openFile(fileName)
+    def __init__(self, file):
+        self.fileName = file.name
+        self.data = self.openFile(file)
 
     def getData(self):
         return self.data

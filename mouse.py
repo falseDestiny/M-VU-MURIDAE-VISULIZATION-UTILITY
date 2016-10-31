@@ -25,10 +25,10 @@ class Mouse:
             self.moveIndex += 1
             if self.moveIndex == len(self.data):
                 self.done = True
-                print("%s is done",self.idNum)
+               # print("%s is done",self.idNum)
             else:
                 move = (self.data[self.moveIndex]["location"],self.totalTime)
-                print(self.idNum + " " +str(move))
+               # print(self.idNum + " " +str(move))
                 self.path.append(move)
                 self.timeCounter = 0
         else:

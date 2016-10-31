@@ -626,3 +626,37 @@ body.loginpage {
 #vectormap {
 	z-index: 1;
 }
+
+.datatable {
+    width: 100%;
+}
+
+.datablock {
+	display: block;
+}
+
+.datatr{
+	
+}
+
+.datatr:after{
+	content: ' ';
+	display: block;
+	visibility: hidden;
+	clear: both;
+}
+
+.databody{
+	height: 600px;
+	overflow-y: auto;
+}
+
+.datatdth{
+	width: 25%;
+	float: left;
+}
+
+.gridOr{
+	height: 100px;
+	width: 100px;
+}

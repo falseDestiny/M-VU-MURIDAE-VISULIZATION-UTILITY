@@ -54,4 +54,8 @@ HeatmapApp.controller('HeatmapController', function($scope){
             radius: 15
         });
     });
+    
+    socket.on('testUpload', function(){
+        console.log('I made it.');
+    });
 });

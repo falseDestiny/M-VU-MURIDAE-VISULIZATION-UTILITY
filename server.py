@@ -6,6 +6,8 @@ import flask_login
 from flask_login import current_user
 from flask_socketio import SocketIO, emit
 from werkzeug import secure_filename
+from parse import Parser
+from sim import Simulation
 
 
 app = Flask(__name__)
@@ -24,7 +26,8 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
 class User(flask_login.UserMixin):
-    pass
+    uploadingData = ""
+    
 def connectToDB():
     connectionString = 'dbname=mousedb user=owner password=41PubBNmfQhmfCNy host=localhost'
     print connectionString
@@ -36,12 +39,38 @@ def connectToDB():
 # setup all of the values from the users table for the current user
 def setup_User(user, data):
     user.id = data['username']
+    
+def getAllDataSets():
+    testList = ['aDataSet1', 'aDataSet2', 'aDataSet3', 'aDataSet4', 'aDataSet5', 'aDataSet6', 'aDataSet7']
+    return testList
+    
+def parseUploadForm(form):
+    parsedData = {}
+    locations = {}
+    oldSet = False
+    if "oldSet" in form.keys():
+        oldSetName = str(form["prevSetName"])
+        oldSet = True
+        locations["oldSet"] = oldSetName
+    else:
+        for i in range(7):
+            for j in range(7):
+                oldKey = "[" + str(i) + ", " + str(j) + "]"
+                newKey = (i * 7) + j
+                value = form[oldKey]
+                if str(value) != "-1":
+                    locations[str(newKey)] = str(value)
+                
+    parsedData["locations"] = locations
+    parsedData["filename"] = str(form["setName"])
+    parsedData["datalines"] = User.uploadingData
+    return parsedData  
+
 
 @login_manager.user_loader
 def user_loader(user_id):
     db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+    cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT * FROM users WHERE username = %s;", (user_id,))
     data = cur.fetchone()
     if(len(data) > 0):
@@ -80,7 +109,7 @@ def index():
     if cur.fetchone():
         user = User()
         user.id = usernameinput
-        flask_login.login_user(user)
+        flask_login.login_user(user, remember=True)
             
         return redirect(url_for('index'))
 
@@ -100,8 +129,8 @@ def maps():
 def data():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    return render_template('data.html', currentpage='data')
+    otherDataSets = getAllDataSets()
+    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets())
 
 @app.route('/users')
 @flask_login.login_required
@@ -136,16 +165,34 @@ def upload():
         # Move the file form the temporal folder to the upload folder
         
         # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) # remove this line if we are not saving the file
+        myData = Parser(file).getData()
+        User.uploadingData = myData["data"]
+        return render_template('loadeddata.html', myData=myData, otherDataSets=getAllDataSets())
         
-        return render_template('index.html')
+        #return render_template('index.html')
         # Will return to index page if incorrect file format is uploaded
     else: 
-        return render_template('index.html')
+        return render_template('loadeddata.html')
+        
+@app.route('/setDataUpload', methods=['POST'])
+def setDataUpload():
+    myData = parseUploadForm(request.form)
+    mySimulation = Simulation()
+    mySimulation.setUp(myData["datalines"])
+    mySimulation.runFullSim()
+    thesePaths = mySimulation.getAllPaths()
+    theseHeatMaps = mySimulation.getAllHeatData()
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)",(myData["filename"], 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(myData["locations"])))
+    db.commit()
+    return render_template('data.html')
 
 
 ################################################################################
 ################################## SOCKET IO ###################################
 ################################################################################
+
 
 @socketio.on('connect', namespace='/heatmap')
 def makeConnection(): 
@@ -207,4 +254,5 @@ def returnHeatmapData():
 if __name__ == '__main__':
     #app.run(host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)), debug = True)
     socketio.run(app, host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)), debug = True)
+    
     
