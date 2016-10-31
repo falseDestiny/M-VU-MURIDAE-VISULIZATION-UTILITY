@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block bodyTag %}
+<body ng-controller="HeatmapController">
+{% endblock %}
+
+{% block content %}
+		<div class="container pagecontent" onclick="closeLinks()">
+
+			<div class="row">
+
+				<div id="intro" class="col-xs-12 align-center">
+					<a href="/" class="logo pagelogo"><img src="static/images/mlogo.png" alt="" /></a>
+				</div>
+
+				<div class="col-lg-12">
+
+					<!-- CONTENT PANEL -->
+					<div class="col-xs-12 col-md-8 col-lg-9 align-center">
+						<div class="panel" id="canvasContainer">
+							
+							<div class="empty-panel">
+								<h1>MURIDAE<br>VISUALIZATION<br>UTILITY</h1>
+							</div>
+							
+							<canvas class="canvas" id="heatmap"></canvas>
+							<canvas class="canvas" id="vectormap"></canvas>
+						</div>
+					</div>
+
+					<!-- OPTION PANEL -->
+					<div class="col-xs-12 col-md-4 col-lg-3 align-center">
+						<div class="panel">
+
+							<!-- Single button -->
+							<div class="btn-group btn-flex">
+							  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							    Select Data Set <span class="caret"></span>
+							  </button>
+							  <ul class="dropdown-menu bullet pull-center">
+							    <li><input type="radio" id="ID" name="NAME" value="VALUE"><label for="ID">Label 1</label></li>
+							    <li><input type="radio" id="ID2" name="NAME" value="VALUE"><label for="ID2">Label 2</label></li>
+							    <li><input type="radio" id="ID3" name="NAME" value="VALUE"><label for="ID3">Label 3</label></li>
+							    <li><input type="radio" id="ID4" name="NAME" value="VALUE"><label for="ID4">Label 4</label></li>
+							  </ul>
+							</div>
+
+							<div class="btn-group btn-flex">
+								<button type="button" class="btn btn-default" ng-click="grabData()">Display Heat Map</button>
+							</div>
+
+							<div class="btn-group btn-flex btn-flex-last">
+								<button type="button" class="btn btn-default" ng-click="testVector()">Display Vector Map</button>
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+{% endblock %}
+
+{% block loadScripts %}
+<script type="text/javascript" src="/static/js/rainbowvis.js"></script>
+<script type="text/javascript" src="/static/js/heatmap.js"></script>
+{% endblock %}

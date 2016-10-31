@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block bodyTag %}
+<body>
+{% endblock %}
+
+{% block content %}
+<div class="container pagecontent" onclick="closeLinks()">
+
+	<div class="row">
+
+		<div id="intro" class="col-xs-12 align-center">
+			<a href="/" class="logo pagelogo"><img src="static/images/mlogo.png" alt="" /></a>
+		</div>
+
+		<div class="col-lg-12">
+
+			<!-- CONTENT PANEL -->
+			<div class="col-xs-12 col-md-8 col-md-offset-2">
+				
+				<div class="panel clearfix">
+
+					<!-- <div class="empty-panel">
+						<h1>MURIDAE<br>VISUALIZATION<br>UTILITY</h1>
+					</div>
+-->					
+						
+						<div class="col-sm-8 col-sm-offset-2 table-responsive">
+							
+
+							<table class="table table-hover usertable">
+ 							<tbody>
+ 								<tr>
+	 								<td class="col-xs-4">ADMIN</td>
+	 								<td class="col-xs-4">
+	 									<button class="btn btn-default" type="button" data-toggle="collapse" data-target="#userOne" aria-expanded="false" aria-controls="collapseExample">
+											Change Password
+										</button>
+	 								</td>
+	 								<td class="col-xs-4">
+	 									<button class="btn btn-default" type="button">
+											DELETE
+										</button>
+	 								</td>
+ 								</tr>
+								</tbody>
+							</table>
+							
+						
+							<div class="collapse" id="userOne">
+							<div class="well">
+								Password changing stuff goes here
+							</div>
+						</div>
+
+							<table class="table table-hover usertable">
+ 							<tbody>
+ 								<tr>
+	 								<td class="col-xs-4">Sean</td>
+	 								<td class="col-xs-4">
+	 									<button class="btn btn-default" type="button" data-toggle="collapse" data-target="#userTwo" aria-expanded="false" aria-controls="collapseExample">
+											Change Password
+										</button>
+	 								</td>
+	 								<td class="col-xs-4 align-center">
+	 									<button class="btn btn-default" type="button">
+											DELETE
+										</button>
+	 								</td>
+ 								</tr>
+								</tbody>
+							</table>
+							
+						
+							<div class="collapse" id="userTwo">
+							<div class="well">
+								Password changing stuff goes here
+							</div>
+						</div>
+					</div>
+
+				</div><!-- end .panel -->
+			</div><!-- end content panel -->
+
+		</div>
+
+	</div>
+
+</div>
+
+{% endblock %}

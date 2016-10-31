@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block bodyTag %}
+<body>
+{% endblock %}
+
+{% block content %}
+<div class="container maincontent" onclick="closeLinks()">
+
+	<div class="row">
+
+		<div id="intro" class="col-xs-12 col-md-12 col-lg-4">
+			<a href="/" class="logo"><img src="static/images/mlogo.png" alt="" /></a>
+			<header>
+				<h2>MURIDAE VISUALIZATION UTILITY</h2>
+				<p>Clever tag line goes here</p>
+			</header>
+		</div>
+
+		<div class="col-lg-8">
+
+			<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 align-center panelbutton">
+				<a href="/maps">
+					<div class="panel main-panel-button main-panel-size">
+						<p><i class="fa fa-map-o fa-3x"></i> <h1>View Maps</h1></p>
+					</div>
+				</a>
+			</div>
+
+			<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 align-center panelbutton">
+				<a href="/data">
+					<div class="panel main-panel-button main-panel-size">
+						<p><i class="fa fa-database fa-3x"></i> <h1>Manage Data</h1></p>
+					</div>
+				</a>
+			</div>
+
+			<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 align-center panelbutton">
+				<a href="/users">
+					<div class="panel main-panel-button main-panel-size">
+						<p><i class="fa fa-user fa-3x"></i> <h1>Manage Users</h1></p>
+					</div>
+				</a>
+			</div>
+
+		</div>
+
+	</div>
+
+</div>
+{% endblock %}
