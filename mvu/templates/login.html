@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block bodyTag %}
+<body class="loginpage">
+{% endblock %}
+
+{% block content %}
+
+<!-- MAIN CONTENT -->
+<div class="container pagecontent">
+
+	<div class="panel col-xs-12 col-sm-6 col-sm-offset-3 col-lg-4 col-lg-offset-4">
+
+		
+		<div class="col-xs-12 loginbox">
+
+			<div id="loginlogo" class="col-xs-12">
+				<a href="/" class="logo"><img src="static/images/mlogo.png" alt="" /></a>
+				<header>
+					<h3>MURIDAE<br>VISUALIZATION<br>UTILITY</h3>
+				</header>
+			</div>
+			
+			{% if login_failed == 'true' %}
+			<div class="failedlogin">Your Username and/or Password is incorrect.<br>Please try again.</div>
+			{% endif %}
+
+			<form method="POST" action="/">
+				<!--<h3>USERNAME</h3>-->
+			    <div class="input-group input-group-lg loginbar">
+			    	<span class="input-group-addon" id="username-addon1"><i class="fa fa-user"></i></span>
+			    	<input type="text" name="username" class="form-control" placeholder="Username" aria-describedby="username-addon1" />
+			    </div>
+
+			    <!--<h3>PASSWORD</h3>-->
+				<div class="input-group input-group-lg loginbar">
+					<span class="input-group-addon" id="password-addon1"><i class="fa fa-key"></i></span>
+					<input type="password" name="password" class="form-control" placeholder="Password" aria-describedby="password-addon1" />
+				</div>
+
+				<div class="align-center">
+					<input type="submit" value="Sign In" name="submit" class="btn btn-default btn-lg" />
+				</div>
+			</form>
+			
+			<a href="/resetpassword">Forgot Password</a>
+
+		</div>
+
+	</div>
+
+</div>
+
+{% endblock %}

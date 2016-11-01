@@ -21,8 +21,8 @@ function heatmap(canvasId, dataset, options) {
     // create color gradient
     var color = new Rainbow();
     
-    // set heatmap data values to array
-    var arr = Object.keys(dataset).map(function(k) { return dataset[k] });
+    // // set heatmap data values to array
+    // var arr = Object.keys(dataset).map(function(k) { return dataset[k] });
     
     // create options object if none passed in
     if (typeof options == 'undefined')
@@ -33,7 +33,7 @@ function heatmap(canvasId, dataset, options) {
     // add color data to options object
     options.colorSet = {
         color: color,
-        arr: arr
+        arr: dataset
     };
     
     // Check Options against default option set
@@ -41,7 +41,7 @@ function heatmap(canvasId, dataset, options) {
     
     // set colors
     color.setSpectrum(options.colors.low, options.colors.high);
-    color.setNumberRange(0, getMaxValue(arr));
+    color.setNumberRange(0, getMaxValue(dataset));
     
     // get canvas element
     var myCanvas = document.getElementById(canvasId);
@@ -60,7 +60,7 @@ function checkDefaults(options)
     "use strict";
     
     // DEFAULT OPTIONS
-    var properties = ["rows", "cols", "colors", "radius", "stroke"];
+    var properties = ["rows", "cols", "border", "gutter", "colors", "radius", "stroke"];
     
     var getProperty = function (propertyName)
     {
@@ -75,10 +75,16 @@ function checkDefaults(options)
             switch (properties[property])
             {
               case "rows":
-                options.rows = 6;
+                options.rows = 7;
                 break;
               case "cols":
                 options.cols = 4;
+                break;
+              case "border":
+                options.border = 10;
+                break;
+              case "gutter":
+                options.gutter = 5;
                 break;
               case "colors":
                 options.colors = {low: "blue", high: "red"};
@@ -149,17 +155,23 @@ function Grid()
     
     this.drawGrid = function (ctx, gridSize, options)
     {
-        var x = 10, y = 10, gutter = 10;
-        var boxWidth = ((gridSize.width - 10) / options.cols) - gutter;
-        var boxHeight = ((gridSize.height - 10) / options.rows) - gutter;
+        var x = options.border, y = options.border
+
+        var maxWidth = gridSize.width - (2 * x);
+        var maxHeight = gridSize.height - (2 * y);
+        
+        var boxWidth = ((maxWidth + options.gutter) / options.cols);
+        var boxHeight = ((maxHeight + options.gutter) / options.rows);
         
         // draw the grid
         var i, j, stroke;
-        var boxes = options.rows * options.cols;
         
-        if (boxes > options.colorSet.arr.length)
+        var boxes = 0;
+        var maxBoxes = options.rows * options.cols;
+        
+        if (maxBoxes > options.colorSet.arr.length)
         {
-            boxes = options.colorSet.arr.length - 1;
+            maxBoxes = options.colorSet.arr.length - 1;
         }
         
         drawgrid:
@@ -167,46 +179,29 @@ function Grid()
         {
             for (j = 0; j < options.cols; j++)
             {
-                // top row
-                if (i == 0) 
+                if (options.colorSet.arr[boxes] == -1) // empty space box
                 {
-                    if (j != 1)
-                    {
-                        ctx.fillStyle = "#ffffff"
-                    }
-                    else
-                    {
-                        // food square
-                        ctx.fillStyle = "#" + options.colorSet.color.colorAt(options.colorSet.arr[boxes]);
-                        boxes -= 1;
-                    }
-                }
-                else
-                {
-                    this.setColors(ctx, boxes, options.colorSet);
-                    boxes -= 1;
-                }
-                
-                if (i == 0 && j != 1)
-                {
+                    ctx.fillStyle = "#ffffff";
                     stroke = false;
                 }
                 else
                 {
+                    this.setColors(ctx, boxes, options.colorSet);
                     stroke = options.stroke;
                 }
-                
+                boxes += 1;
+
                 this.drawRoundedRect(
                     ctx,  
-                    x + (j * (boxWidth + gutter)),
-                    y + (i * (boxHeight + gutter)), 
-                    boxWidth, 
-                    boxHeight, 
+                    x + (j * boxWidth ),
+                    y + (i * boxHeight), 
+                    boxWidth - options.gutter, 
+                    boxHeight - options.gutter, 
                     options.radius, 
                     true, 
                     stroke
                 );
-                if (boxes < 0) { break drawgrid; } // break out of loops when out of boxes
+                if (boxes > options.colorSet.arr.length) { break drawgrid; } // break out of loops when out of boxes
             }
         }
         

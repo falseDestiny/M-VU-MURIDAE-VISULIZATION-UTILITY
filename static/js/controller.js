@@ -20,16 +20,38 @@ HeatmapApp.controller('HeatmapController', function($scope){
         socket.emit('getMouseData');
     };
     
-    socket.on('mouseData', function(mouseheatdata) {
+    socket.on('mouseData', function(data) {
         console.log('Loading Map...');
         
-        $scope.testdata = JSON.parse(mouseheatdata);
+        var mouseHeatData = data.heatdata;
+        var mouse = data.mouseId;
+        
+        $scope.testdata = JSON.parse(mouseHeatData);
+        
+        var mouseData = $scope.testdata[mouse];
+        
+        var arr = Object.keys(mouseData.mapping).map(function(k) { return mouseData.mapping[k] });
+        
+        var newarr = [];
+        
+        for (var i in arr)
+        {
+            if (mouseData.dataset.hasOwnProperty(arr[i]))
+            {
+                newarr.push(mouseData.dataset[arr[i]]);
+            }
+            else
+            {
+                newarr.push(-1);
+            }
+        }
+        
+        console.log(newarr);
         
         sampleChart = null;
-        sampleChart = new heatmap('testmap', $scope.testdata.mouse1, {
+        sampleChart = new heatmap('heatmap', newarr, {
             stroke: true,
-            radius: 15,
-            rows: 7 // 6 rows of data + top row for food square
+            radius: 15
         });
     });
     
