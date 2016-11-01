@@ -1,0 +1,201 @@
+{% extends "layout.html" %}
+
+{% block bodyTag %}
+<body>
+{% endblock %}
+
+{% block content %}
+<div class="container pagecontent" onclick="closeLinks()">
+
+	<div class="row">
+
+		<div id="intro" class="col-xs-12 align-center">
+			<a href="/" class="logo pagelogo"><img src="static/images/mlogo.png" alt="" /></a>
+		</div>
+
+		<div class="col-lg-12">
+
+			<!-- CONTENT PANEL -->
+			<div class="col-xs-12 col-md-8 col-lg-9">
+				<div class="panel matchHeight">
+					<div class="well text-center responsive">
+						<form action="setDataUpload" method="post" >
+							<table class="table table-block table-responsive">
+								<tr>
+									<td style="text-align:center">
+										<table style="width:100%">
+											<tbody>
+												{% for i in range(7) %}
+													<tr>
+				    								{% for j in range(7) %}
+				        								<td class="align-center">
+				        									{% set name = [i,j] %}
+				        									<select name="{{name}}" style="width:70px" >
+				        										<option value="-1">--</option>
+				        										{% for line in myData.locations %}
+		  														<option value={{line}}>{{line}}</option>
+		  														{% endfor %}
+															</select>
+				        								</td>
+				    								{% endfor %}
+													</tr>
+												{% endfor %}
+											</tbody>
+										</table>
+									</td>
+								</tr>
+							</table>
+							<div class "panel panel-default">
+								<label>Data set name: </label> <input type="text" style="width=300px" name="setName" placeholder={{myData.filename}} />
+							</div>
+							<div class "panel panel-default">
+									<br />
+								<label class="btn btn-default" style="width:200px">
+								Save Data Set to Database
+								<input type="submit" value="setDataUpload" style="display: none;">
+								</label>
+								<label class="btn btn-default"  style="width:200px">
+								Cancel
+								</label>
+								<label class="btn-block">
+									<br />
+								To upload this data set, you'll need to define the grid it uses. <br />Please identify the sensor at each grid position. For any unused senors, leave unselected.
+								</label>
+							</div>
+							<div class "panel panel-default">
+								<label class="btn-block">
+									Or choose a previously-uploaded data set and mimic it's grid.<br />
+									<input type="checkbox" name="oldSet" /><Label>- Use Previous Set -</Label>
+									<select name="prevSetName" style="width:200px">
+										{% for line in otherDataSets %}
+											<option value={{ line }}>{{ line }}</option>
+										{% endfor %}
+									</select>
+								</label>
+							</div>
+							<input type="hidden" name="data" value={{ myData }} />
+						</form>
+					</div>
+				<div class="panel panel-default">
+					<div class="table-responsive">
+						<!--	<table class="table table-hover table-bordered">-->
+						<table class="table table-striped datatable" >
+							<thead class="datablock">
+								<tr class="datablock datatr">
+									<th class="datablock datatdth" style="height:40px" >Subject</th>
+									<th class="datablock datatdth" style="height:40px; text-align: left;">Location</th>
+									<th class="datablock datatdth" style="height:40px; text-align: left;">Time Stamp</th>
+									<th class="datablock datatdth" style="height:40px; text-align: center;">Duration</th>
+								</tr>
+							</thead>
+							
+								<tbody class="datablock databody" >
+									{% for key, value in myData.data.iteritems() %}
+										{% for line in value %}
+											<tr class="datablock datatr">
+												<td class="datablock datatdth" >{{key}} </td>
+												<td class="datablock datatdth" style="text-align: left;">{{line.location}}</td>
+												<td class="datablock datatdth" style="text-align: left;">{{line.timeStamp}}</td>
+												<td class="datablock datatdth" style="text-align: center;">{{line.duration}}</td>
+											</tr>
+										{% endfor %}
+									{% endfor %}
+								</tbody>
+						</table>
+					</div> 
+				</div>	
+					<!-- -->
+
+				</div><!-- end .panel -->
+			</div><!-- end content panel -->
+
+			<!-- OPTION PANEL -->
+			<div class="col-xs-12 col-md-4 col-lg-3 align-center">
+				<div class="panel matchHeight">
+
+					<!-- FILE UPLOAD BUTTON -->
+					<div class="btn-flex-submit-block fileupload">
+						<form action="upload" method="post" class="col-xs-12 col-12" enctype="multipart/form-data">
+
+							<label class="btn btn-block btn-default">
+								Upload Data Set
+								<input type="file" name="file" style="display: none;">
+							</label>									
+							
+							<div class="btn-flex-submit">
+								<input type="text" class="form-control" readonly>
+							</div>
+							
+							<div class="btn-flex-submit">
+								<label class="btn btn-block btn-default">
+									Submit
+									<input type="submit" value="Upload" style="display: none;">
+								</label>
+							</div>
+
+						</form>
+					</div>
+					
+
+					<!-- DATA SELECT DROPDOWN -->
+					<div class="btn-group btn-flex">
+					  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					    Select Data Set <span class="caret"></span>
+					  </button>
+					  <ul class="dropdown-menu bullet pull-center">
+					    <li><input type="radio" id="ID" name="NAME" value="VALUE"><label for="ID">Label 1</label></li>
+					    <li><input type="radio" id="ID2" name="NAME" value="VALUE"><label for="ID2">Label 2</label></li>
+					    <li><input type="radio" id="ID3" name="NAME" value="VALUE"><label for="ID3">Label 3</label></li>
+					    <li><input type="radio" id="ID4" name="NAME" value="VALUE"><label for="ID4">Label 4</label></li>
+					  </ul>
+					</div>
+
+					<!-- LOAD DATA BUTTON -->
+					<div class="btn-group btn-flex">
+						<button type="button" class="btn btn-default">Load Data Set</button>
+					</div>
+
+					<!-- DELETE DATA BUTTON -->
+					<div class="btn-group btn-flex btn-flex-last">
+						<button type="button" class="btn btn-default">Delete Data Set</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+{% block loadScripts %}
+		
+<script type="text/javascript">
+	$(function() {
+
+		// We can attach the `fileselect` event to all file inputs on the page
+	  	$(document).on('change', ':file', function() {
+	    	var input = $(this),
+	        	numFiles = input.get(0).files ? input.get(0).files.length : 1,
+	        	label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+	    	input.trigger('fileselect', [numFiles, label]);
+	  	});
+
+	  	// We can watch for our custom `fileselect` event like this
+	  	$(document).ready( function() {
+	    	$(':file').on('fileselect', function(event, numFiles, label) {
+
+	        	var input = $(this).parents('.fileupload').find(':text'),
+	            	log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+	          	if( input.length ) {
+	            	input.val(log);
+	          	} else {
+	            	if( log ) alert(log);
+	          	}
+
+	      	});
+	  	});
+	  
+	});
+</script>
+
+{% endblock %}
