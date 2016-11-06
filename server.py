@@ -208,58 +208,51 @@ def setDataUpload():
 def makeConnection(): 
     print('connected')
 
-@socketio.on('getMouseData', namespace='/heatmap')
-def returnHeatmapData():
+@socketio.on('getDatasetNames', namespace='/heatmap')
+def getDatasetNames():
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    sampleDataStructure = {
-        'mouse1': {
-            'mouseid': '041940A041',
-            'dataset': {
-                'RFID1': 1003, 
-                'RFID2': 2040,
-                'RFID3': 5032,
-                'RFID4': 230,
-                'RFID5': 2013,
-                'RFID6': 2345,
-                'RFID7': 6433,
-                'RFID8': 993,
-                'RFID9': 2036,
-                'RFID10': 1008,
-                'RFID11': 987,
-                'RFID12': 3378,
-                'RFID13': 7692,
-                'RFID14': 746,
-                'RFID15': 6154,
-                'RFID16': 7466,
-                'RFID17': 2987,
-                'RFID18': 3680,
-                'RFID19': 4568,
-                'RFID20': 879,
-                'RFID21': 6543,
-                'RFID22': 2013,
-                'RFID23': 8971,
-                'RFID24': 635,
-                'RFID25': 5009 
-            },
-            'mapping': {
-                '0': 'null', '1': 'RFID25', '2': 'null', '3': 'null',
-                '4': 'RFID24', '5': 'RFID23', '6': 'RFID22', '7': 'RFID21',
-                '8': 'RFID20', '9': 'RFID19', '10': 'RFID18', '11': 'RFID17',
-                '12': 'RFID16', '13': 'RFID15', '14': 'RFID14', '15': 'RFID13',
-                '16': 'RFID12', '17': 'RFID11', '18': 'RFID10', '19': 'RFID9',
-                '20': 'RFID8', '21': 'RFID7', '22': 'RFID6', '23': 'RFID5',
-                '24': 'RFID4', '25': 'RFID3', '26': 'RFID2', '27': 'RFID1'
-            }
+    # get dataset names from database
+    datasetnames = "SELECT datasetname AS name FROM datasets;"
+    cur.execute(datasetnames)
+    results = cur.fetchall()
+    
+    test = []
+    
+    if(len(results) > 0):
+        for result in results:
+            tmp = {'name': result[0] }
+            test.append(tmp)
+    
+        for i in test:
+            emit('datasetnamelist', i)
+            
+@socketio.on('loadMice', namespace='/heatmap')
+def loadMice(dataset):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    print("HI THERE" + dataset)
+    
+    # grab the dataset for the passed selection
+    getDataset = "SELECT heatdata FROM datasets WHERE datasetname = %s;"
+    print(getDataset % ("%%" + dataset + "%%"))
+    # cur.execute(getDataset, ("%%" + dataset + "%%"))
+    cur.execute("SELECT heatdata FROM datasets WHERE datasetname = '%s';" % (dataset))
+    result = cur.fetchone()
+    cur.execute("SELECT vectordata FROM datasets WHERE datasetname = '%s';" % (dataset))
+    vecresult = cur.fetchone()
+    cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (dataset))
+    locresult = cur.fetchone()
+    
+    emit('returnDataset', {
+        'data': {
+            'heatdata': result,
+            'vectdata': vecresult,
+            'mapping': locresult
         }
-    }
-    
-    mouse = 'mouse1'
-    
-    emit('mouseData', { 
-        'heatdata': json.dumps(sampleDataStructure), 
-        'mouseId': mouse 
     })
-
 
 if __name__ == '__main__':
     #app.run(host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)), debug = True)

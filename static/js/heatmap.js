@@ -5,10 +5,6 @@ Sean Walsh
 
 required libraries: 
     RainbowVis-JS - released under Eclipse Public License - v 1.0
-    
-note:
-  top row of heatmap is hard coded to provide one square specific to M-VU app
-  see drawGrid method...
   
 */
 
@@ -183,6 +179,11 @@ function Grid()
                 {
                     ctx.fillStyle = "#ffffff";
                     stroke = false;
+                }
+                else if (options.colorSet.arr[boxes] == 0) // no value box
+                {
+                    ctx.fillStyle = "#ffffff";
+                    stroke = true;
                 }
                 else
                 {
