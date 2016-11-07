@@ -67,6 +67,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
         
         for(var i in keys) {
             $scope.mice.push({'list': keys[i]});
+            $scope.$apply();
         }
         
         // ADD MISSING RFIDs TO HEATDATA
@@ -108,6 +109,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
     });
     
     $scope.showHeatMap = function showHeatMap() {
+        
         if($scope.mouseselection != $scope.mice[0].list) {
             console.log("Loading heatmap for " + $scope.mouseselection + "...");
             
@@ -136,6 +138,15 @@ HeatmapApp.controller('HeatmapController', function($scope){
             
             document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
         }
-    }
+    };
 });
 
+
+HeatmapApp.controller('DataController', function($scope){
+    
+    $scope.testvar = "";
+    
+    $scope.test = function test(testvar) {
+        console.log("HI THERE!: " + $scope.testvar);
+    };
+});
