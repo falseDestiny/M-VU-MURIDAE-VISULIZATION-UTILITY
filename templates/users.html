@@ -20,63 +20,41 @@
 				
 				<div class="panel clearfix">
 
-					<!-- <div class="empty-panel">
-						<h1>MURIDAE<br>VISUALIZATION<br>UTILITY</h1>
-					</div>
--->					
-						
+                    <div class = align-left>
+                        <a href="/createaccount" class="active" ><i class="fa fa-user-plus fa-2x" ></i></a>
+
+                        <a href="/deleteaccount" class="active" ><i class="fa fa-user-times fa-2x" ></i></a>
+
+                        <a href="/changepassword" class="active" ><i class="fa fa-key fa-2x" ></i></a>
+                    </div>
+                        
 						<div class="col-sm-8 col-sm-offset-2 table-responsive">
-							
+						    
+                                <table class="table usertable">
 
+ 								    <tr>
+	 								    <td class="col-xs-4">Username</td>
+	 								    <td class="col-xs-4">User Type</td>
+	 								    <td class="col-xs-4">User Email</td>
+ 								    </tr>
+ 								 
+ 								 </table>
 							<table class="table table-hover usertable">
  							<tbody>
- 								<tr>
-	 								<td class="col-xs-4">ADMIN</td>
-	 								<td class="col-xs-4">
-	 									<button class="btn btn-default" type="button" data-toggle="collapse" data-target="#userOne" aria-expanded="false" aria-controls="collapseExample">
-											Change Password
-										</button>
-	 								</td>
-	 								<td class="col-xs-4">
-	 									<button class="btn btn-default" type="button">
-											DELETE
-										</button>
-	 								</td>
- 								</tr>
+ 							    
+                                {% for data in userdata %}
+ 								    <tr>
+	 								    <td class="col-xs-4">{{data['username']}}</td>
+	 								    <td class="col-xs-4">{% if data['admin']==true %}admin{% else %}user{% endif %}</td>
+	 								    <td class="col-xs-4">{{data['email']}}</td>
+ 								    </tr>
+                                {% endfor %}
+
 								</tbody>
 							</table>
 							
-						
-							<div class="collapse" id="userOne">
-							<div class="well">
-								Password changing stuff goes here
-							</div>
-						</div>
-
-							<table class="table table-hover usertable">
- 							<tbody>
- 								<tr>
-	 								<td class="col-xs-4">Sean</td>
-	 								<td class="col-xs-4">
-	 									<button class="btn btn-default" type="button" data-toggle="collapse" data-target="#userTwo" aria-expanded="false" aria-controls="collapseExample">
-											Change Password
-										</button>
-	 								</td>
-	 								<td class="col-xs-4 align-center">
-	 									<button class="btn btn-default" type="button">
-											DELETE
-										</button>
-	 								</td>
- 								</tr>
-								</tbody>
-							</table>
 							
 						
-							<div class="collapse" id="userTwo">
-							<div class="well">
-								Password changing stuff goes here
-							</div>
-						</div>
 					</div>
 
 				</div><!-- end .panel -->

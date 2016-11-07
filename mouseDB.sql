@@ -23,6 +23,7 @@ CREATE TABLE users (
     userid SERIAL NOT NULL PRIMARY KEY,
     username citext NOT NULL,
     password text NOT NULL,
+    email TEXT UNIQUE CONSTRAINT valid_email CHECK (email ~ '\A\S+@\S+\.\S+\Z'),
     admin boolean NOT NULL
 );
 
@@ -72,7 +73,7 @@ GRANT select, usage ON users_userid_seq, datasets_datasetID_seq, dataline_datali
 --
 -- INSERT SOME USERS FOR DEVELOPMENT
 --
-INSERT INTO users (username, password, admin) VALUES ('justin', crypt('password', gen_salt('bf')), true);
-INSERT INTO users (username, password, admin) VALUES ('sean', crypt('password', gen_salt('bf')), true);
-INSERT INTO users (username, password, admin) VALUES ('shane', crypt('password', gen_salt('bf')), true);
-INSERT INTO users (username, password, admin) VALUES ('user', crypt('password', gen_salt('bf')), false);
+INSERT INTO users (username, password, email, admin) VALUES ('justin', crypt('password', gen_salt('bf')), 'fox51v2@yahoo.com', true);
+INSERT INTO users (username, password, email, admin) VALUES ('sean', crypt('password', gen_salt('bf')), 'fox51v@yahoo.com', true);
+INSERT INTO users (username, password, email, admin) VALUES ('shane', crypt('password', gen_salt('bf')), 'fox51@yahoo.com', true);
+INSERT INTO users (username, password, email, admin) VALUES ('user', crypt('password', gen_salt('bf')), 'fox5@yahoo.com', false);
