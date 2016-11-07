@@ -26,7 +26,8 @@
 					</div>
 				</a>
 			</div>
-
+			
+            {% if admin == [true] %}
 			<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 align-center panelbutton">
 				<a href="/data">
 					<div class="panel main-panel-button main-panel-size">
@@ -34,7 +35,9 @@
 					</div>
 				</a>
 			</div>
-
+            {% endif %}
+            
+            {% if admin == [true] %}
 			<div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 align-center panelbutton">
 				<a href="/users">
 					<div class="panel main-panel-button main-panel-size">
@@ -42,6 +45,7 @@
 					</div>
 				</a>
 			</div>
+            {% endif %}
 
 		</div>
 

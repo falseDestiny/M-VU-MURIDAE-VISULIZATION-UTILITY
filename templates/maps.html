@@ -31,21 +31,46 @@
 					<!-- OPTION PANEL -->
 					<div class="col-xs-12 col-md-4 col-lg-3 align-center">
 						<div class="panel">
-
-							<!-- Single button -->
-							<form class="btn-group btn-flex">
-								<select class="btn btn-default" ng-model="selection" ng-change="loadDataset()">
-									<option ng-repeat="option in datasets">{% raw %}{{option.name}}{% endraw %}</option>
-								</select>
-								<noscript><input type="submit" value="Submit"></noscript>
-							</form>
 							
-							
+							<!-- DATASET SELECT DROPDOWN -->
 							<div class="btn-group btn-flex">
-								<select class="btn btn-default" ng-model="mouseselection">
-									<option ng-repeat="option in mice">{% raw %}{{option.list}}{% endraw %}</option>
-								</select>
+								<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							    	Select Dataset <span class="caret"></span>
+							  	</button>
+							  	<ul class="dropdown-menu bullet pull-center">
+							  		<li ng-repeat="option in datasets">
+							  			<input 
+							  				type="radio"
+							  				id="{% raw %}{{option.name}}{% endraw %}"
+							  				name="datalist"
+							  				ng-model="$parent.selection"
+							  				value="{% raw %}{{option.name}}{% endraw %}"
+							  				ng-change="loadDataset()"
+							  			/>
+							  			<label for="{% raw %}{{option.name}}{% endraw %}">{% raw %}{{option.name}}{% endraw %}</label>
+							  		</li>
+							  	</ul>
 							</div>
+						  	
+							<!-- MOUSE SELECT DROPDOWN -->
+							<div class="btn-group btn-flex">
+							  	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							    	Select Mouse <span class="caret"></span>
+							  	</button>
+							  	<ul class="dropdown-menu bullet pull-center">
+							    	<li ng-repeat="option in mice">
+							    		<input 
+							    			type="radio"
+							    			id="{% raw %}{{option.list}}{% endraw %}"
+							    			name="mouselist"
+							    			ng-model="$parent.mouseselection"
+							    			value="{% raw %}{{option.list}}{% endraw %}"
+							    		/>
+							    		<label for="{% raw %}{{option.list}}{% endraw %}">{% raw %}{{option.list}}{% endraw %}</label>
+							    	</li>
+							  	</ul>
+							</div>
+
 							
 							<div class="btn-group btn-flex">
 								<button type="button" class="btn btn-default" ng-click="showHeatMap()">Display Heat Map</button>
