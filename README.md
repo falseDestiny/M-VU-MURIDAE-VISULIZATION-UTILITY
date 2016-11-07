@@ -8,4 +8,5 @@
     <li>Flask-SocketIO</li>
     <li>python-psycopg2</li>
     <li>postgresql-contrib-9.3</li>
+    <li>flask_mail==0.9.0</li>
  </ul>
