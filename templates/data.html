@@ -56,27 +56,23 @@
 					
 
 					<!-- DATA SELECT DROPDOWN -->
-					<div class="btn-group btn-flex">
-					  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					    Select Data Set <span class="caret"></span>
-					  </button>
-					  <ul class="dropdown-menu bullet pull-center">
-					    <li><input type="radio" id="ID" name="NAME" value="VALUE"><label for="ID">Label 1</label></li>
-					    <li><input type="radio" id="ID2" name="NAME" value="VALUE"><label for="ID2">Label 2</label></li>
-					    <li><input type="radio" id="ID3" name="NAME" value="VALUE"><label for="ID3">Label 3</label></li>
-					    <li><input type="radio" id="ID4" name="NAME" value="VALUE"><label for="ID4">Label 4</label></li>
-					  </ul>
-					</div>
-
-					<!-- LOAD DATA BUTTON -->
-					<div class="btn-group btn-flex">
-						<button type="button" class="btn btn-default">Load Data Set</button>
-					</div>
-
-					<!-- DELETE DATA BUTTON -->
-					<div class="btn-group btn-flex btn-flex-last">
-						<button type="button" class="btn btn-default">Delete Data Set</button>
-					</div>
+					<form action="loadData" method="post" enctype="multipart/form-data">
+						<div class="btn-group btn-flex">
+							<select name="setToLoad" class="btn btn-default"  >
+									{% for line in otherDataSets %}
+										<option value={{ line }}>{{ line }}</option>
+									{% endfor %}
+							</select>
+						  </ul>
+						</div>
+						<!-- LOAD DATA BUTTON -->
+						<div class="btn-group btn-flex">
+							<label class="btn btn-block btn-default">
+									Load Data Set
+							<input type="submit" value="LoadData" style="display: none;">
+							</label>
+						</div>
+					</form>
 
 				</div>
 			</div>
