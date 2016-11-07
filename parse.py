@@ -53,14 +53,19 @@ class Parser:
                 "location":location,
                 "duration":duration
             }
-            if location not in listofLocs:
-                listofLocs.append(location)
+            #if location not in listofLocs:
+            #    listofLocs.append(location)
             # Add a new mouse if this mouseID isn't already in the data
             if (mouseID not in data.keys()):
                 data[mouseID] = []
             # Add this data line to this particular subject
             data[mouseID].append(line)
         metaInfo["data"] = data
+        for i in range(1, 26):
+            if i < 10:
+                listofLocs.append("RFID0" + str(i))
+            else:
+                listofLocs.append("RFID" + str(i))
         listofLocs.sort();
         metaInfo["locations"] = listofLocs
         metaInfo["filename"] = dataFile.filename

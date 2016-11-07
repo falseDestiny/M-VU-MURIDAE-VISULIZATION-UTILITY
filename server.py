@@ -167,7 +167,7 @@ def upload():
         # Remove unsupported chars from filename
         filename = secure_filename(file.filename)
         
-        print('filename: ' + file.filename) # this is a test line, it should print the filename to the console...
+        #print('filename: ' + file.filename) # this is a test line, it should print the filename to the console...
         
         # The variable called file stores the file, this could be sent to the parser rather than being saved
         # Nothing withing this if statement is needed for parsing purposes. I am leaving it to show
@@ -177,6 +177,7 @@ def upload():
         # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) # remove this line if we are not saving the file
         myData = Parser(file).getData()
         User.uploadingData = myData["data"]
+        User.uploadingFileName = myData["filename"]
         return render_template('loadeddata.html', myData=myData, otherDataSets=getAllDataSets())
         
         #return render_template('index.html')
@@ -192,6 +193,12 @@ def setDataUpload():
     mySimulation.runFullSim()
     thesePaths = mySimulation.getAllPaths()
     theseHeatMaps = mySimulation.getAllHeatData()
+    if myData["filename"] == "":
+        myData["filename"] = User.uploadingFileName
+    
+    #print("Filename! " + myData["filename"])
+    #myData[""]
+    
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)",(myData["filename"], 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(myData["locations"])))
