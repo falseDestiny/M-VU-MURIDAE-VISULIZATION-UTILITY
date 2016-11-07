@@ -41,8 +41,14 @@ def setup_User(user, data):
     user.id = data['username']
     
 def getAllDataSets():
-    testList = ['aDataSet1', 'aDataSet2', 'aDataSet3', 'aDataSet4', 'aDataSet5', 'aDataSet6', 'aDataSet7']
-    return testList
+    db = connectToDB()
+    cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT datasetname FROM datasets;", )
+    holddata = cur.fetchall()
+    allsets = []
+    for line in holddata:
+        allsets.append(line[0])
+    return allsets
     
 def parseUploadForm(form):
     parsedData = {}
@@ -65,7 +71,33 @@ def parseUploadForm(form):
     parsedData["filename"] = str(form["setName"])
     parsedData["datalines"] = User.uploadingData
     return parsedData  
-
+    
+# This is a function to help bring a json back from the database and turn it back into a dictionary   
+def convertString(longstring):
+    final = {}
+    done = False
+    counter = 0
+    while counter < len(longstring):
+        if longstring[counter] == "{" or longstring[counter] == "}":
+            counter += 1
+        else:
+            thiskey = ""
+            thisvalue = ""
+            print("skipping: " + longstring[counter])
+            counter += 1
+            while not done:
+                thiskey += longstring[counter]
+                counter += 1
+                if longstring[counter] == '"':
+                    done = True
+            done = False
+            counter += 4
+            while longstring[counter] != '"':
+                thisvalue += longstring[counter]
+                counter += 1
+            counter += 3
+            final[thiskey]=thisvalue
+    return final
 
 @login_manager.user_loader
 def user_loader(user_id):
@@ -198,10 +230,26 @@ def setDataUpload():
     
     #print("Filename! " + myData["filename"])
     #myData[""]
+    #print(myData)
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if "oldSet" in myData["locations"].keys():
+        #print(myData["locations"]["oldSet"])
+        oldLoc = myData["locations"]["oldSet"]
+        cur.execute("SELECT locationmap from datasets where datasetname=%s", (oldLoc,))
+        holdlocations = cur.fetchall()
+        tempLocations = holdlocations[0][0]
+        getLocations = convertString(tempLocations)
+        #for key in tempLocations.keys():
+            #getLocations[key.strip()] = tempLocations[key].strip()
+        #for item in getLocations:
+            #print(item)
+    else:
+        getLocations = myData["locations"]
     
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)",(myData["filename"], 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(myData["locations"])))
+    cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)",(myData["filename"], 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations)))
     db.commit()
     return render_template('data.html')
 
@@ -240,11 +288,9 @@ def loadMice(dataset):
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    print("HI THERE" + dataset)
-    
     # grab the dataset for the passed selection
     getDataset = "SELECT heatdata FROM datasets WHERE datasetname = %s;"
-    print(getDataset % ("%%" + dataset + "%%"))
+    #print(getDataset % ("%%" + dataset + "%%"))
     # cur.execute(getDataset, ("%%" + dataset + "%%"))
     cur.execute("SELECT heatdata FROM datasets WHERE datasetname = '%s';" % (dataset))
     result = cur.fetchone()
