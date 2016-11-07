@@ -8,20 +8,7 @@ from flask_socketio import SocketIO, emit
 from werkzeug import secure_filename
 from parse import Parser
 from sim import Simulation
-from flask import Flask
-from flask_mail import Mail, Message
 
-app =Flask(__name__)
-mail=Mail(app)
-
-app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'mvuwebapp@gmail.com'
-app.config['MAIL_PASSWORD'] = 'mvuwebapppass'
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-
-mail=Mail(app)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24).encode('hex')
@@ -243,7 +230,7 @@ def unauthorized_handler():
 def index():
     if request.method == 'GET':
         if current_user.is_authenticated:
-            return render_template('index.html', login_failed='false', currentpage='home', admin=session["admin"])
+            return render_template('index.html', login_failed='false', currentpage='home')
         else:
             return render_template('login.html', login_failed='false', currentpage='login')
             
@@ -300,192 +287,6 @@ def manageusers():
     
     return render_template('users.html', currentpage='users', userdata=userdata, admin=session["admin"])
 
-@app.route('/createaccount', methods=['GET', 'POST'])
-def create_account():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    if request.method == 'GET':
-        return render_template('create_account.html', currentpage = 'create_account', admin=session["admin"])
-    
-    #POST
-    # check username
-    usernameinput = request.form['username']
-    passwordinput = request.form['password']
-    useremailinput = request.form['email']
-    admin = request.form['admin']
-    
-    if admin == "user":
-        admin = 'false'
-    else:
-        admin = 'true'
-    print "User type is "+admin 
-
-    print "Checking username...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (usernameinput,))
-    if cur.fetchone():
-        return render_template('create_account.html', currentpage='create_account', bad_account='badusername', account_created='false', admin=session["admin"])
-        
-    # make sure passwords match
-    print "Checking password...."
-    password1 = request.form['password']
-    password2 = request.form['retypepassword']
-    if password1 != password2:
-        return render_template('create_account.html', currentpage='create_account', bad_account='badpassword', account_created='false', admin=session["admin"])
-    
-    # make sure email doesn't exist
-    print "Checking email...."
-    pattern = re.compile("\A\S+@\S+\.\S+\Z")
-    cur.execute("SELECT email FROM users WHERE email = %s;", (useremailinput,))
-    if cur.fetchone() or not pattern.match(useremailinput):
-        return render_template('create_account.html', currentpage='create_account', bad_account='bademail', account_created='false', admin=session["admin"])
-        
-    # attempt to create user
-    print "Attempting to create user...."
-    print "username" + request.form['username'] + " Password: " + request.form['password']
-    try:
-        cur.execute("INSERT INTO users (username, password, email, admin) VALUES (%s, crypt(%s, gen_salt('bf')), %s, %s);", (usernameinput, passwordinput, useremailinput, admin))
-    except:
-        print("Error creating user...")
-        db.rollback()
-    db.commit()
-        
-    # check to see if user was created
-    print "Checking success of user creation...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (usernameinput,))
-    if cur.fetchone():
-        # user was created
-        print "User created"
-        account_created = 'true'
-    else:
-        # user was NOT created
-        print "User not created"
-        account_created = 'false'
-            
-    return render_template('account_created.html', currentpage='create_account', bad_account='unknown', admin=session["admin"], account_created=account_created, user=usernameinput)
-
-@app.route('/deleteaccount', methods=['GET', 'POST'])
-def delete_account():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    if request.method == 'GET':
-        return render_template('delete_account.html', currentpage = 'delete_account', admin=session["admin"])
-
-    # make sure user input matches
-    print "Checking username match...."
-    username1 = request.form['username1']
-    username2 = request.form['username2']
-    if username1 != username2:
-        return render_template('delete_account.html', currentpage='delete_account', bad_account='badpassword', account_created='false', admin=session["admin"])
-
-    print "Checking for username in database...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (username1,))
-    if cur.fetchone():
-        print "Username is found."
-    else:
-        return render_template('delete_account.html', currentpage='delete_account', bad_account='badusername', account_created='false', admin=session["admin"])
-    
-    # attempt to delete user
-    print "Attempting to delete user...."
-    try:
-        print(cur.mogrify("DELETE FROM users WHERE username = 'sean';"))
-        cur.execute("DELETE FROM users WHERE username = 'sean';")
-    except:
-        print("Error deleting user...")
-        db.rollback()
-    db.commit()
-        
-    # check to see if user was deleted
-    print "Checking success of user deletion...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (username1,))
-    if cur.fetchone():
-        # user not deleted
-        print "User not deleted"
-        account_created = 'true'
-    else:
-        # user deleted
-        print "User deleted"
-        account_created = 'false'
-            
-    return render_template('account_deleted.html', currentpage='delete_account', bad_account='unknown', account_created=account_created, user=username1, admin=session["admin"])
-
-@app.route('/changepassword', methods=['GET', 'POST'])
-def change_password():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    if request.method == 'GET':
-        return render_template('change_password.html', currentpage = 'change_password', admin=session["admin"])
-
-    password = request.form['password']
-    retypepassword = request.form['retypepassword']
-    username = request.form['username']
-
-    # check to see if user exists
-    print "Checking username...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (username,))
-    if cur.fetchone():
-        print "Username is found."
-    else:
-        return render_template('change_password.html', currentpage='change_password', bad_account='badusername', account_created='false', admin=session["admin"])
-
-    # make sure user password matches
-    print "Checking passwords...."
-    if password != retypepassword:
-        return render_template('change_password.html', currentpage='change_password', bad_account='badpassword', account_created='false', admin=session["admin"])
-        
-    # try to insert new password
-    try:
-        print("Inserting password...")
-        cur.execute("UPDATE users SET password = crypt('%s', gen_salt('bf')) WHERE username= '%s'" % (password, username))
-    except:
-        print("Error Inserting password...")
-        db.rollback()
-    db.commit()
-            
-    return render_template('password_changed.html', currentpage='change_password', bad_account='unknown', user=username, admin=session["admin"])
-
-
-@app.route('/sendpassword', methods=['GET', 'POST'])
-def send_password():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    if request.method == 'GET':
-        return render_template('send_password.html', currentpage = 'send_password')
-        
-    # get email from form
-    email = request.form['email']
-    print "User email is ."+email
-
-    # check to see if user exists
-    print "Checking username...."
-    cur.execute("SELECT email FROM users WHERE email = %s;", (email,))
-    if cur.fetchone():
-        print "Checking password...."
-        # cur.execute("SELECT INTO users password VALUES (crypt(%s, gen_salt('bf')) WHERE username = %s);", (password, username,))
-
-        cur.execute("SELECT password = crypt('password', gen_salt('bf')) FROM users WHERE email = %s;", (email,))
-        password = cur.fetchall()
-        print password
-        print password
-        print password
-        print password
-            
-        msg = Message('MVU Password', sender = 'mvuwebapp@yahoo.com', recipients = [email])
-        msg.body = "Hello, this is yot password- "+str(password) 
-        mail.send(msg)
-        
-        print "Mail Sent."
-    else:
-        return render_template('send_password.html', currentpage='change_password', bad_account='badusername', account_created='false')
-            
-    return render_template('password_sent.html', currentpage='send_password', email=email, bad_account='unknown')
-
-
-
-
 ################################################################################
 ############################ File Upload Functions #############################
 ################################################################################
@@ -517,7 +318,7 @@ def upload():
         #return render_template('index.html')
         # Will return to index page if incorrect file format is uploaded
     else: 
-        return render_template('loadeddata.html')
+        return render_template('loadeddata.html', admin=session["admin"])
         
 @app.route('/setDataUpload', methods=['POST'])
 def setDataUpload():
@@ -549,7 +350,7 @@ def setDataUpload():
     return viewDataPage(getDataToView(myData["filename"]))
     
 def viewDataPage(data):
-    return render_template('viewdata.html', myData=data, otherDataSets=getAllDataSets())
+    return render_template('viewdata.html', myData=data, otherDataSets=getAllDataSets(), admin=session["admin"])
 
 def getDataToView(setName):
     db = connectToDB()
