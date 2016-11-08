@@ -134,15 +134,16 @@ def logout():
 @login_manager.unauthorized_handler
 def unauthorized_handler():
     return render_template('login.html', login_failed = 'true', currentpage='login')
-    
+        
 @app.route('/', methods=['GET', 'POST']) #handle login
 def index():
+    
     if request.method == 'GET':
         if current_user.is_authenticated:
             return render_template('index.html', login_failed='false', currentpage='home', admin=session["admin"])
         else:
             return render_template('login.html', login_failed='false', currentpage='login')
-            
+
     #attempt login
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -284,10 +285,22 @@ def delete_account():
     # attempt to delete user
     print "Attempting to delete user...."
     try:
-        print(cur.mogrify("DELETE FROM users WHERE username = 'sean';"))
-        cur.execute("DELETE FROM users WHERE username = 'sean';")
-    except:
+        query = "DELETE FROM users WHERE username = %s;"
+        
+        #check to see if current user is deleting themself
+        selfdeletion = False
+        if current_user.id == username1:
+            flask_login.logout_user()
+            selfdeletion = True
+        
+        print(cur.mogrify(query, (username1,)))
+        cur.execute(query, (username1,))
+    except psycopg2.Error as e:
         print("Error deleting user...")
+        if selfdeletion:
+            user = User()
+            user.id = username1
+            flask_login.login_user(user)
         db.rollback()
     db.commit()
         
@@ -297,13 +310,15 @@ def delete_account():
     if cur.fetchone():
         # user not deleted
         print "User not deleted"
-        account_created = 'true'
+        account_deleted = 'false'
     else:
         # user deleted
         print "User deleted"
-        account_created = 'false'
+        if selfdeletion:
+            return redirect(url_for('index'))
+        account_deleted = 'true'
             
-    return render_template('account_deleted.html', currentpage='delete_account', bad_account='unknown', account_created=account_created, user=username1, admin=session["admin"])
+    return render_template('account_deleted.html', currentpage='delete_account', bad_account='unknown', account_deleted=account_deleted, user=username1, admin=session["admin"])
 
 @app.route('/changepassword', methods=['GET', 'POST'])
 def change_password():

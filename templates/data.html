@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block bodyTag %}
-<body>
+<body ng-controller="DataController">
 {% endblock %}
 
 {% block content %}
@@ -37,7 +37,7 @@
 
 							<label class="btn btn-block btn-default">
 								Upload Data Set
-								<input type="file" name="file" style="display: none;">
+								<input id="upload" type="file" name="file" style="display: none;">
 							</label>									
 							
 							<div class="btn-flex-submit">
@@ -61,10 +61,10 @@
 					    Select Data Set <span class="caret"></span>
 					  </button>
 					  <ul class="dropdown-menu bullet pull-center">
-					    <li><input type="radio" id="ID" name="NAME" value="VALUE"><label for="ID">Label 1</label></li>
-					    <li><input type="radio" id="ID2" name="NAME" value="VALUE"><label for="ID2">Label 2</label></li>
-					    <li><input type="radio" id="ID3" name="NAME" value="VALUE"><label for="ID3">Label 3</label></li>
-					    <li><input type="radio" id="ID4" name="NAME" value="VALUE"><label for="ID4">Label 4</label></li>
+					    <li><input type="radio" id="ID" name="NAME" value="label 1" ng-model="testvar" ng-change='test(testvar)'><label for="ID">Label 1</label></li>
+					    <li><input type="radio" id="ID2" name="NAME" value="label 2" ng-model="testvar" ng-change='test(testvar)'><label for="ID2">Label 2</label></li>
+					    <li><input type="radio" id="ID3" name="NAME" value="label 3" ng-model="testvar" ng-change='test(testvar)'><label for="ID3">Label 3</label></li>
+					    <li><input type="radio" id="ID4" name="NAME" value="label 4" ng-model="testvar" ng-change='test(testvar)'><label for="ID4">Label 4</label></li>
 					  </ul>
 					</div>
 
@@ -77,6 +77,8 @@
 					<div class="btn-group btn-flex btn-flex-last">
 						<button type="button" class="btn btn-default">Delete Data Set</button>
 					</div>
+					
+					
 
 				</div>
 			</div>
