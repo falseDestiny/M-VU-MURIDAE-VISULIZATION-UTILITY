@@ -8,9 +8,8 @@ from flask_socketio import SocketIO, emit
 from werkzeug import secure_filename
 from parse import Parser
 from sim import Simulation
-from flask import Flask
 from flask_mail import Mail, Message
-
+  
 app =Flask(__name__)
 mail=Mail(app)
 
@@ -40,6 +39,7 @@ login_manager.init_app(app)
 
 class User(flask_login.UserMixin):
     uploadingData = ""
+    viewingData = ""
     
 def connectToDB():
     connectionString = 'dbname=mousedb user=owner password=41PubBNmfQhmfCNy host=localhost'
@@ -85,18 +85,46 @@ def parseUploadForm(form):
     parsedData["datalines"] = User.uploadingData
     return parsedData  
     
-# This is a function to help bring a json back from the database and turn it back into a dictionary   
+def parseUpdatedForm(form):
+    parsedData = {}
+    locations = {}
+    oldSet = False
+    if "oldSet" in form.keys():
+        oldSetName = str(form["prevSetName"])
+        db = connectToDB()
+        cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("SELECT locationmap from datasets where datasetname=%s", (oldSetName,))
+        holdlocations = cur.fetchall()
+        tempLocations = holdlocations[0][0]
+        locations = convertString(tempLocations)  
+    else:
+        for i in range(49):
+            value = form[str(i)]
+            if str(value) != "-1":
+                locations[str(i)]=str(value)
+                
+    print(form["setName"])
+    if form["setName"] == "":
+        parsedData["setName"] = User.viewingData
+    else:
+        parsedData["setName"] = form["setName"]
+        
+    parsedData["locations"] = locations
+    return parsedData
+    
+# This is a function to help bring a location map json back from the database and turn it back into a dictionary   
 def convertString(longstring):
     final = {}
     done = False
     counter = 0
+   # print(longstring)
     while counter < len(longstring):
         if longstring[counter] == "{" or longstring[counter] == "}":
             counter += 1
         else:
             thiskey = ""
             thisvalue = ""
-            print("skipping: " + longstring[counter])
+            #print("skipping: " + longstring[counter])
             counter += 1
             while not done:
                 thiskey += longstring[counter]
@@ -110,6 +138,81 @@ def convertString(longstring):
                 counter += 1
             counter += 3
             final[thiskey]=thisvalue
+    return final
+
+# this is a function to help bring a heat map data json from the database and turn it back into a dictionary
+def convertHeatString(longstring):
+    final = {}
+    done = False
+    counter = 2
+    while not done:
+        thisKey = ""
+        while longstring[counter] !='"':
+            thisKey += longstring[counter]
+            counter += 1
+        final[thisKey] = {}
+        counter += 5
+        secondDone = False
+        while not secondDone:
+            lockey = ""
+            while longstring[counter] != '"':
+                lockey += longstring[counter]
+                counter += 1
+            counter += 3
+            value = ""
+            while longstring[counter] != ',' and longstring[counter] != '}':
+                value += longstring[counter]
+                counter += 1
+            final[thisKey][lockey] = int(value)
+            if longstring[counter] == '}':
+                secondDone = True
+                counter += 1
+            else:
+                counter += 3
+        if longstring[counter] == '}':
+            done = True
+        else:
+            counter += 4
+    return final
+    
+# this is a function to help bring a vector map data json from the database and turn it back into a dictionary
+def convertVectorString(longstring):
+    final = {}
+    done = False
+    counter = 2
+    while not done:
+        thisKey = ""
+        while longstring[counter] !='"':
+            thisKey += longstring[counter]
+            counter += 1
+        final[thisKey] = []
+        counter += 6
+        secondDone = False
+        while not secondDone:
+            lockey = ""
+            while longstring[counter] != '"':
+                lockey += longstring[counter]
+                counter += 1
+            counter += 3
+            value = ""
+            while longstring[counter] != ']':
+                value += longstring[counter]
+                counter += 1
+            thisEntry = []
+            thisEntry.append(lockey)
+            thisEntry.append(int(value))
+            final[thisKey].append(thisEntry)
+            counter += 1
+            if longstring[counter] == ']':
+                secondDone = True
+                counter += 1
+            else:
+                counter += 4
+        if longstring[counter] == '}':
+            done = True
+        else:
+            counter += 3
+    print(final)
     return final
 
 @login_manager.user_loader
@@ -182,6 +285,7 @@ def data():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     otherDataSets = getAllDataSets()
+    User.viewingData=""
     return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
 
 @app.route('/users', methods=['GET', 'POST'])
@@ -393,9 +497,6 @@ def send_password():
             
     return render_template('password_sent.html', currentpage='send_password', email=email, bad_account='unknown')
 
-
-
-
 ################################################################################
 ############################ File Upload Functions #############################
 ################################################################################
@@ -413,8 +514,6 @@ def upload():
         # Remove unsupported chars from filename
         filename = secure_filename(file.filename)
         
-        #print('filename: ' + file.filename) # this is a test line, it should print the filename to the console...
-        
         # The variable called file stores the file, this could be sent to the parser rather than being saved
         # Nothing withing this if statement is needed for parsing purposes. I am leaving it to show
         # functionality if you want to test it.
@@ -429,7 +528,7 @@ def upload():
         #return render_template('index.html')
         # Will return to index page if incorrect file format is uploaded
     else: 
-        return render_template('loadeddata.html')
+        return render_template('loadeddata.html', admin=session["admin"])
         
 @app.route('/setDataUpload', methods=['POST'])
 def setDataUpload():
@@ -442,9 +541,6 @@ def setDataUpload():
     if myData["filename"] == "":
         myData["filename"] = User.uploadingFileName
     
-    #print("Filename! " + myData["filename"])
-    #myData[""]
-    #print(myData)
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if "oldSet" in myData["locations"].keys():
@@ -454,10 +550,6 @@ def setDataUpload():
         holdlocations = cur.fetchall()
         tempLocations = holdlocations[0][0]
         getLocations = convertString(tempLocations)
-        #for key in tempLocations.keys():
-            #getLocations[key.strip()] = tempLocations[key].strip()
-        #for item in getLocations:
-            #print(item)
     else:
         getLocations = myData["locations"]
     
@@ -465,8 +557,76 @@ def setDataUpload():
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)",(myData["filename"], 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations)))
     db.commit()
-    return render_template('data.html')
+    return viewDataPage(getDataToView(myData["filename"]))
+    
+def viewDataPage(data):
+    return render_template('viewdata.html', myData=data, otherDataSets=getAllDataSets(), admin=session["admin"])
 
+def getDataToView(setName):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT * from datasets WHERE datasetname = %s", (setName,))
+    thisData = cur.fetchall()
+    if len(thisData) != 1:
+        otherDataSets = getAllDataSets()
+        return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
+    User.viewingData=setName
+    formattedData = {}
+    formattedData["setName"] = str(setName)
+    formattedData["heatData"] = convertHeatString(thisData[0][3])
+    formattedData["vectorData"] = convertVectorString(thisData[0][4])
+    formattedData["datasetname"] = thisData[0][6]
+    allLocations = []
+    for i in range(1, 26):
+            if i < 10:
+                allLocations.append("RFID0" + str(i))
+            else:
+                allLocations.append("RFID" + str(i))
+    formattedData["alllocations"] = allLocations
+    assembleMap = []
+    rowCounter = 0
+    rowNames = ["firstRow", "secondRow", "thirdRow", "fourthRow", "fifthRow", "sixthRow", "seventhRow"]
+    rawLocations = convertString(thisData[0][5])
+    
+    formattedData["rowMap"] = {}
+    for name in rowNames:
+        formattedData["rowMap"][name] = []
+    for i in range (49):
+        if i > 0 and i % 7 == 0:
+            rowCounter += 1
+        entry = {}
+        entry["index"] = i
+        if str(i) in rawLocations.keys():
+            entry["value"] = rawLocations[str(i)]
+        else:
+            entry["value"] = "--"
+        formattedData["rowMap"][rowNames[rowCounter]].append(entry)
+    return formattedData
+    
+
+@app.route('/loadData', methods=['POST'])
+def loadData():
+    setToLoad = request.form["setToLoad"]
+    return viewDataPage(getDataToView(setToLoad))
+    
+@app.route('/updateData', methods=['POST'])
+def updateData():
+    updatedForm = request.form
+    updatedData = parseUpdatedForm(updatedForm)
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("UPDATE datasets SET datasetname=%s, locationmap=%s WHERE datasetname=%s",(updatedData["setName"], json.dumps(updatedData["locations"]), User.viewingData))
+    db.commit()
+    
+    return viewDataPage(getDataToView(updatedData["setName"]))
+    
+@app.route('/deleteData', methods=['POST'])
+def deleteData():
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("DELETE from datasets WHERE datasetname=%s",(User.viewingData,))
+    db.commit()
+    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
 
 ################################################################################
 ################################## SOCKET IO ###################################
