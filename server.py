@@ -99,7 +99,7 @@ def parseUpdatedForm(form):
             if str(value) != "-1":
                 locations[str(i)]=str(value)
                 
-    print(form["setName"])
+    #print(form["setName"])
     if form["setName"] == "":
         parsedData["setName"] = User.viewingData
     else:
@@ -208,7 +208,7 @@ def convertVectorString(longstring):
             done = True
         else:
             counter += 3
-    print(final)
+    #print(final)
     return final
 
 @login_manager.user_loader
