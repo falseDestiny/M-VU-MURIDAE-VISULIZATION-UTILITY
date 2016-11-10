@@ -10,8 +10,8 @@ from parse import Parser
 from sim import Simulation
 from flask_mail import Mail, Message
   
-app =Flask(__name__)
-mail=Mail(app)
+app = Flask(__name__)
+app.secret_key = os.urandom(24).encode('hex')
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
@@ -20,11 +20,6 @@ app.config['MAIL_PASSWORD'] = 'mvuwebapppass'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
-mail=Mail(app)
-
-app = Flask(__name__)
-app.secret_key = os.urandom(24).encode('hex')
-
 # This is the path to the upload directory, In cloud9 it sends the file to a folder named uploads
 # Not needed since a parser will be used
 # app.config['UPLOAD_FOLDER'] = 'uploads/'
@@ -32,6 +27,7 @@ app.secret_key = os.urandom(24).encode('hex')
 # Only files containing these extensions will be accepted
 app.config['ALLOWED_EXTENSIONS'] = set(['xls', 'xlsx', 'csv', 'xlsm', 'xlt', 'xml'])
 
+mail = Mail(app)
 socketio = SocketIO(app)
 
 login_manager = flask_login.LoginManager()
@@ -221,7 +217,7 @@ def user_loader(user_id):
     cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT * FROM users WHERE username = %s;", (user_id,))
     data = cur.fetchone()
-    if(len(data) > 0):
+    if data is not None:
         user = User()
         setup_User(user, data)
         return user
@@ -543,8 +539,9 @@ def setDataUpload():
     
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    print(myData["locations"].keys())
     if "oldSet" in myData["locations"].keys():
-        #print(myData["locations"]["oldSet"])
+        print(myData["locations"]["oldSet"])
         oldLoc = myData["locations"]["oldSet"]
         cur.execute("SELECT locationmap from datasets where datasetname=%s", (oldLoc,))
         holdlocations = cur.fetchall()
@@ -636,7 +633,111 @@ def deleteData():
 @socketio.on('connect', namespace='/heatmap')
 def makeConnection(): 
     print('connected')
+    
 
+#USER FUNCTIONS
+@socketio.on('getUsers', namespace='/heatmap')
+def getUsers():
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    cur.execute("SELECT * FROM users")
+    results = cur.fetchall()
+    
+    userdata = []
+    
+    if(len(results) > 0):
+        for result in results:
+            # result[1] = username, result[3] = email, result[4] = admin
+            adminValue = "No"
+            if result[4]:
+                adminValue = "Yes"
+            user = {'name': result[1], 'admin': adminValue, 'email': result[3]}
+            userdata.append(user)
+        
+        emit('returnUsers', userdata)
+    else:
+        print("Error retrieving users from database...");
+
+@socketio.on('deleteUser', namespace='/heatmap')
+def deleteUser(username):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    testDeletion = True
+    
+    # Make sure user exists in database
+    print("Checking for username in database....")
+    cur.execute("SELECT username FROM users WHERE username = %s;", (username,))
+    if cur.fetchone():
+        print("Username is found.")
+    else:
+        # send message alerting user to error
+        message = "User " + username + " not found."
+        emit('errorDeletingUser', message)
+        testDeletion = False
+        
+    # Attempt to delete user
+    print("Attempting to delete user....")
+    try:
+        query = "DELETE FROM users WHERE username = %s;"
+        
+        # Check to see if current user is deleting themself
+        selfdeletion = False
+        if current_user.id == username:
+            flask_login.logout_user()
+            selfdeletion = True
+        
+        # Check to see if more than one admin
+        dontDeleteLastAdmin = False
+        if selfdeletion:
+            print("CHECKING FOR ADMIN COUNT")
+            cur.execute("SELECT admin FROM users WHERE admin = 't';")
+            result = cur.fetchall()
+            if len(result) < 2:
+                dontDeleteLastAdmin = True # if user is last admin do not delete them.
+        
+        if dontDeleteLastAdmin:
+            # send message alerting user to last admin rule
+            message = "You cannot delete the last Admin User."
+            print(message)
+            emit('lastAdminDelete', message)
+            testDeletion = False
+        else:
+            print(cur.mogrify(query, (username,)))
+            cur.execute(query, (username,))
+            
+    except:
+        print("Error deleting user...")
+        if selfdeletion:
+            user = User()
+            user.id = username
+            flask_login.login_user(user)
+        # send message alerting user to error
+        message = "Error deleting user " + username + " from database."
+        emit('errorDeletingUser', message)
+        testDeletion = False
+        db.rollback()
+    db.commit()
+    
+    if testDeletion:
+        # Check to make sure user was deleted
+        print("Checking success of user deletion....")
+        cur.execute("SELECT username FROM users WHERE username = %s;", (username,))
+        if cur.fetchone():
+            # user not deleted
+            print("User not deleted")
+            # send message alerting user to this fact
+            message = "Error deleting user " + username + " from database."
+            emit('errorDeletingUser', message)
+        else:
+            print("User deleted")
+            if selfdeletion:
+                print("I DELETED MYSELF")
+                emit('redirect', {'url': url_for('index')})
+
+
+#MAP FUNCTIONS
 @socketio.on('getDatasetNames', namespace='/heatmap')
 def getDatasetNames():
     db = connectToDB()
@@ -682,7 +783,6 @@ def loadMice(dataset):
     })
 
 if __name__ == '__main__':
-    #app.run(host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)), debug = True)
     socketio.run(app, host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)), debug = True)
     
     
