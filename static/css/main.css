@@ -576,13 +576,6 @@ hr {
 	}
 }
 
-/* used with matchHeight.js */
-@media only screen and (max-width : 767px) {
-  .panels {
-    height: auto !important;
-  } 
-}
-
 .usertable > tbody > tr > td {
 	border-top: 0px;
 	vertical-align: middle;
@@ -628,6 +621,7 @@ hr {
 	z-index: 1;
 }
 
+/* DATA TABLE */
 .datatable {
     width: 100%;
 }
@@ -662,6 +656,7 @@ hr {
 	width: 100px;
 }
 
+/* START USER MANAGEMENT */
 /* POPUP BOX */
 #deleteUserPopup, #createUserPopup, #changePasswordPopup, #headerHide, #MessageBox {
 	position: fixed;
@@ -702,25 +697,19 @@ hr {
 	font-family: 'Raleway', sans-serif;
 	text-align: center;
 	position: absolute;
-  	transition: all 5s ease-in-out;
+  	transition: all 1s ease-in-out;
 }
 
-.createUser-popupdiv {
-	width: 400px;
-	margin-left: -200px;
-	padding: 0 50px 0 50px;
-}
-
-.createUserForm {
-	padding-bottom: 0px;
+@media only screen and (min-width : 768px) {
+	.wide-popupdiv {
+		width: 400px;
+		margin-left: -200px;
+		padding: 0 50px 0 50px;
+	}
 }
 
 .createUser-flex {
 	padding: 0 0 10px 0;
-}
-
-.changepasstext {
-	margin-bottom: 15px;
 }
 
 /* MANAGE USER DIV TABLE */
@@ -776,3 +765,5 @@ hr {
 	background-color: white;
 	border-radius: 5px;
 }
+
+/* END USER MANAGEMENT */

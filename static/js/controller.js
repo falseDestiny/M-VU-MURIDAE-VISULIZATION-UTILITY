@@ -295,85 +295,62 @@ HeatmapApp.controller('UserController', function($scope){
     });
     
     // SHOW-HIDE POPUP
-    $scope.popup_hide = function popup_hide() {
+    $scope.popup_hide = function popup_hide(passedDiv) {
         document.getElementById('headerHide').style.visibility = "hidden";
-        document.getElementById('createUserPopup').style.visibility = "hidden";
-        document.getElementById('deleteUserPopup').style.visibility = "hidden";
-        document.getElementById('changePasswordPopup').style.visibility = "hidden";
+        document.getElementById(passedDiv).style.visibility = "hidden";
         
         document.getElementById('headerHide').style.opacity = 0;
-        document.getElementById('createUserPopup').style.opacity = 0;
-        document.getElementById('deleteUserPopup').style.opacity = 0;
-        document.getElementById('changePasswordPopup').style.opacity = 0;
+        document.getElementById(passedDiv).style.opacity = 0;
     };
     
-    $scope.createUser_show = function createUser_show(value) {
+    $scope.popup_show = function popup_show(passedDiv, value) {
+        //Header
         document.getElementById('headerHide').style.visibility = "visible";
-        document.getElementById('createUserPopup').style.visibility = "visible";
         document.getElementById('headerHide').style.opacity = 1;
-        document.getElementById('createUserPopup').style.opacity = 1;
-        
-        // Reset the form
-        angular.copy({}, $scope.formdata);
-        $scope.formdata.usertype = null;
-        $('#createUserForm')[0].reset();
-        $('#createUserForm').validator('destroy').validator();
+        //Popup
+        document.getElementById(passedDiv).style.visibility = "visible";
+        document.getElementById(passedDiv).style.opacity = 1;
+      
+        //if createUser
+        if (passedDiv == "createUserPopup") {
+            // Reset the form
+            angular.copy({}, $scope.formdata);
+            $scope.formdata.usertype = null;
+            $('#createUserForm')[0].reset();
+            $('#createUserForm').validator('destroy').validator();
+        }
+        else if(passedDiv == "changePasswordPopup") {
+            $scope.passName = value;
+            console.log("changing password for " + $scope.passName);
+            
+            // Reset the form
+            angular.copy({}, $scope.changeformdata);
+            $('#changePasswordForm')[0].reset();
+            $('#changePasswordForm').validator('destroy').validator();
+        }
+        else if(passedDiv == "deleteUserPopup") {
+            $scope.deleteName = value;
+        }
     };
-    
-    $scope.changepassword_show = function changepassword_show(value) {
-        document.getElementById('headerHide').style.visibility = "visible";
-        document.getElementById('changePasswordPopup').style.visibility = "visible";
-        document.getElementById('headerHide').style.opacity = 1;
-        document.getElementById('changePasswordPopup').style.opacity = 1;
-        $scope.passName = value;
-        console.log("changing password for " + $scope.passName);
-        
-        // Reset the form
-        angular.copy({}, $scope.changeformdata);
-        $('#changePasswordForm')[0].reset();
-        $('#changePasswordForm').validator('destroy').validator();
-    };
-    
-    $scope.deleteuser_show = function deleteuser_show(value) {
-        document.getElementById('headerHide').style.visibility = "visible";
-        document.getElementById('deleteUserPopup').style.visibility = "visible";
-        document.getElementById('headerHide').style.opacity = 1;
-        document.getElementById('deleteUserPopup').style.opacity = 1;
-        $scope.deleteName = value;
-    };
-    
-    $scope.showMessageBox = function showMessageBox() {
-        document.getElementById('headerHide').style.visibility = "visible";
-        document.getElementById('MessageBox').style.visibility = "visible";
-        document.getElementById('headerHide').style.opacity = 1;
-        document.getElementById('MessageBox').style.opacity = 1;
-    };
-    
-    $scope.hideMessageBox = function hideMessageBox() {
-        document.getElementById('headerHide').style.visibility = "hidden";
-        document.getElementById('MessageBox').style.visibility = "hidden";
-        document.getElementById('headerHide').style.opacity = 0;
-        document.getElementById('MessageBox').style.opacity = 0;
-    };
-    
+
     // CREATE USER
     $scope.createUser = function createUser() {
         socket.emit('createDaUser', $scope.formdata);
-        $scope.popup_hide();
+        $scope.popup_hide("createUserPopup");
     };
     
     // CHANGE PASSWORD
     $scope.changeUserPassword = function changeUserPassword(value) {
         $scope.changeformdata.username = value;
         socket.emit('changeUserPassword', $scope.changeformdata);
-        $scope.popup_hide();
+        $scope.popup_hide("changePasswordPopup");
     };
     
     // DELETE USER
     $scope.delete_user = function delete_user() {
         console.log("Deleting " + $scope.deleteName + "...");
         socket.emit('deleteUser', $scope.deleteName);
-        $scope.popup_hide();
+        $scope.popup_hide("deleteUserPopup");
     };
     
     // MESSAGE BOX
@@ -382,8 +359,8 @@ HeatmapApp.controller('UserController', function($scope){
         $scope.MessageBoxMessage = message;
         $scope.$apply();
         
-        setTimeout($scope.showMessageBox(), 1000);
-        setTimeout($scope.hideMessageBox, 5000);
+        setTimeout($scope.popup_show, 300, "MessageBox", null);
+        setTimeout($scope.popup_hide, 5000, "MessageBox");
         
         socket.emit('getUsers');
     });
