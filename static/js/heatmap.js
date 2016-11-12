@@ -8,7 +8,7 @@ required libraries:
   
 */
 
-// var Rainbow = require('rainbowvis.js');
+var Rainbow = require('rainbowvis.js');
 
 function heatmap(canvasId, dataset, options) {
     
@@ -16,9 +16,6 @@ function heatmap(canvasId, dataset, options) {
     
     // create color gradient
     var color = new Rainbow();
-    
-    // // set heatmap data values to array
-    // var arr = Object.keys(dataset).map(function(k) { return dataset[k] });
     
     // create options object if none passed in
     if (typeof options == 'undefined')
@@ -33,8 +30,10 @@ function heatmap(canvasId, dataset, options) {
     };
     
     // Check Options against default option set
+    console.log("HI 1");
     options = checkDefaults(options);
-    
+    console.log(options);
+    console.log("HI 2");
     // set colors
     color.setSpectrum(options.colors.low, options.colors.high);
     color.setNumberRange(0, getMaxValue(dataset));
@@ -54,9 +53,9 @@ function heatmap(canvasId, dataset, options) {
 function checkDefaults(options)
 {
     "use strict";
-    
+    console.log("HI THERE");
     // DEFAULT OPTIONS
-    var properties = ["rows", "cols", "border", "gutter", "colors", "radius", "stroke"];
+    var properties = ["rows", "cols", "border", "gutterWidth", "gutterHeight", "colors", "radius", "stroke"];
     
     var getProperty = function (propertyName)
     {
@@ -65,32 +64,37 @@ function checkDefaults(options)
     
     for (var property in properties)
     {
+        console.log("PROP: " + properties[property]);
         if (typeof getProperty(properties[property]) == 'undefined')
         {
             // DEFAULT VALUES
             switch (properties[property])
             {
-              case "rows":
-                options.rows = 7;
-                break;
-              case "cols":
-                options.cols = 4;
-                break;
-              case "border":
-                options.border = 10;
-                break;
-              case "gutter":
-                options.gutter = 5;
-                break;
-              case "colors":
-                options.colors = {low: "blue", high: "red"};
-                break;
-              case "radius":
-                options.radius = 10;
-                break;
-              case "stroke":
-                options.stroke = true;
-                break;
+                case "rows":
+                    options.rows = 7;
+                    break;
+                case "cols":
+                    options.cols = 4;
+                    break;
+                case "border":
+                    options.border = 10;
+                    break;
+                case "gutterWidth":
+                    options.gutterWidth = 5;
+                    break;
+                case "gutterHeight":
+                    options.gutterHeight = 5;
+                    break;
+                case "colors":
+                    console.log("TEST");
+                    options.colors = {low: "blue", high: "red"};
+                    break;
+                case "radius":
+                    options.radius = 10;
+                    break;
+                case "stroke":
+                    options.stroke = true;
+                    break;
             }
         }
     }
@@ -133,16 +137,16 @@ function Grid()
         canvas.width = 0;
         canvas.height = 0;
         
-        canvas.width = canvas.parentNode.clientWidth;
-        
         if (window.innerWidth > 1200)
         {
-            canvas.parentNode.style.height = "500px";
+            canvas.width = canvas.parentNode.clientWidth;
+            canvas.parentNode.style.height = canvas.width + "px";
             canvas.height = canvas.parentNode.clientHeight;
         }
         else
         {
-            canvas.parentNode.style.height = "300px";
+            canvas.width = canvas.parentNode.clientWidth;
+            canvas.parentNode.style.height = canvas.width + "px";
             canvas.height = canvas.parentNode.clientHeight;
         }
         
@@ -151,13 +155,13 @@ function Grid()
     
     this.drawGrid = function (ctx, gridSize, options)
     {
-        var x = options.border, y = options.border
+        var x = options.border, y = options.border;
 
         var maxWidth = gridSize.width - (2 * x);
         var maxHeight = gridSize.height - (2 * y);
         
-        var boxWidth = ((maxWidth + options.gutter) / options.cols);
-        var boxHeight = ((maxHeight + options.gutter) / options.rows);
+        var boxWidth = ((maxWidth + options.gutterWidth) / options.cols);
+        var boxHeight = ((maxHeight + options.gutterHeight) / options.rows);
         
         // draw the grid
         var i, j, stroke;
@@ -196,8 +200,8 @@ function Grid()
                     ctx,  
                     x + (j * boxWidth ),
                     y + (i * boxHeight), 
-                    boxWidth - options.gutter, 
-                    boxHeight - options.gutter, 
+                    boxWidth - options.gutterWidth, 
+                    boxHeight - options.gutterHeight, 
                     options.radius, 
                     true, 
                     stroke

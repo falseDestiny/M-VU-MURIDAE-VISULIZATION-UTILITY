@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block bodyTag %}
-<body>
+<body ng-controller="UserController">
 {% endblock %}
 
 {% block content %}
@@ -16,48 +16,228 @@
 		<div class="col-lg-12">
 
 			<!-- CONTENT PANEL -->
-			<div class="col-xs-12 col-md-8 col-md-offset-2">
+
+			
+			<div class="col-xs-12 col-md-10 col-md-offset-1 col-lg-8 col-lg-offset-2 userBackground">
 				
-				<div class="panel clearfix">
-
-                    <div class = align-left>
-                        <a href="/createaccount" class="active" ><i class="fa fa-user-plus fa-2x" ></i></a>
-
-                        <a href="/deleteaccount" class="active" ><i class="fa fa-user-times fa-2x" ></i></a>
-
-                        <a href="/changepassword" class="active" ><i class="fa fa-key fa-2x" ></i></a>
+				<!--<div class="panel clearfix">-->
+					
+					<!-- MESSAGE BOX STARTS HERE -->
+					<div id="MessageBox">
+						<div class="panel loginbox popupdiv">
+							<span ng-bind="MessageBoxMessage"></span>
+						</div>
                     </div>
-                        
-						<div class="col-sm-8 col-sm-offset-2 table-responsive">
-						    
-                                <table class="table usertable">
-
- 								    <tr>
-	 								    <td class="col-xs-4">Username</td>
-	 								    <td class="col-xs-4">User Type</td>
-	 								    <td class="col-xs-4">User Email</td>
- 								    </tr>
- 								 
- 								 </table>
-							<table class="table table-hover usertable">
- 							<tbody>
- 							    
-                                {% for data in userdata %}
- 								    <tr>
-	 								    <td class="col-xs-4">{{data['username']}}</td>
-	 								    <td class="col-xs-4">{% if data['admin']==true %}admin{% else %}user{% endif %}</td>
-	 								    <td class="col-xs-4">{{data['email']}}</td>
- 								    </tr>
-                                {% endfor %}
-
-								</tbody>
-							</table>
-							
-							
+                    <!-- MESSAGE BOX ENDS HERE -->
+					
+					<!-- CREATE USER POPUP STARTS HERE -->
+					<div id="createUserPopup">
+		                <div class="panel loginbox popupdiv createUser-popupdiv">
+			                    <h2 align="center">Create New User:</h2>
+			                    
+			                    <form role="form" data-toggle="validator" id="createUserForm" name="createUserForm" novalidate ng-submit="createUserForm.$valid && createUser()">
+		                    
+		                    		<!-- USERNAME -->
+									<div class="form-group has-feedback">
+										<div class="input-group">
+									    	<span class="input-group-addon" id="username-addon1"><i class="fa fa-user"></i></span>
+									    	<input type="text" ng-model="formdata.username" name="username" class="form-control" placeholder="Username" aria-describedby="username-addon1" data-error="Username Required!" required />
+									    	
+									    </div>
+									    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+									    <div class="help-block with-errors"></div>
+							    	</div>
+							    	
+							    	<!-- EMAIL -->
+							    	<div class="form-group has-feedback">
+										<div class="input-group">
+									    	<span class="input-group-addon" id="email-addon1"><i class="fa fa-envelope"></i></span>
+									    	<input type="email" ng-model="formdata.email" name="email" class="form-control" placeholder="example@example.com" aria-describedby="email-addon1" data-error="Invalid Email" required />
+									   	</div>
+									   	<span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+								    	<div class="help-block with-errors"></div>
+							    	</div>
+							    	
+							    	<!-- PASSWORD -->
+							    	<div class="form-group">
+								    	<div class="form-group has-feedback">
+											<div class="input-group">
+										    	<span class="input-group-addon"><i class="fa fa-unlock-alt"></i></span>
+										    	<input id="inputPassword" ng-model="formdata.password" type="password" data-minlength="6" data-error="Minimum of 6 characers" name="password" class="form-control" placeholder="Password - min 6 characters" required />
+									    	</div>
+									    	<span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+									    	<div class="help-block with-errors"></div>
+									    </div>
+								    	
+								    	<div class="form-group has-feedback">
+											<div class="input-group">
+										    	<span class="input-group-addon" id="password-addon1"><i class="fa fa-unlock-alt"></i></span>
+										    	<input type="password" ng-model="formdata.matchpassword" data-match="#inputPassword" data-match-error="Whoops, these don't match" name="retypepassword" class="form-control" placeholder="Re-type Password" aria-describedby="password-addon1" required />
+									    	</div>
+									    	<span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+									    	<div class="help-block with-errors"></div>
+									    </div>
+									</div>
+									
+									<!-- USER TYPE -->
+									<div class="form-group">
+										<div class="btn-group btn-flex createUser-flex">
+											<button data-toggle="dropdown" class="btn btn-default dropdown-toggle">Select User Type&nbsp;<span class="caret"></span></button>
+										  	<ul class="dropdown-menu bullet pull-center">
+										  		<li><input type="radio"	id="user" ng-model="formdata.usertype" name="USERTYPE" value="user" data-error="Select a User Type" required /><label for="user">User</label></li>
+										  		<li><input type="radio"	id="admin" ng-model="formdata.usertype" name="USERTYPE" value="admin" required /><label for="admin">Admin</label></li>
+										  	</ul>
+										</div>
+										<div class="help-block with-errors"></div>
+									</div>
+									
+									<!-- SUBMIT AND CANCEL -->
+									<div class="form-group">	
+										<input type="submit" data-disable=true value="Create Account" name="submit" class="btn btn-default" />
+										<button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" ng-click="popup_hide()">
+					                    	Cancel
+					                    </button>
+					       			</div>
+								</form>
+		                </div>
+                    </div>
+                   
+					<!-- CREATE USER POPUP ENDS HERE -->
+					
+                    <!--DELETE USER POPUP STARTS HERE -->
+                    <div id="deleteUserPopup">
+		                <div class="panel loginbox popupdiv">
+		                	<h2 align="center">Delete User:</h2>
+		                    
+	                    	Are you sure you want to delete
+	                    	<h3>user: <strong ng-bind="deleteName"></strong></h3>
+		                     
+		                    <button type="button" class="btn btn-danger" aria-haspopup="true" aria-expanded="false" ng-click="delete_user()">
+		                    	<i class="fa fa-trash-o fa-lg"></i> Delete
+		                    </button> 
+		                    <button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" ng-click="popup_hide()">
+		                    	Cancel
+		                    </button>
+		                </div>
+                    </div>
+		            <!--DELETE USER POPUP ENDS HERE-->
+		            
+		            <!--CHANGE PASSWORD POPUP STARTS HERE -->
+		            <div id="changePasswordPopup">
+		                <div class="panel loginbox popupdiv">
+		                    <h2 align="center">Change Password:</h2>
+		                   
+		                    <h3>for user: <strong ng-bind="passName"></strong></h3>
+		                    
+		                    <form role="form" data-toggle="validator" id="changePasswordForm" name="changePasswordForm" novalidate ng-submit="changePasswordForm.$valid && changeUserPassword(passName)">
+		                    	<!-- PASSWORD -->
+						    	<div class="form-group">
+							    	<div class="form-group has-feedback">
+										<div class="input-group">
+									    	<span class="input-group-addon"><i class="fa fa-unlock-alt"></i></span>
+									    	<input type="password" id="changePass" ng-model="changeformdata.password" data-minlength="6" data-error="Minimum of 6 characers" name="password" class="form-control" placeholder="Password - min 6 characters" required />
+								    	</div>
+								    	<span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+								    	<div class="help-block with-errors"></div>
+								    </div>
+							    	
+							    	<div class="form-group has-feedback">
+										<div class="input-group">
+									    	<span class="input-group-addon"><i class="fa fa-unlock-alt"></i></span>
+									    	<input type="password" ng-model="changeformdata.matchpassword" data-match="#changePass" data-match-error="Whoops, these don't match" name="retypepassword" class="form-control" placeholder="Re-type Password" required />
+								    	</div>
+								    	<span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+								    	<div class="help-block with-errors"></div>
+								    </div>
+								</div>
+								
+								<!-- SUBMIT AND CANCEL -->
+								<div class="form-group">	
+									<input type="submit" data-disable=true value="Change Password" name="submit" class="btn btn-default" />
+									<button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" ng-click="popup_hide()">
+				                    	Cancel
+				                    </button>
+				       			</div>
+							</form>
+		                </div>
+                    </div>
+		            <!--CHANGE PASSWORD POPUP ENDS HERE -->
+					
+					<!--USER TABLE -->
+					<div class="col-xs-12">
+						<!-- TITLE ROW -->
+						<div class="row">
+							<!-- TITLE -->
+							<div class="col-xs-12 userTopRow">
+								<div class="float-left">
+									<span class="heading">M<span class="headinghelper">anage</span> U<span class="headinghelper">sers</span></span>
+								</div>
+							<!-- CREATE USER BUTTON -->
+								<div class="float-right">
+									<button 
+										type="button" 
+										class="btn btn-default" 
+										aria-haspopup="true" 
+										aria-expanded="false"
+				                    	ng-click="createUser_show()"
+				                    >	
+				                    	<i class="fa fa-user-plus fa-lg"></i>
+				                    </button>
+				                </div>
+			                </div>
+						</div>
 						
+						<!-- HEADER ROW -->
+						<div class="row ">
+							<div class="col-xs-3 col-sm-2 userHeaderRow">
+								<strong>Username</strong>
+							</div>
+							<div class="col-xs-2 col-sm-2 userHeaderRow">
+								<strong>Admin</strong>
+							</div>
+							<div class="col-xs-7 col-sm-8 userHeaderRow">
+								<strong>Email</strong>
+							</div>
+						</div>
+						
+						<!-- REPEAT ROW -->
+						<div class="row tableline" ng-repeat="user in users">
+							<div class="col-xs-3 col-sm-2 userRows">
+								<span ng-bind="user.name"></span>
+							</div>
+							<div class="col-xs-2 col-sm-2 userRows">
+								<span ng-bind="user.admin"></span>
+							</div>
+							<div class="col-xs-7 col-sm-6 userRows">
+								<span ng-bind="user.email"></span>
+							</div>
+							<div class="col-xs-12 col-sm-2 userRows buttons-right">
+								<button 
+									type="button" 
+									class="btn btn-default" 
+									aria-haspopup="true" 
+									aria-expanded="false"
+									ng-model="$parent.passName" 
+									ng-click="changepassword_show(user.name)"
+								>	
+									<i class="fa fa-unlock-alt fa-lg"></i>
+								</button>
+								<button 
+									type="button" 
+									class="btn btn-danger" 
+									aria-haspopup="true" 
+									aria-expanded="false"
+									ng-model="$parent.deleteName" 
+									ng-click="deleteuser_show(user.name)"
+								>	
+									<i class="fa fa-trash-o fa-lg"></i>
+								</button>
+							</div>
+						</div>
 					</div>
+					<!--END USER TABLE -->
 
-				</div><!-- end .panel -->
+				<!--</div>!-- end .panel -->
 			</div><!-- end content panel -->
 
 		</div>
@@ -66,4 +246,8 @@
 
 </div>
 
+{% endblock %}
+
+{% block loadScripts %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.5/validator.min.js"></script>
 {% endblock %}

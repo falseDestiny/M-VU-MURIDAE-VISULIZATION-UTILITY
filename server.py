@@ -296,167 +296,6 @@ def manageusers():
     
     return render_template('users.html', currentpage='users', userdata=userdata, admin=session["admin"])
 
-@app.route('/createaccount', methods=['GET', 'POST'])
-def create_account():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    if request.method == 'GET':
-        return render_template('create_account.html', currentpage = 'create_account', admin=session["admin"])
-    
-    #POST
-    # check username
-    usernameinput = request.form['username']
-    passwordinput = request.form['password']
-    useremailinput = request.form['email']
-    admin = request.form['admin']
-    
-    if admin == "user":
-        admin = 'false'
-    else:
-        admin = 'true'
-    print "User type is "+admin 
-
-    print "Checking username...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (usernameinput,))
-    if cur.fetchone():
-        return render_template('create_account.html', currentpage='create_account', bad_account='badusername', account_created='false', admin=session["admin"])
-        
-    # make sure passwords match
-    print "Checking password...."
-    password1 = request.form['password']
-    password2 = request.form['retypepassword']
-    if password1 != password2:
-        return render_template('create_account.html', currentpage='create_account', bad_account='badpassword', account_created='false', admin=session["admin"])
-    
-    # make sure email doesn't exist
-    print "Checking email...."
-    pattern = re.compile("\A\S+@\S+\.\S+\Z")
-    cur.execute("SELECT email FROM users WHERE email = %s;", (useremailinput,))
-    if cur.fetchone() or not pattern.match(useremailinput):
-        return render_template('create_account.html', currentpage='create_account', bad_account='bademail', account_created='false', admin=session["admin"])
-        
-    # attempt to create user
-    print "Attempting to create user...."
-    print "username" + request.form['username'] + " Password: " + request.form['password']
-    try:
-        cur.execute("INSERT INTO users (username, password, email, admin) VALUES (%s, crypt(%s, gen_salt('bf')), %s, %s);", (usernameinput, passwordinput, useremailinput, admin))
-    except:
-        print("Error creating user...")
-        db.rollback()
-    db.commit()
-        
-    # check to see if user was created
-    print "Checking success of user creation...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (usernameinput,))
-    if cur.fetchone():
-        # user was created
-        print "User created"
-        account_created = 'true'
-    else:
-        # user was NOT created
-        print "User not created"
-        account_created = 'false'
-            
-    return render_template('account_created.html', currentpage='create_account', bad_account='unknown', admin=session["admin"], account_created=account_created, user=usernameinput)
-
-@app.route('/deleteaccount', methods=['GET', 'POST'])
-def delete_account():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    if request.method == 'GET':
-        return render_template('delete_account.html', currentpage = 'delete_account', admin=session["admin"])
-
-    # make sure user input matches
-    print "Checking username match...."
-    username1 = request.form['username1']
-    username2 = request.form['username2']
-    if username1 != username2:
-        return render_template('delete_account.html', currentpage='delete_account', bad_account='badpassword', account_created='false', admin=session["admin"])
-
-    print "Checking for username in database...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (username1,))
-    if cur.fetchone():
-        print "Username is found."
-    else:
-        return render_template('delete_account.html', currentpage='delete_account', bad_account='badusername', account_created='false', admin=session["admin"])
-    
-    # attempt to delete user
-    print "Attempting to delete user...."
-    try:
-        query = "DELETE FROM users WHERE username = %s;"
-        
-        #check to see if current user is deleting themself
-        selfdeletion = False
-        if current_user.id == username1:
-            flask_login.logout_user()
-            selfdeletion = True
-        
-        print(cur.mogrify(query, (username1,)))
-        cur.execute(query, (username1,))
-    except psycopg2.Error as e:
-        print("Error deleting user...")
-        if selfdeletion:
-            user = User()
-            user.id = username1
-            flask_login.login_user(user)
-        db.rollback()
-    db.commit()
-        
-    # check to see if user was deleted
-    print "Checking success of user deletion...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (username1,))
-    if cur.fetchone():
-        # user not deleted
-        print "User not deleted"
-        account_deleted = 'false'
-    else:
-        # user deleted
-        print "User deleted"
-        if selfdeletion:
-            return redirect(url_for('index'))
-        account_deleted = 'true'
-            
-    return render_template('account_deleted.html', currentpage='delete_account', bad_account='unknown', account_deleted=account_deleted, user=username1, admin=session["admin"])
-
-@app.route('/changepassword', methods=['GET', 'POST'])
-def change_password():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    if request.method == 'GET':
-        return render_template('change_password.html', currentpage = 'change_password', admin=session["admin"])
-
-    password = request.form['password']
-    retypepassword = request.form['retypepassword']
-    username = request.form['username']
-
-    # check to see if user exists
-    print "Checking username...."
-    cur.execute("SELECT username FROM users WHERE username = %s;", (username,))
-    if cur.fetchone():
-        print "Username is found."
-    else:
-        return render_template('change_password.html', currentpage='change_password', bad_account='badusername', account_created='false', admin=session["admin"])
-
-    # make sure user password matches
-    print "Checking passwords...."
-    if password != retypepassword:
-        return render_template('change_password.html', currentpage='change_password', bad_account='badpassword', account_created='false', admin=session["admin"])
-        
-    # try to insert new password
-    try:
-        print("Inserting password...")
-        cur.execute("UPDATE users SET password = crypt('%s', gen_salt('bf')) WHERE username= '%s'" % (password, username))
-    except:
-        print("Error Inserting password...")
-        db.rollback()
-    db.commit()
-            
-    return render_template('password_changed.html', currentpage='change_password', bad_account='unknown', user=username, admin=session["admin"])
-
-
 @app.route('/sendpassword', methods=['GET', 'POST'])
 def send_password():
     db = connectToDB()
@@ -659,6 +498,107 @@ def getUsers():
     else:
         print("Error retrieving users from database...");
 
+@socketio.on('createDaUser', namespace='/heatmap')
+def createDaUser(formdata):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # user variables
+    username = formdata['username']
+    password = formdata['password']
+    email = formdata['email']
+    usertype = formdata['usertype']
+    
+    # check usertype
+    if usertype == "user":
+        usertype = "false"
+    else:
+        usertype = "true"
+    
+    # Check for username
+    print("Checking username....")
+    usernameExists = False
+    checkUserQuery = "SELECT username FROM users WHERE username = %s;"
+    cur.execute(checkUserQuery, (username,))
+    if cur.fetchone():
+        #username found - throw error
+        error_message = "Sorry, the username '" + username + "' already exists!"
+        print(error_message)
+        emit('loadMessageBox', error_message)
+        usernameExists = True
+    
+    # Attempt to create user
+    if not usernameExists:
+        usernameInsertGood = True
+        print("Attempting to create user....")
+        try:
+            createUserQuery = "INSERT INTO users (username, password, email, admin) VALUES (%s, crypt(%s, gen_salt('bf')), %s, %s);"
+            cur.execute(createUserQuery, (username, password, email, usertype))
+        except:
+            usernameInsertGood = False
+            errormessage = "Whoops! User Creation Failed!"
+            print(errormessage)
+            emit('loadMessageBox', errormessage)
+            db.rollback()
+        db.commit()
+        
+        # Check to see if user was created
+        if usernameInsertGood:
+            print("Checking success of user creation....")
+            cur.execute(checkUserQuery, (username,))
+            if cur.fetchone():
+                # user created
+                success_message = "User created!"
+                print(success_message)
+                emit('loadMessageBox', success_message)
+            else:
+                errormessage = "Whoops! User Creation Failed!"
+                print(errormessage)
+                emit('loadMessageBox', errormessage)
+
+@socketio.on('changeUserPassword', namespace='/heatmap')
+def changeUserPassword(changeformdata):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    username = changeformdata['username']
+    password = changeformdata['password']
+    matchpassword = changeformdata['matchpassword']
+    
+    # Check to see if user exists
+    print("Checking for username....")
+    errorCheckPass = False
+    checkUserQuery = "SELECT username FROM users WHERE username = %s;"
+    cur.execute(checkUserQuery, (username,))
+    if cur.fetchone():
+        print("Username found")
+        errorCheckPass = True
+    else:
+        errorMessage = "ERROR: Username not found."
+        print(errorMessage)
+        emit('loadMessageBox', errorMessage);
+    
+    # make sure passwords match
+    if password != matchpassword:
+        errorMessage = "ERROR: Passwords don't match."
+        print(errorMessage)
+        emit('loadMessageBox', errorMessage);
+        errorCheckPass = False
+    
+    # try to insert new password
+    try:
+        print("Inserting password...")
+        passwordInsertQuery = "UPDATE users SET password = crypt(%s, gen_salt('bf')) WHERE username = %s;"
+        cur.execute(passwordInsertQuery, (password, username))
+        success_message = "Password changed!"
+        emit('loadMessageBox', success_message)
+    except:
+        errorMessage = "ERROR: Problem updating password..."
+        print(errorMessage)
+        emit('loadMessageBox', errorMessage)
+        db.rollback()
+    db.commit()
+        
 @socketio.on('deleteUser', namespace='/heatmap')
 def deleteUser(username):
     db = connectToDB()
@@ -673,8 +613,8 @@ def deleteUser(username):
         print("Username is found.")
     else:
         # send message alerting user to error
-        message = "User " + username + " not found."
-        emit('errorDeletingUser', message)
+        message = "User '" + username + "' not found."
+        emit('loadMessageBox', message)
         testDeletion = False
         
     # Attempt to delete user
@@ -701,7 +641,7 @@ def deleteUser(username):
             # send message alerting user to last admin rule
             message = "You cannot delete the last Admin User."
             print(message)
-            emit('lastAdminDelete', message)
+            emit('loadMessageBox', message)
             testDeletion = False
         else:
             print(cur.mogrify(query, (username,)))
@@ -715,7 +655,7 @@ def deleteUser(username):
             flask_login.login_user(user)
         # send message alerting user to error
         message = "Error deleting user " + username + " from database."
-        emit('errorDeletingUser', message)
+        emit('loadMessageBox', message)
         testDeletion = False
         db.rollback()
     db.commit()
@@ -729,13 +669,15 @@ def deleteUser(username):
             print("User not deleted")
             # send message alerting user to this fact
             message = "Error deleting user " + username + " from database."
-            emit('errorDeletingUser', message)
+            emit('loadMessageBox', message)
         else:
             print("User deleted")
             if selfdeletion:
                 print("I DELETED MYSELF")
                 emit('redirect', {'url': url_for('index')})
-
+            else:
+                message = username + " has been deleted!"
+                emit('loadMessageBox', message)
 
 #MAP FUNCTIONS
 @socketio.on('getDatasetNames', namespace='/heatmap')

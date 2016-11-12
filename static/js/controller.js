@@ -1,4 +1,4 @@
-/*global angular*/
+/*global angular $*/
 /*global heatmap vectormap*/
 /*global io location*/
 var HeatmapApp = angular.module('HeatmapApp', []);
@@ -259,11 +259,18 @@ HeatmapApp.controller('UserController', function($scope){
     
     var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
     
-    $scope.deleteName = "";
-    $scope.passName = "";
-    $scope.pass1 = "";
-    $scope.pass2 = "";
     $scope.users = [];
+    $scope.MessageBoxMessage = "";
+    
+    // Create User Scope Variables
+    $scope.formdata = {};
+    
+    // Delete User Scope Variables
+    $scope.deleteName = "";
+    
+    // Change Password Scope Variables
+    $scope.passName = "";
+    $scope.changeformdata = {};
     
     socket.on('connect', function(){
         console.log('Connected');
@@ -283,58 +290,102 @@ HeatmapApp.controller('UserController', function($scope){
        console.log($scope.users);
     });
     
-    socket.on('errorDeletingUser', function(message) {
-       console.log(message);
-       
-    });
-    
-    socket.on('lastAdminDelete', function(message) {
-       console.log(message);
-       
-    });
-    
     socket.on('redirect', function (data) {
         window.location = data.url;
     });
     
+    // SHOW-HIDE POPUP
     $scope.popup_hide = function popup_hide() {
-        document.getElementById('headerHide').style.display = "none";
-        document.getElementById('deleteUserPopup').style.display = "none";
-        document.getElementById('createUserPopup').style.display = "none";
-        document.getElementById('changePasswordPopup').style.display = "none";
+        document.getElementById('headerHide').style.visibility = "hidden";
+        document.getElementById('createUserPopup').style.visibility = "hidden";
+        document.getElementById('deleteUserPopup').style.visibility = "hidden";
+        document.getElementById('changePasswordPopup').style.visibility = "hidden";
+        
+        document.getElementById('headerHide').style.opacity = 0;
+        document.getElementById('createUserPopup').style.opacity = 0;
+        document.getElementById('deleteUserPopup').style.opacity = 0;
+        document.getElementById('changePasswordPopup').style.opacity = 0;
     };
     
     $scope.createUser_show = function createUser_show(value) {
-        document.getElementById('headerHide').style.display = "block";
-        document.getElementById('createUserPopup').style.display = "block";
+        document.getElementById('headerHide').style.visibility = "visible";
+        document.getElementById('createUserPopup').style.visibility = "visible";
+        document.getElementById('headerHide').style.opacity = 1;
+        document.getElementById('createUserPopup').style.opacity = 1;
+        
+        // Reset the form
+        angular.copy({}, $scope.formdata);
+        $scope.formdata.usertype = null;
+        $('#createUserForm')[0].reset();
+        $('#createUserForm').validator('destroy').validator();
     };
     
     $scope.changepassword_show = function changepassword_show(value) {
-        document.getElementById('headerHide').style.display = "block";
-        document.getElementById('changePasswordPopup').style.display = "block";
+        document.getElementById('headerHide').style.visibility = "visible";
+        document.getElementById('changePasswordPopup').style.visibility = "visible";
+        document.getElementById('headerHide').style.opacity = 1;
+        document.getElementById('changePasswordPopup').style.opacity = 1;
         $scope.passName = value;
         console.log("changing password for " + $scope.passName);
+        
+        // Reset the form
+        angular.copy({}, $scope.changeformdata);
+        $('#changePasswordForm')[0].reset();
+        $('#changePasswordForm').validator('destroy').validator();
     };
     
     $scope.deleteuser_show = function deleteuser_show(value) {
-        document.getElementById('headerHide').style.display = "block";
-        document.getElementById('deleteUserPopup').style.display = "block";
+        document.getElementById('headerHide').style.visibility = "visible";
+        document.getElementById('deleteUserPopup').style.visibility = "visible";
+        document.getElementById('headerHide').style.opacity = 1;
+        document.getElementById('deleteUserPopup').style.opacity = 1;
         $scope.deleteName = value;
     };
     
-    
-    $scope.changeUserPassword = function changeUserPassword() {
-        console.log("password one: " + $scope.pass1);
-        console.log("password two: " + $scope.pass2);
-        $scope.popup_hide();
-        $scope.pass1 = '';
-        $scope.pass2 = '';
+    $scope.showMessageBox = function showMessageBox() {
+        document.getElementById('headerHide').style.visibility = "visible";
+        document.getElementById('MessageBox').style.visibility = "visible";
+        document.getElementById('headerHide').style.opacity = 1;
+        document.getElementById('MessageBox').style.opacity = 1;
     };
     
+    $scope.hideMessageBox = function hideMessageBox() {
+        document.getElementById('headerHide').style.visibility = "hidden";
+        document.getElementById('MessageBox').style.visibility = "hidden";
+        document.getElementById('headerHide').style.opacity = 0;
+        document.getElementById('MessageBox').style.opacity = 0;
+    };
+    
+    // CREATE USER
+    $scope.createUser = function createUser() {
+        socket.emit('createDaUser', $scope.formdata);
+        $scope.popup_hide();
+    };
+    
+    // CHANGE PASSWORD
+    $scope.changeUserPassword = function changeUserPassword(value) {
+        $scope.changeformdata.username = value;
+        socket.emit('changeUserPassword', $scope.changeformdata);
+        $scope.popup_hide();
+    };
+    
+    // DELETE USER
     $scope.delete_user = function delete_user() {
         console.log("Deleting " + $scope.deleteName + "...");
         socket.emit('deleteUser', $scope.deleteName);
-        socket.emit('getUsers');
         $scope.popup_hide();
     };
+    
+    // MESSAGE BOX
+    socket.on('loadMessageBox', function(message) {
+        console.log(message);
+        $scope.MessageBoxMessage = message;
+        $scope.$apply();
+        
+        setTimeout($scope.showMessageBox(), 1000);
+        setTimeout($scope.hideMessageBox, 5000);
+        
+        socket.emit('getUsers');
+    });
+
 });
