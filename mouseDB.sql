@@ -18,7 +18,7 @@ CREATE ROLE owner LOGIN PASSWORD '41PubBNmfQhmfCNy';
 -- Table structure
 --
 
-DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users (
     userid SERIAL NOT NULL PRIMARY KEY,
     username citext NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE users (
     admin boolean NOT NULL
 );
 
-DROP TABLE IF EXISTS datasets;
+DROP TABLE IF EXISTS datasets CASCADE;
 CREATE TABLE datasets (
     datasetID SERIAL NOT NULL PRIMARY KEY,
     uploadDate timestamp default current_timestamp,
@@ -39,35 +39,14 @@ CREATE TABLE datasets (
     UNIQUE (datasetID)
 );
 
-DROP TABLE IF EXISTS subject;
-CREATE TABLE subject (
-    idRFID int NOT NULL PRIMARY KEY,
-    label text,
-    customColor text
-);
-
-DROP TABLE IF EXISTS dataline;
-CREATE TABLE dataline (
-    datalineID SERIAL NOT NULL PRIMARY KEY,
-    datasetID SERIAL REFERENCES datasets,
-    idRFID int references subject,
-    gridPos text NOT NULL,
-    duration int NOT NULL
-);
-
-DROP TABLE IF EXISTS subjectmap;
-CREATE TABLE subjectmap(
-    datasetID SERIAL references datasets,
-    idRFID int references subject
-);
 -- ------------------------------------------------------------
 
 --
 -- GRANT PERMISSIONS
 --
-GRANT select, update, insert ON users, datasets, subject, dataline, subjectmap TO owner;
+GRANT select, update, insert ON users, datasets TO owner;
 GRANT delete ON users, datasets TO owner;
-GRANT select, usage ON users_userid_seq, datasets_datasetID_seq, dataline_datalineID_seq TO owner;
+GRANT select, usage ON users_userid_seq, datasets_datasetID_seq TO owner;
 
 -- ------------------------------------------------------------
 
