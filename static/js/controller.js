@@ -230,11 +230,11 @@ HeatmapApp.controller('UploadController', function($scope){
         $scope.datasets = [];
         socket.emit('getDatasetNames');
         console.log($scope.datasets);
-        $scope.popup_show("gridOptionPopUp");
         $scope.rowsInt = 0;
         $scope.colsInt = 0;
         $scope.locationMap = [];
         $scope.thisFileName = "thisisasamplefilename";
+        socket.emit('checkUploading');
     });
     
     // This is an example function that you can use to emit to from the server file.
@@ -265,7 +265,7 @@ HeatmapApp.controller('UploadController', function($scope){
     });
     
     socket.on('finishedUploading', function(){
-        
+        socket.emit('getDatasetNames');
     });
     
     $scope.popup_show = function popup_show(passedDiv) {
@@ -306,6 +306,15 @@ HeatmapApp.controller('UploadController', function($scope){
     //$scope.array = [];
     //$scope.array.push({'data': "data"});
     //$scope.$apply();
+    
+    socket.on('checkedUploading', function(uploading){
+        console.log("I made it here");
+        console.log(uploading)
+        if(uploading==true){
+            console.log("bool worked.");
+            $scope.popup_show("gridOptionPopUp");
+        }
+    });
     
     $scope.defineGrid = function defineGrid() {
         $scope.popup_hide("gridOptionPopUp");

@@ -33,13 +33,15 @@ socketio = SocketIO(app)
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
+dataUploadStorage = {}
+
+
 class User(flask_login.UserMixin):
-    uploadingData = ""
-    viewingData = ""
+    pass
     
 def connectToDB():
     connectionString = 'dbname=mousedb user=owner password=41PubBNmfQhmfCNy host=localhost'
-    print connectionString
+    #print connectionString
     try:
         return psycopg2.connect(connectionString)
     except:
@@ -48,76 +50,7 @@ def connectToDB():
 # setup all of the values from the users table for the current user
 def setup_User(user, data):
     user.id = data['username']
-    
-def getAllDataSets():
-    db = connectToDB()
-    cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT datasetname FROM datasets;", )
-    holddata = cur.fetchall()
-    allsets = []
-    for line in holddata:
-        allsets.append(line[0])
-    return allsets
-    
-    
-def parseLocations(rows, cols, setData):
-    locations = {}
-    locations["rows"] = str(rows)
-    locations["columns"] = str(cols)
-    for i in range(int(rows)):
-        for j in range(int(cols)):
-            thisIndex = (i * int(cols)) + j
-            locations[str(thisIndex)] = str(setData[thisIndex])
-    return locations         
-    
-def parseUploadForm(form):
-    parsedData = {}
-    locations = {}
-    oldSet = False
-    if "oldSet" in form.keys():
-        oldSetName = str(form["prevSetName"])
-        oldSet = True
-        locations["oldSet"] = oldSetName
-    else:
-        for i in range(7):
-            for j in range(7):
-                oldKey = "[" + str(i) + ", " + str(j) + "]"
-                newKey = (i * 7) + j
-                value = form[oldKey]
-                if str(value) != "-1":
-                    locations[str(newKey)] = str(value)
-                
-    parsedData["locations"] = locations
-    parsedData["filename"] = str(form["setName"])
-    parsedData["datalines"] = User.uploadingData
-    return parsedData  
-    
-def parseUpdatedForm(form):
-    parsedData = {}
-    locations = {}
-    oldSet = False
-    if "oldSet" in form.keys():
-        oldSetName = str(form["prevSetName"])
-        db = connectToDB()
-        cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("SELECT locationmap from datasets where datasetname=%s", (oldSetName,))
-        holdlocations = cur.fetchall()
-        tempLocations = holdlocations[0][0]
-        locations = convertString(tempLocations)  
-    else:
-        for i in range(49):
-            value = form[str(i)]
-            if str(value) != "-1":
-                locations[str(i)]=str(value)
-                
-    #print(form["setName"])
-    if form["setName"] == "":
-        parsedData["setName"] = User.viewingData
-    else:
-        parsedData["setName"] = form["setName"]
-        
-    parsedData["locations"] = locations
-    return parsedData
+
     
 # This is a function to help bring a location map json back from the database and turn it back into a dictionary   
 def convertString(longstring):
@@ -221,6 +154,23 @@ def convertVectorString(longstring):
             counter += 3
     #print(final)
     return final
+    
+    
+    # For a given file, return whether it's an allowed type or not
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
+
+def parseLocations(rows, cols, setData):
+    locations = {}
+    locations["rows"] = str(rows)
+    locations["columns"] = str(cols)
+    for i in range(int(rows)):
+        for j in range(int(cols)):
+            thisIndex = (i * int(cols)) + j
+            locations[str(thisIndex)] = str(setData[thisIndex])
+    return locations         
 
 @login_manager.user_loader
 def user_loader(user_id):
@@ -286,21 +236,41 @@ def maps():
     
     return render_template('maps.html', currentpage='maps', admin=session["admin"])
     
-@app.route('/data')
+@app.route('/data', methods=["GET", "POST"])
 @flask_login.login_required
 def data():
+    if request.method == 'POST':
+        file = request.files['file']
+        #Check if the file is one of the allowed types/extensions
+        if file and allowed_file(file.filename):
+            # Remove unsupported chars from filename
+            filename = secure_filename(file.filename)
+            #print("Through here.")
+            
+            # The variable called file stores the file, this could be sent to the parser rather than being saved
+            # Nothing withing this if statement is needed for parsing purposes. I am leaving it to show
+            # functionality if you want to test it.
+            # Move the file form the temporal folder to the upload folder
+            
+            myData = Parser(file).getData()
+            session["currentlyUploading"] = True
+            print(session.keys())
+            dataUploadStorage[session["user_id"]] = myData["data"]
+            
+            #print(myData["data"])
+            #session["uploadingData"] = myData["data"] 
+            session["uploadingFileName"] = myData["filename"] 
+            #print("Done parsing.")
+    #        print(session["currentlyUploading"])
+    #        print(session["uploadingData"])
+    #        print(session["uploadingFileName"])
+    else:
+        session["uploadingFileName"] = ""
+        session["currentlyUploading"] = False
+        if session["user_id"] in dataUploadStorage.keys():
+            del dataUploadStorage[session["user_id"]]
     return render_template('data.html', currentpage='data', admin=session["admin"])
     
-    
-#@app.route('/data')
-#@flask_login.login_required
-#def data():
-#    db = connectToDB()
-#    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#    otherDataSets = getAllDataSets()
-#    User.viewingData=""
-#    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
-
 @app.route('/users', methods=['GET', 'POST'])
 @flask_login.login_required
 def manageusers():
@@ -353,137 +323,6 @@ def send_password():
 ############################ File Upload Functions #############################
 ################################################################################
 
-# For a given file, return whether it's an allowed type or not
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-
-@app.route('/upload', methods=['POST'])
-def upload():
-    file = request.files['file']
-    # Check if the file is one of the allowed types/extensions
-    if file and allowed_file(file.filename):
-        # Remove unsupported chars from filename
-        filename = secure_filename(file.filename)
-        
-        # The variable called file stores the file, this could be sent to the parser rather than being saved
-        # Nothing withing this if statement is needed for parsing purposes. I am leaving it to show
-        # functionality if you want to test it.
-        # Move the file form the temporal folder to the upload folder
-        
-        # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) # remove this line if we are not saving the file
-        myData = Parser(file).getData()
-        User.uploadingData = myData["data"]
-        User.uploadingFileName = myData["filename"]
-        return render_template('upload.html')
-        
-        #return render_template('index.html')
-        # Will return to index page if incorrect file format is uploaded
-    else: 
-        return data()
-        
-@app.route('/setDataUpload', methods=['POST'])
-def setDataUpload():
-    myData = parseUploadForm(request.form)
-    mySimulation = Simulation()
-    mySimulation.setUp(myData["datalines"])
-    mySimulation.runFullSim()
-    thesePaths = mySimulation.getAllPaths()
-    theseHeatMaps = mySimulation.getAllHeatData()
-    if myData["filename"] == "":
-        myData["filename"] = User.uploadingFileName
-    
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    print(myData["locations"].keys())
-    if "oldSet" in myData["locations"].keys():
-        print(myData["locations"]["oldSet"])
-        oldLoc = myData["locations"]["oldSet"]
-        cur.execute("SELECT locationmap from datasets where datasetname=%s", (oldLoc,))
-        holdlocations = cur.fetchall()
-        tempLocations = holdlocations[0][0]
-        getLocations = convertString(tempLocations)
-    else:
-        getLocations = myData["locations"]
-    
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)",(myData["filename"], 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations)))
-    db.commit()
-    return viewDataPage(getDataToView(myData["filename"]))
-    
-def viewDataPage(data):
-    return render_template('viewdata.html', myData=data, otherDataSets=getAllDataSets(), admin=session["admin"])
-
-def getDataToView(setName):
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * from datasets WHERE datasetname = %s", (setName,))
-    thisData = cur.fetchall()
-    if len(thisData) != 1:
-        otherDataSets = getAllDataSets()
-        return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
-    User.viewingData=setName
-    formattedData = {}
-    formattedData["setName"] = str(setName)
-    formattedData["heatData"] = convertHeatString(thisData[0][3])
-    formattedData["vectorData"] = convertVectorString(thisData[0][4])
-    formattedData["datasetname"] = thisData[0][6]
-    allLocations = []
-    for i in range(1, 26):
-            if i < 10:
-                allLocations.append("RFID0" + str(i))
-            else:
-                allLocations.append("RFID" + str(i))
-    formattedData["alllocations"] = allLocations
-    assembleMap = []
-    rowCounter = 0
-    rowNames = ["firstRow", "secondRow", "thirdRow", "fourthRow", "fifthRow", "sixthRow", "seventhRow"]
-    rawLocations = convertString(thisData[0][5])
-    
-    formattedData["rowMap"] = {}
-    for name in rowNames:
-        formattedData["rowMap"][name] = []
-    for i in range (49):
-        if i > 0 and i % 7 == 0:
-            rowCounter += 1
-        entry = {}
-        entry["index"] = i
-        if str(i) in rawLocations.keys():
-            entry["value"] = rawLocations[str(i)]
-        else:
-            entry["value"] = "--"
-        formattedData["rowMap"][rowNames[rowCounter]].append(entry)
-    return formattedData
-    
-
-@app.route('/loadData', methods=['POST'])
-def loadData():
-    setToLoad = ""
-    try:
-        setToLoad = request.form["setToLoad"]
-    except:
-        return data()
-    return viewDataPage(getDataToView(setToLoad))
-    
-@app.route('/updateData', methods=['POST'])
-def updateData():
-    updatedForm = request.form
-    updatedData = parseUpdatedForm(updatedForm)
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("UPDATE datasets SET datasetname=%s, locationmap=%s WHERE datasetname=%s",(updatedData["setName"], json.dumps(updatedData["locations"]), User.viewingData))
-    db.commit()
-    
-    return viewDataPage(getDataToView(updatedData["setName"]))
-    
-@app.route('/deleteData', methods=['POST'])
-def deleteData():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("DELETE from datasets WHERE datasetname=%s",(User.viewingData,))
-    db.commit()
-    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
 
 ################################################################################
 ################################## SOCKET IO ###################################
@@ -498,7 +337,7 @@ def makeConnection():
 @socketio.on('finishUpload', namespace='/heatmap')
 def uploadData(setData):
     mySimulation = Simulation()
-    mySimulation.setUp(User.uploadingData)
+    mySimulation.setUp(dataUploadStorage[session["user_id"]])
     mySimulation.runFullSim()
     thesePaths = mySimulation.getAllPaths()
     theseHeatMaps = mySimulation.getAllHeatData()
@@ -510,14 +349,23 @@ def uploadData(setData):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)", (thisFileName, 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations)))
     db.commit()
+    session["currentlyUploading"] = False
+    del dataUploadStorage[session["user_id"]]
+    session["uploadingFileName"] = ""
     emit('finishedUploading')
         
-
 @socketio.on('getSetName', namespace='/heatmap')
 def getSetName():
-    print("Tried to get a set name.")
-    emit('haveSetName', User.uploadingFileName)
-
+    #print("Tried to get a set name.")
+    emit('haveSetName', session["uploadingFileName"])
+    
+@socketio.on('checkUploading', namespace='/heatmap')
+def checkIfUploading():
+    #print(session["currentlyUploading"])
+    if "currentlyUploading" in session.keys():
+        emit('checkedUploading', session["currentlyUploading"])
+    else:
+        emit('checkedUploading', False)
 
 #USER FUNCTIONS
 @socketio.on('getUsers', namespace='/heatmap')
@@ -774,3 +622,140 @@ if __name__ == '__main__':
     socketio.run(app, host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)), debug = True)
     
     
+
+# Stuff I'm saving ... but can probably delete - Justin
+
+    
+#def getAllDataSets():
+#    db = connectToDB()
+#    cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#    cur.execute("SELECT datasetname FROM datasets;", )
+#    holddata = cur.fetchall()
+#    allsets = []
+#    for line in holddata:
+#        allsets.append(line[0])
+#    return allsets
+
+    
+#def parseUploadForm(form):
+#    parsedData = {}
+#    locations = {}
+#    oldSet = False
+#    if "oldSet" in form.keys():
+#        oldSetName = str(form["prevSetName"])
+#        oldSet = True
+#        locations["oldSet"] = oldSetName
+#    else:
+#        for i in range(7):
+#            for j in range(7):
+#                oldKey = "[" + str(i) + ", " + str(j) + "]"
+#                newKey = (i * 7) + j
+#                value = form[oldKey]
+#                if str(value) != "-1":
+#                    locations[str(newKey)] = str(value)
+#                
+#    parsedData["locations"] = locations
+#    parsedData["filename"] = str(form["setName"])
+#    parsedData["datalines"] = User.uploadingData
+#    return parsedData  
+    
+#def parseUpdatedForm(form):
+#    parsedData = {}
+#    locations = {}
+#    oldSet = False
+#    if "oldSet" in form.keys():
+#        oldSetName = str(form["prevSetName"])
+#        db = connectToDB()
+#        cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#        cur.execute("SELECT locationmap from datasets where datasetname=%s", (oldSetName,))
+#        holdlocations = cur.fetchall()
+#        tempLocations = holdlocations[0][0]
+#        locations = convertString(tempLocations)  
+#    else:
+#        for i in range(49):
+#            value = form[str(i)]
+#            if str(value) != "-1":
+#                locations[str(i)]=str(value)
+                
+    #print(form["setName"])
+#    if form["setName"] == "":
+#        parsedData["setName"] = User.viewingData
+#    else:
+#        parsedData["setName"] = form["setName"]
+        
+#    parsedData["locations"] = locations
+#    return parsedData
+
+#@app.route('/setDataUpload', methods=['POST'])
+#def setDataUpload():
+#    myData = parseUploadForm(request.form)
+#    mySimulation = Simulation()
+#    mySimulation.setUp(myData["datalines"])
+#    mySimulation.runFullSim()
+#    thesePaths = mySimulation.getAllPaths()
+#    theseHeatMaps = mySimulation.getAllHeatData()
+#    if myData["filename"] == "":
+#        myData["filename"] = User.uploadingFileName
+    
+#    db = connectToDB()
+#    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#    print(myData["locations"].keys())
+#    if "oldSet" in myData["locations"].keys():
+#        print(myData["locations"]["oldSet"])
+#        oldLoc = myData["locations"]["oldSet"]
+#        cur.execute("SELECT locationmap from datasets where datasetname=%s", (oldLoc,))
+#        holdlocations = cur.fetchall()
+#        tempLocations = holdlocations[0][0]
+#        getLocations = convertString(tempLocations)
+#    else:
+#        getLocations = myData["locations"]
+    
+#    db = connectToDB()
+#    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#    cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)",(myData["filename"], 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations)))
+#    db.commit()
+#    return viewDataPage(getDataToView(myData["filename"]))
+    
+#def viewDataPage(data):
+#    return render_template('viewdata.html', myData=data, otherDataSets=getAllDataSets(), admin=session["admin"])
+
+#def getDataToView(setName):
+#    db = connectToDB()
+#    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#    cur.execute("SELECT * from datasets WHERE datasetname = %s", (setName,))
+#    thisData = cur.fetchall()
+#    if len(thisData) != 1:
+#        otherDataSets = getAllDataSets()
+#        return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
+#    User.viewingData=setName
+#    formattedData = {}
+#    formattedData["setName"] = str(setName)
+#    formattedData["heatData"] = convertHeatString(thisData[0][3])
+#    formattedData["vectorData"] = convertVectorString(thisData[0][4])
+#    formattedData["datasetname"] = thisData[0][6]
+#    allLocations = []
+#    for i in range(1, 26):
+#            if i < 10:
+#                allLocations.append("RFID0" + str(i))
+#            else:
+#                allLocations.append("RFID" + str(i))
+#    formattedData["alllocations"] = allLocations
+#    assembleMap = []
+#    rowCounter = 0
+#    rowNames = ["firstRow", "secondRow", "thirdRow", "fourthRow", "fifthRow", "sixthRow", "seventhRow"]
+#    rawLocations = convertString(thisData[0][5])
+    
+#    formattedData["rowMap"] = {}
+#    for name in rowNames:
+#        formattedData["rowMap"][name] = []
+#    for i in range (49):
+#        if i > 0 and i % 7 == 0:
+#            rowCounter += 1
+#        entry = {}
+#        entry["index"] = i
+#        if str(i) in rawLocations.keys():
+#            entry["value"] = rawLocations[str(i)]
+#        else:
+#            entry["value"] = "--"
+#        formattedData["rowMap"][rowNames[rowCounter]].append(entry)
+#    return formattedData
