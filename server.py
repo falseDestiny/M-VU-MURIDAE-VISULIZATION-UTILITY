@@ -59,6 +59,17 @@ def getAllDataSets():
         allsets.append(line[0])
     return allsets
     
+    
+def parseLocations(rows, cols, setData):
+    locations = {}
+    locations["rows"] = str(rows)
+    locations["columns"] = str(cols)
+    for i in range(int(rows)):
+        for j in range(int(cols)):
+            thisIndex = (i * int(cols)) + j
+            locations[str(thisIndex)] = str(setData[thisIndex])
+    return locations         
+    
 def parseUploadForm(form):
     parsedData = {}
     locations = {}
@@ -278,11 +289,17 @@ def maps():
 @app.route('/data')
 @flask_login.login_required
 def data():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    otherDataSets = getAllDataSets()
-    User.viewingData=""
-    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
+    return render_template('data.html', currentpage='data', admin=session["admin"])
+    
+    
+#@app.route('/data')
+#@flask_login.login_required
+#def data():
+#    db = connectToDB()
+#    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+#    otherDataSets = getAllDataSets()
+#    User.viewingData=""
+#    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
 
 @app.route('/users', methods=['GET', 'POST'])
 @flask_login.login_required
@@ -358,12 +375,12 @@ def upload():
         myData = Parser(file).getData()
         User.uploadingData = myData["data"]
         User.uploadingFileName = myData["filename"]
-        return render_template('loadeddata.html', myData=myData, otherDataSets=getAllDataSets())
+        return render_template('upload.html')
         
         #return render_template('index.html')
         # Will return to index page if incorrect file format is uploaded
     else: 
-        return render_template('loadeddata.html', admin=session["admin"])
+        return data()
         
 @app.route('/setDataUpload', methods=['POST'])
 def setDataUpload():
@@ -442,7 +459,11 @@ def getDataToView(setName):
 
 @app.route('/loadData', methods=['POST'])
 def loadData():
-    setToLoad = request.form["setToLoad"]
+    setToLoad = ""
+    try:
+        setToLoad = request.form["setToLoad"]
+    except:
+        return data()
     return viewDataPage(getDataToView(setToLoad))
     
 @app.route('/updateData', methods=['POST'])
@@ -473,6 +494,30 @@ def deleteData():
 def makeConnection(): 
     print('connected')
     
+#UPLOAD FUNCTIONS
+@socketio.on('finishUpload', namespace='/heatmap')
+def uploadData(setData):
+    mySimulation = Simulation()
+    mySimulation.setUp(User.uploadingData)
+    mySimulation.runFullSim()
+    thesePaths = mySimulation.getAllPaths()
+    theseHeatMaps = mySimulation.getAllHeatData()
+    thisFileName = str(setData[0])
+    rows = str(setData[1])
+    cols = str(setData[2])
+    getLocations = parseLocations(rows, cols, setData[3])
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)", (thisFileName, 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations)))
+    db.commit()
+    emit('finishedUploading')
+        
+
+@socketio.on('getSetName', namespace='/heatmap')
+def getSetName():
+    print("Tried to get a set name.")
+    emit('haveSetName', User.uploadingFileName)
+
 
 #USER FUNCTIONS
 @socketio.on('getUsers', namespace='/heatmap')
@@ -682,6 +727,7 @@ def deleteUser(username):
 #MAP FUNCTIONS
 @socketio.on('getDatasetNames', namespace='/heatmap')
 def getDatasetNames():
+    print("Getting names!!!!")
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     

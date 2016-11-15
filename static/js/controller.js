@@ -207,18 +207,35 @@ HeatmapApp.controller('HeatmapController', function($scope){
 });
 
 
-HeatmapApp.controller('DataController', function($scope){
+HeatmapApp.controller('UploadController', function($scope){
     
     var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
     
+    
+    
+    $scope.sensors=["---","RFID01","RFID02","RFID03","RFID04","RFID05","RFID06","RFID07","RFID08","RFID09","RFID10","RFID11","RFID12","RFID13","RFID14","RFID15","RFID16","RFID17","RFID18","RFID19","RFID20","RFID21","RFID22","RFID23","RFID24","RFID25","RFID26","RFID27","RFID28","RFID29","RFID30","RFID31","RFID32","RFID33","RFID34","RFID35","RFID36",]
+    
     // This is a scope variable - if you want to access a variable from the html page, it needs to be a scope variable.
-    $scope.variable = ""; // in javascript there is no type declaration, just like python. the variable will be whatever type you init it to.
+    //$scope.variable = ""; // in javascript there is no type declaration, just like python. the variable will be whatever type you init it to.
     
     // This is a normal variable:
-    var normalVariable = "";
+    //var normalVariable = "";
+    
+    $scope.datasets = [{'name': 'Select Data Set'}];  
     
     socket.on('connect', function() {
         console.log('Connected');
+        $scope.gridReady = false;
+        $scope.setRows = "1";
+        $scope.setCols = "1";
+        $scope.datasets = [];
+        socket.emit('getDatasetNames');
+        console.log($scope.datasets);
+        $scope.popup_show("gridOptionPopUp");
+        $scope.rowsInt = 0;
+        $scope.colsInt = 0;
+        $scope.locationMap = [];
+        $scope.thisFileName = "thisisasamplefilename";
     });
     
     // This is an example function that you can use to emit to from the server file.
@@ -236,11 +253,48 @@ HeatmapApp.controller('DataController', function($scope){
         console.log("HI THERE!");
     }; // these functions need a semi-colon here
     
+    
+    socket.on('datasetnamelist', function(ser) {
+       console.log("Adding " + ser.name + " to list...");
+       $scope.datasets.push(ser);
+       $scope.$apply();
+    });
+    
+    socket.on('haveSetName', function(setName) {
+       $scope.thisFileName=setName; 
+       $scope.$apply();
+    });
+    
+    socket.on('finishedUploading', function(){
+        
+    });
+    
+    $scope.popup_show = function popup_show(passedDiv) {
+        //Header
+        document.getElementById('headerHide').style.visibility = "visible";
+        document.getElementById('headerHide').style.opacity = 1;
+        //Popup
+        document.getElementById(passedDiv).style.visibility = "visible";
+        document.getElementById(passedDiv).style.opacity = 1;
+    };
+    
+    // SHOW-HIDE POPUP
+    $scope.popup_hide = function popup_hide(passedDiv) {
+        document.getElementById('headerHide').style.visibility = "hidden";
+        document.getElementById(passedDiv).style.visibility = "hidden";
+        document.getElementById('headerHide').style.opacity = 0;
+        document.getElementById(passedDiv).style.opacity = 0;
+    };
+    
+    $scope.testPopUp = function testPopUp() {
+        console.log("HI THERE!");
+    }; 
+    
     // to emit to python you need to call:
-    socket.emit('keyword'); 
+    //socket.emit('keyword'); 
     // or if you want a parameter
-    $scope.parameter = "";
-    socket.emit('keyword', $scope.parameter);
+    //$scope.parameter = "";
+    //socket.emit('keyword', $scope.parameter);
     
     // In python to catch this emit call your function header should look like this:
     // @socketio.on('keyword', namespace='/heatmap')
@@ -250,9 +304,127 @@ HeatmapApp.controller('DataController', function($scope){
     
     // if you want to push data to an array you need to call "$apply()"
     // example:
-    $scope.array = [];
-    $scope.array.push({'data': "data"});
-    $scope.$apply();
+    //$scope.array = [];
+    //$scope.array.push({'data': "data"});
+    //$scope.$apply();
+    
+    $scope.defineGrid = function defineGrid() {
+        $scope.popup_hide("gridOptionPopUp");
+        console.log("Let's define a grid ...");
+        $scope.popup_show('setDimensionsPopUp');
+    };
+    
+    $scope.mimicGrid = function mimicGrid() {
+        $scope.popup_hide("gridOptionPopUp");
+        console.log("Let's mimic a grid ...");
+    };
+    
+    $scope.cancelUpload = function cancelUpload() {
+        $scope.popup_hide("gridOptionPopUp");
+        console.log("Canceling upload");
+    };
+    
+    $scope.cancelDimenDef = function cancelDimenDef(){
+        $scope.popup_hide('setDimensionsPopUp');
+        $scope.popup_show("gridOptionPopUp");
+    };
+    
+    $scope.cancelGridDef = function cancelGridDef(){
+        $scope.popup_hide('defineGridPopUp');
+        $scope.popup_show("setDimensionsPopUp");
+    };
+    
+    $scope.getGridSelector = function getGridSelector(){
+        $scope.popup_hide("setDimensionsPopUp");
+        console.log("Parsing ... ");
+        console.log($scope.setRows);
+        console.log($scope.setCols);
+        $scope.rowsInt = parseInt($scope.setRows, 10);
+        $scope.colsInt = parseInt($scope.setCols, 10);
+        console.log($scope.locationMap);
+        $scope.popup_show("defineGridPopUp");
+    };
+    
+    $scope.confirmGridDef = function confirmGridDef(){
+        $scope.popup_hide("defineGridPopUp");
+        socket.emit('getSetName');
+        $scope.popup_show("finalizeUpload");
+    };
+    
+    $scope.dontFinalize = function dontFinalize(){
+        $scope.popup_hide("finalizeUpload");
+    };
+    
+    $scope.completeUpload = function completeUpload(){
+        $scope.popup_hide("finalizeUpload");
+        var finalOutput = [];
+        finalOutput.push($scope.thisFileName);
+        finalOutput.push($scope.rowsInt);
+        finalOutput.push($scope.colsInt);
+        var locMap = [];
+        for(var keyS in $scope.locationMap){
+            locMap.push($scope.locationMap[keyS.toString()]);
+        }
+        
+        finalOutput.push(locMap);
+        socket.emit('finishUpload', finalOutput);
+    };
+    
+    $scope.checkName = function checkName(){
+        if($scope.thisFileName==""){
+            document.getElementById('completeUpload').setAttribute("disabled","true");
+        }
+        else if($scope.datasets.indexOf($scope.thisFileName) != -1){
+            console.log("Duplicate file name.");
+            document.getElementById('completeUpload').setAttribute("disabled","true");
+        }
+        else{
+            document.getElementById('completeUpload').removeAttribute("disabled");
+        }
+    };
+    
+    $scope.checkGrid = function checkGrid(){
+        var holdLocs = [];
+        for(var key in $scope.locationMap){
+            holdLocs.push(key.toString());
+            console.log(key.toString());
+        }
+        var failed = false;
+        for(var i = 0; i < $scope.rowsInt; i++){
+            for(var j = 0; j < $scope.colsInt; j ++){
+               if(holdLocs.indexOf((i + "," + j).toString()) == -1){
+                   failed = true;
+                   i = $scope.rowsInt;
+                   j = $scope.colsInt;
+               }
+            }
+        }
+        if(!failed){
+            var holdValues = [];
+            console.log("step 1.");
+            for(var keyS in $scope.locationMap){
+                if($scope.locationMap[keyS.toString()] != "---"){
+                    console.log(holdValues);
+                    if(holdValues.indexOf($scope.locationMap[keyS.toString()]) == -1){
+                        holdValues.push($scope.locationMap[keyS.toString()]);
+                    }
+                    else{
+                        failed = true;
+                        document.getElementById('dupRFID').style.visibility = "visible";
+                    }
+                }
+            }
+        }
+        
+        if(!failed){
+            document.getElementById('checkedGrid').removeAttribute("disabled");
+        }
+        else{
+            document.getElementById('checkedGrid').setAttribute("disabled","true");
+        }
+    };
+    
+    
 });
 
 HeatmapApp.controller('UserController', function($scope){
@@ -364,5 +536,16 @@ HeatmapApp.controller('UserController', function($scope){
         
         socket.emit('getUsers');
     });
+    
+    
 
+});
+
+HeatmapApp.filter('range', function() {
+  return function(input, total) {
+    total = parseInt(total);
+    for (var i=0; i<total; i++)
+      input.push(i);
+    return input;
+  };
 });
