@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block bodyTag %}
-<body ng-controller="DataController">
+<!--<body ng-controller="DataController">-->
 {% endblock %}
 
 {% block content %}
@@ -55,24 +55,25 @@
 					</div>
 					
 
-					<!-- DATA SELECT DROPDOWN -->
-					<form action="loadData" method="post" enctype="multipart/form-data">
-						<div class="btn-group btn-flex">
-							<select name="setToLoad" class="btn btn-default"  >
-									{% for line in otherDataSets %}
-										<option value={{ line }}>{{ line }}</option>
-									{% endfor %}
-							</select>
-						  </ul>
-						</div>
-						<!-- LOAD DATA BUTTON -->
-						<div class="btn-group btn-flex">
-							<label class="btn btn-block btn-default">
-									Load Data Set
-							<input type="submit" value="LoadData" style="display: none;">
-							</label>
-						</div>
-					</form>
+					<!-- DATASET SELECT DROPDOWN -->
+					<div class="btn-group btn-flex">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					    	Select Dataset <span class="caret"></span>
+					  	</button>
+					  	<ul class="dropdown-menu bullet pull-center">
+					  		<li ng-repeat="option in datasets">
+					  			<input 
+					  				type="radio"
+					  				id="{% raw %}{{option.name}}{% endraw %}"
+					  				name="datalist"
+					  				ng-model="$parent.selection"
+					  				value="{% raw %}{{option.name}}{% endraw %}"
+					  				ng-change="loadDataset()"
+					  			/>
+					  			<label for="{% raw %}{{option.name}}{% endraw %}">{% raw %}{{option.name}}{% endraw %}</label>
+					  		</li>
+					  	</ul>
+					</div>
 
 				</div>
 			</div>
