@@ -5,7 +5,7 @@ var HeatmapApp = angular.module('HeatmapApp', []);
 
 HeatmapApp.controller('HeatmapController', function($scope){
    
-    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
   
     // VARIABLES
     $scope.testdata = []; // heatmap data
@@ -206,10 +206,9 @@ HeatmapApp.controller('HeatmapController', function($scope){
     };
 });
 
-
 HeatmapApp.controller('DataController', function($scope){
     
-    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
     
     // This is a scope variable - if you want to access a variable from the html page, it needs to be a scope variable.
     $scope.variable = ""; // in javascript there is no type declaration, just like python. the variable will be whatever type you init it to.
@@ -257,7 +256,7 @@ HeatmapApp.controller('DataController', function($scope){
 
 HeatmapApp.controller('UserController', function($scope){
     
-    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
     
     $scope.users = [];
     $scope.MessageBoxMessage = "";
