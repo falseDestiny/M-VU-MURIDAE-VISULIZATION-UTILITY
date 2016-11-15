@@ -329,7 +329,7 @@ HeatmapApp.controller('UploadController', function($scope){
     
     $scope.cancelUpload = function cancelUpload() {
         $scope.popup_hide("gridOptionPopUp");
-        console.log("Canceling upload");
+        socket.emit("clearUpload");
     };
     
     $scope.cancelDimenDef = function cancelDimenDef(){
@@ -361,6 +361,7 @@ HeatmapApp.controller('UploadController', function($scope){
     
     $scope.dontFinalize = function dontFinalize(){
         $scope.popup_hide("finalizeUpload");
+        socket.emit("clearUpload");
     };
     
     $scope.completeUpload = function completeUpload(){

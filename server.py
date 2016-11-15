@@ -366,6 +366,12 @@ def checkIfUploading():
         emit('checkedUploading', session["currentlyUploading"])
     else:
         emit('checkedUploading', False)
+        
+@socketio.on('clearUpload', namespace='/heatmap')
+def clearUpload():
+    session["currentlyUploading"] = False
+    del dataUploadStorage[session["user_id"]]
+    session["uploadingFileName"] = ""
 
 #USER FUNCTIONS
 @socketio.on('getUsers', namespace='/heatmap')
@@ -575,7 +581,6 @@ def deleteUser(username):
 #MAP FUNCTIONS
 @socketio.on('getDatasetNames', namespace='/heatmap')
 def getDatasetNames():
-    print("Getting names!!!!")
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
