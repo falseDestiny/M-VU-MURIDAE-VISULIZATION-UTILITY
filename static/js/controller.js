@@ -222,18 +222,19 @@ HeatmapApp.controller('UploadController', function($scope){
     $scope.datasets = [{'name': 'Select Data Set'}];  
     
     socket.on('connect', function() {
-        console.log('Connected');
+        //console.log('Connected');
         $scope.gridReady = false;
         $scope.setRows = "1";
         $scope.setCols = "1";
         $scope.datasets = [];
         socket.emit('getDatasetNames');
-        console.log($scope.datasets);
-        $scope.popup_show("gridOptionPopUp");
+        //console.log($scope.datasets);
         $scope.rowsInt = 0;
         $scope.colsInt = 0;
         $scope.locationMap = [];
+        $scope.mimicedGrid = "";
         $scope.thisFileName = "thisisasamplefilename";
+        socket.emit('checkUploading');
     });
     
     socket.on('datasetnamelist', function(ser) {
@@ -248,7 +249,7 @@ HeatmapApp.controller('UploadController', function($scope){
     });
     
     socket.on('finishedUploading', function(){
-        
+        //socket.emit('getDatasetNames');
     });
     
     $scope.popup_show = function popup_show(passedDiv) {
@@ -272,6 +273,48 @@ HeatmapApp.controller('UploadController', function($scope){
         console.log("HI THERE!");
     }; 
     
+    // to emit to python you need to call:
+    //socket.emit('keyword'); 
+    // or if you want a parameter
+    //$scope.parameter = "";
+    //socket.emit('keyword', $scope.parameter);
+    
+    // In python to catch this emit call your function header should look like this:
+    // @socketio.on('keyword', namespace='/heatmap')
+    // def pythonFunction(parameter):
+    
+    // you can call $scope functions in javascript like this: $scope.exampleFunction();
+    
+    // if you want to push data to an array you need to call "$apply()"
+    // example:
+    //$scope.array = [];
+    //$scope.array.push({'data': "data"});
+    //$scope.$apply();
+    
+    socket.on('checkedUploading', function(uploading){
+        console.log("I made it here");
+        console.log(uploading)
+        if(uploading==true){
+            console.log("bool worked.");
+            $scope.popup_show("gridOptionPopUp");
+        }
+    });
+    
+    socket.on('setMimicGrid', function(grid){
+       console.log(grid);
+       $scope.colsInt = parseInt(grid["columns"]);
+       $scope.rowsInt = parseInt(grid["rows"]);
+       for(var i=0; i < $scope.rowsInt; i++){
+           for(var j = 0; j < $scope.colsInt; j ++){
+               var thisKey = ((i * $scope.colsInt) + j);
+               var thisValue = grid[thisKey];
+               $scope.locationMap[[i,j]] = thisValue;
+           }
+       }
+       socket.emit('getSetName');
+       $scope.popup_show("finalizeUpload");
+    });
+    
     $scope.defineGrid = function defineGrid() {
         $scope.popup_hide("gridOptionPopUp");
         console.log("Let's define a grid ...");
@@ -281,11 +324,34 @@ HeatmapApp.controller('UploadController', function($scope){
     $scope.mimicGrid = function mimicGrid() {
         $scope.popup_hide("gridOptionPopUp");
         console.log("Let's mimic a grid ...");
+        $scope.popup_show('mimicGridPopUp');
+    };
+    
+    $scope.cancelMimic = function cancelMimic(){
+        $scope.popup_hide('mimicGridPopUp');
+        $scope.popup_show("gridOptionPopUp");
+    };
+    
+    $scope.validateMimic = function validateMimic(){
+        console.log("validating.");
+        console.log(document.getElementById('submitMimicGrid'));
+        console.log($scope.mimicedGrid);
+        if($scope.mimicedGrid != ""){
+            document.getElementById('submitMimicGrid').removeAttribute("disabled");
+        }
+        else{
+            document.getElementById('submitMimicGrid').setAttribute("disabled","true");
+        }
+    };
+    
+    $scope.loadMimicGrid = function loadMimicGrid(){
+        $scope.popup_hide('mimicGridPopUp');
+        socket.emit("getGridToMimic", $scope.mimicedGrid);
     };
     
     $scope.cancelUpload = function cancelUpload() {
         $scope.popup_hide("gridOptionPopUp");
-        console.log("Canceling upload");
+        socket.emit("clearUpload");
     };
     
     $scope.cancelDimenDef = function cancelDimenDef(){
@@ -312,11 +378,13 @@ HeatmapApp.controller('UploadController', function($scope){
     $scope.confirmGridDef = function confirmGridDef(){
         $scope.popup_hide("defineGridPopUp");
         socket.emit('getSetName');
+        console.log($scope.locationMap);
         $scope.popup_show("finalizeUpload");
     };
     
     $scope.dontFinalize = function dontFinalize(){
         $scope.popup_hide("finalizeUpload");
+        socket.emit("clearUpload");
     };
     
     $scope.completeUpload = function completeUpload(){
