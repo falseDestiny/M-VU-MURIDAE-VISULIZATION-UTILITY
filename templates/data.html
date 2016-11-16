@@ -16,206 +16,205 @@
 		<div class="col-lg-12">
 			<!-- CONTENT PANEL -->
 			<div class="col-xs-12 col-md-8 col-lg-9">
-				<div class="panel">
-                    <!--GENERIC POPUP STARTS HERE -->
-                    <div id="genericPopUp">
-		                <div class="panel loginbox popupdiv">
-		                	<h2 align="center">It's an empty pop up!</h2>
-		                </div>
-                    </div>
-                    <!--GENERIC POPUP ENDS HERE -->
-                    
-                    <!--DELETE POPUP STARTS HERE -->
-                    <div id="deletePopUp">
-                    	<div class="panel loginbox popupdiv">
-	                    	<h4 align="center"><br/>Are you sure you want to delete this data set? </h4>
-			                <div class="btn-group btn-flex">
-		                        <button type="button" class="btn btn-default" ng-click="deleteSet()" >CONFIRM DELETE</button>
-		                    </div>
-		                    <div class="btn-group btn-flex">
-	                            <button type="button" class="btn btn-default" ng-click="cancelDelete()" >CANCEL</button>
-	                        </div>
-	                         <br />
-		                </div>
-                    </div>
-                    <!--DELETE POPUP ENDS HERE -->
-                    
-                    <!--EDIT POPUP STARTS HERE -->
-                    <div id="editPopUp">
-                    	<div class="panel loginbox popupdiv wide-popupdiv" style="width:500px;">
-                    		<table class="table table-block table-responsive">
-										<tbody>
-											<tr ng-repeat="i in [] | range:rowsInt">
-												<td ng-repeat="j in [] | range:colsInt">
-													<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[[$parent.$index, $index]]" ng-change="checkEdit()" >
-														<option ng-repeat="rf in sensors" value="{% raw %}{{rf}}{% endraw %}">{% raw %}{{ rf }}{% endraw %}</option>
-													</select>
-												</td>
-											</tr>
-										</tbody>
-								</table>
-								
-							<h3>Note all locations must be set to an RFID or '---', and no RFID may be duplicated.</h3>	
+					
+				<!-- ####################### POPUPS ######################## -->
+                <!--GENERIC POPUP STARTS HERE -->
+                <div id="genericPopUp">
+	                <div class="panel loginbox popupdiv">
+	                	<h2 align="center">It's an empty pop up!</h2>
+	                </div>
+                </div>
+                <!--GENERIC POPUP ENDS HERE -->
+                
+                <!--DELETE POPUP STARTS HERE -->
+                <div id="deletePopUp">
+                	<div class="panel loginbox popupdiv">
+                    	<h4 align="center"><br/>Are you sure you want to delete this data set? </h4>
+		                <div class="btn-group btn-flex">
+	                        <button type="button" class="btn btn-default" ng-click="deleteSet()" >CONFIRM DELETE</button>
+	                    </div>
+	                    <div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="cancelDelete()" >CANCEL</button>
+                        </div>
+                         <br />
+	                </div>
+                </div>
+                <!--DELETE POPUP ENDS HERE -->
+                
+                <!--EDIT POPUP STARTS HERE -->
+                <div id="editPopUp">
+                	<div class="panel loginbox popupdiv wide-popupdiv" style="width:500px;">
+                		<table class="table table-block table-responsive">
+									<tbody>
+										<tr ng-repeat="i in [] | range:rowsInt">
+											<td ng-repeat="j in [] | range:colsInt">
+												<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[[$parent.$index, $index]]" ng-change="checkEdit()" >
+													<option ng-repeat="rf in sensors" value="{% raw %}{{rf}}{% endraw %}">{% raw %}{{ rf }}{% endraw %}</option>
+												</select>
+											</td>
+										</tr>
+									</tbody>
+							</table>
 							
-							<h3>Change the data set name</h3>
-		                	<h3>Note a data set name must be unique in the database.</h3>
-		                	<div class="btn-flex-submit">
-								<input type="text" id="fileNameButton" class="form-control" ng-model="tempName" ng-change="checkEdit()">
-							</div>
-							
-                    		
-			                <div class="btn-group btn-flex">
-		                        <button type="button" id="saveEditsButton" class="btn btn-default" ng-click="saveEdits()" disabled="True">SAVE CHANGES</button>
-		                    </div>
-		                    <div class="btn-group btn-flex">
-	                            <button type="button" class="btn btn-default" ng-click="cancelEdit()" >CANCEL</button>
-	                        </div>
-	                         <br />
-		                </div>
-                    </div>
-                    <!--EDIT POPUP ENDS HERE -->
-                    
-                    
-                    <!--GRID OPTIONS POPUP STARTS HERE -->
-                    <div id="gridOptionPopUp">
-		                <div class="panel loginbox popupdiv wide-popupdiv">
-		                	<h4 align="center"><br/>You must define the grid for this data set, or select a 
-		                						previously uploaded data set and mimic its grid. </h4>
-		                	<div class="btn-group btn-flex">
-                                <button type="button" class="btn btn-default" ng-click="defineGrid()" >DEFINE GRID</button>
-                            </div>
-                            <div class="btn-group btn-flex">
-                                <button type="button" class="btn btn-default" ng-click="mimicGrid()" >MIMIC ANOTHER GRID</button>
-                            </div>
-		                	<div class="btn-group btn-flex">
-                                <button type="button" class="btn btn-default" ng-click="cancelUpload()" >CANCEL</button>
-                            </div>
-                            <br />
-		                </div>
-                    </div>
-                    <!--GRID OPTIONS POPUP ENDS HERE -->
-                    
-                    <!--GRID OPTIONS POPUP STARTS HERE -->
-                    <div id="mimicGridPopUp">
-		                <div class="panel loginbox popupdiv wide-popupdiv">
-		                	<br />
-	                		<select name="mimicSelector" class="btn btn-default" ng-model="mimicedGrid" ng-change="validateMimic(this)">
-									<option ng-repeat="option in datasets" value="{% raw %}{{ option.name }}{% endraw %}" >{% raw %}{{ option.name }}{% endraw %}</option>
-							</select>
-		                	
-		                	
-		                	<div class="btn-group btn-flex">
-                                <button type="button" class="btn btn-default" id="submitMimicGrid" ng-click="loadMimicGrid()" disabled="True">MIMIC GRID</button>
-                            </div>
-		                	<div class="btn-group btn-flex">
-                                <button type="button" class="btn btn-default" ng-click="cancelMimic()" >CANCEL</button>
-                            </div>
-                            <br />
-		                </div>
-                    </div>
-                    <!--GRID OPTIONS POPUP ENDS HERE -->
-                    
-                    
-                    
-                    <!--SET DIMENSIONS POPUP STARTS HERE -->
-                    <div id="setDimensionsPopUp">
-                    	<div class="panel loginbox popupdiv wide-popupdiv">
-                    		<h1> Set dimensions: </h1>
-                    		<label for="setrowsMenu"> Set Rows: </label>
-		                	<select name="setrowsMenu" class="btn btn-default" ng-model="setRows">
-                    		<option value = "1">1</option>
-                    		<option value = "2">2</option>
-                    		<option value = "3">3</option>
-                    		<option value = "4">4</option>
-                    		<option value = "5">5</option>
-                    		<option value = "6">6</option>
-                    		<option value = "7">7</option>
-                    		<option value = "8">8</option>
-                    	</select>
-                    	<br />
-                    	<label for="setcolsMenu"> Set Columns: </label>
-		                	<select name="setcolsMenu" class="btn btn-default" ng-model="setCols">
-                    		<option value = "1">1</option>
-                    		<option value = "2">2</option>
-                    		<option value = "3">3</option>
-                    		<option value = "4">4</option>
-                    		<option value = "5">5</option>
-                    		<option value = "6">6</option>
-                    		<option value = "7">7</option>
-                    		<option value = "8">8</option>
-                    	</select>
-                    	<div class="btn-group btn-flex">
-                                <button type="button" class="btn btn-default" ng-click="getGridSelector()" >DEFINE GRID</button>
+						<h3>Note all locations must be set to an RFID or '---', and no RFID may be duplicated.</h3>	
+						
+						<h3>Change the data set name</h3>
+	                	<h3>Note a data set name must be unique in the database.</h3>
+	                	<div class="btn-flex-submit">
+							<input type="text" id="fileNameButton" class="form-control" ng-model="tempName" ng-change="checkEdit()">
+						</div>
+						
+                		
+		                <div class="btn-group btn-flex">
+	                        <button type="button" id="saveEditsButton" class="btn btn-default" ng-click="saveEdits()" disabled="True">SAVE CHANGES</button>
+	                    </div>
+	                    <div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="cancelEdit()" >CANCEL</button>
+                        </div>
+                         <br />
+	                </div>
+                </div>
+                <!--EDIT POPUP ENDS HERE -->
+               
+                <!--GRID OPTIONS POPUP STARTS HERE -->
+                <div id="gridOptionPopUp">
+	                <div class="panel loginbox popupdiv wide-popupdiv">
+	                	<h4 align="center"><br/>You must define the grid for this data set, or select a 
+	                						previously uploaded data set and mimic its grid. </h4>
+	                	<div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="defineGrid()" >DEFINE GRID</button>
                         </div>
                         <div class="btn-group btn-flex">
-                                <button type="button" class="btn btn-default" ng-click="cancelDimenDef()" >CANCEL</button>
+                            <button type="button" class="btn btn-default" ng-click="mimicGrid()" >MIMIC ANOTHER GRID</button>
+                        </div>
+	                	<div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="cancelUpload()" >CANCEL</button>
                         </div>
                         <br />
-		                </div>
+	                </div>
+                </div>
+                <!--GRID OPTIONS POPUP ENDS HERE -->
+                
+                <!--MIMIC GRID POPUP STARTS HERE -->
+                <div id="mimicGridPopUp">
+	                <div class="panel loginbox popupdiv wide-popupdiv">
+	                	<br />
+                		<select name="mimicSelector" class="btn btn-default" ng-model="mimicedGrid" ng-change="validateMimic(this)">
+								<option ng-repeat="option in datasets" value="{% raw %}{{ option.name }}{% endraw %}" >{% raw %}{{ option.name }}{% endraw %}</option>
+						</select>
+	                	
+	                	
+	                	<div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" id="submitMimicGrid" ng-click="loadMimicGrid()" disabled="True">MIMIC GRID</button>
+                        </div>
+	                	<div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="cancelMimic()" >CANCEL</button>
+                        </div>
+                        <br />
+	                </div>
+                </div>
+                <!--MIMIC GRID POPUP ENDS HERE -->
+                
+                <!--SET DIMENSIONS POPUP STARTS HERE -->
+                <div id="setDimensionsPopUp">
+                	<div class="panel loginbox popupdiv wide-popupdiv">
+                		<h1> Set dimensions: </h1>
+                		<label for="setrowsMenu"> Set Rows: </label>
+	                	<select name="setrowsMenu" class="btn btn-default" ng-model="setRows">
+                		<option value = "1">1</option>
+                		<option value = "2">2</option>
+                		<option value = "3">3</option>
+                		<option value = "4">4</option>
+                		<option value = "5">5</option>
+                		<option value = "6">6</option>
+                		<option value = "7">7</option>
+                		<option value = "8">8</option>
+                	</select>
+                	<br />
+                	<label for="setcolsMenu"> Set Columns: </label>
+	                	<select name="setcolsMenu" class="btn btn-default" ng-model="setCols">
+                		<option value = "1">1</option>
+                		<option value = "2">2</option>
+                		<option value = "3">3</option>
+                		<option value = "4">4</option>
+                		<option value = "5">5</option>
+                		<option value = "6">6</option>
+                		<option value = "7">7</option>
+                		<option value = "8">8</option>
+                	</select>
+                	<div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="getGridSelector()" >DEFINE GRID</button>
                     </div>
-                    <!--SET DIMENSIONS POPUP ENDS HERE -->
-                    
-                    <!--DEFINE GRID POPUP STARTS HERE -->
-                    <div id="defineGridPopUp">
-		                <div class="panel loginbox popupdiv extrawide-popupdiv">
-		                	
-		                		<table class="table table-block table-responsive">
-										<tbody>
-											<tr ng-repeat="i in [] | range:rowsInt">
-												<td ng-repeat="j in [] | range:colsInt">
-													<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[[$parent.$index, $index]]" ng-change="checkGrid()" >
-														<option ng-repeat="rf in sensors" value="{% raw %}{{rf}}{% endraw %}">{% raw %}{{ rf }}{% endraw %}</option>
-													</select>
-												</td>
-											</tr>
-										</tbody>
-								</table>
-								
-							<h3>Note all locations must be set to an RFID or '---', and no RFID may be duplicated.</h3>	
-							<div class="btn-group btn-flex">
-                                <button id="checkedGrid" type="button" class="btn btn-default" ng-click="confirmGridDef()" disabled="True">CONTINUE</button>
-                        	</div>
-		                	<div class="btn-group btn-flex">
-                                <button type="button" class="btn btn-default" ng-click="cancelGridDef()" >CANCEL</button>
-                        	</div>
-                        	
-                    	</div>
-                	</div>
-                    <!--DEFINE GRID POPUP ENDS HERE -->
-                    
-                    <!--FINALIZE UPLOAD STARTS HERE -->
-                    <div id="finalizeUpload">
-		                <div class="panel loginbox popupdiv">
-		                	<table class="table table-block table-responsive">
-										<tbody>
-											<tr ng-repeat="i in [] | range:rowsInt">
-												<td ng-repeat="j in [] | range:colsInt">
-													{% raw %} {{ locationMap[[i,j]] }} {% endraw %}
-												</td>
-											</tr>
-										</tbody>
+                    <div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="cancelDimenDef()" >CANCEL</button>
+                    </div>
+                    <br />
+	                </div>
+                </div>
+                <!--SET DIMENSIONS POPUP ENDS HERE -->
+                
+                <!--DEFINE GRID POPUP STARTS HERE -->
+                <div id="defineGridPopUp">
+	                <div class="panel loginbox popupdiv extrawide-popupdiv">
+	                	
+	                		<table class="table table-block table-responsive">
+									<tbody>
+										<tr ng-repeat="i in [] | range:rowsInt">
+											<td ng-repeat="j in [] | range:colsInt">
+												<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[[$parent.$index, $index]]" ng-change="checkGrid()" >
+													<option ng-repeat="rf in sensors" value="{% raw %}{{rf}}{% endraw %}">{% raw %}{{ rf }}{% endraw %}</option>
+												</select>
+											</td>
+										</tr>
+									</tbody>
 							</table>
-		                	
-		                	<h3>Change the data set name (or the original file name will be used)</h3>
-		                	<h3>Note a data set name must be unique in the database.</h3>
-		                	<div class="btn-flex-submit">
-								<input type="text" id="fileNameButton" class="form-control" ng-model="thisFileName" ng-change="checkName()">
-							</div>
 							
-		                	
-		                	<div class="btn-group btn-flex">
-                                <button id="completeUpload" type="button" class="btn btn-default" ng-click="completeUpload()" disabled="True">COMPLETE UPLOAD</button>
-                        	</div>
-		                	<div class="btn-group btn-flex">
-                                <button type="button" class="btn btn-default" ng-click="dontFinalize()" >CANCEL</button>
-                        	</div>
-		                </div>
-                    </div>
-                    <!--FINALIZE UPLOAD ENDS HERE -->
+						<h3>Note all locations must be set to an RFID or '---', and no RFID may be duplicated.</h3>	
+						<div class="btn-group btn-flex">
+                            <button id="checkedGrid" type="button" class="btn btn-default" ng-click="confirmGridDef()" disabled="True">CONTINUE</button>
+                    	</div>
+	                	<div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="cancelGridDef()" >CANCEL</button>
+                    	</div>
+                    	
+                	</div>
+            	</div>
+                <!--DEFINE GRID POPUP ENDS HERE -->
+                
+                <!--FINALIZE UPLOAD STARTS HERE -->
+                <div id="finalizeUpload">
+	                <div class="panel loginbox popupdiv">
+	                	<table class="table table-block table-responsive">
+									<tbody>
+										<tr ng-repeat="i in [] | range:rowsInt">
+											<td ng-repeat="j in [] | range:colsInt">
+												{% raw %} {{ locationMap[[i,j]] }} {% endraw %}
+											</td>
+										</tr>
+									</tbody>
+						</table>
+	                	
+	                	<h3>Change the data set name (or the original file name will be used)</h3>
+	                	<h3>Note a data set name must be unique in the database.</h3>
+	                	<div class="btn-flex-submit">
+							<input type="text" id="fileNameButton" class="form-control" ng-model="thisFileName" ng-change="checkName()">
+						</div>
+						
+	                	
+	                	<div class="btn-group btn-flex">
+                            <button id="completeUpload" type="button" class="btn btn-default" ng-click="completeUpload()" disabled="True">COMPLETE UPLOAD</button>
+                    	</div>
+	                	<div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="dontFinalize()" >CANCEL</button>
+                    	</div>
+	                </div>
+                </div>
+                <!--FINALIZE UPLOAD ENDS HERE -->
+                <!-- ##################### END POPUPS ###################### -->
                     
-	            	<div class="panel" id="canvasContainer">
+	            <div class="panel" id="canvasContainer">
 	            		
-						<div class="well text-center collapse" >
+					<div class="well text-center collapse" >
 							<row>
 								
 								<table class="table-responsive" style="width:100%;">
@@ -281,12 +280,12 @@
 							</row>
 							
 						</div>
-						
-						<div id="placeholder" class="empty-panel">
-							<h1>MURIDAE<br>VISUALIZATION<br>UTILITY</h1>
-						</div>
+				
+					<div id="placeholder" class="empty-panel">
+						<h1>MURIDAE<br>VISUALIZATION<br>UTILITY</h1>
 					</div>
 				</div><!-- end .panel -->
+					
 			</div><!-- end content panel -->
 
 			<!-- OPTION PANEL -->

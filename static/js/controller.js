@@ -440,7 +440,7 @@ HeatmapApp.controller('UploadController', function($scope){
     };
     
     $scope.loadDataset = function loadDataset() {
-        document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
+        document.querySelector('#placeholder').style.display="none"; //hides the placeholder div
         $('.collapse').collapse("show");
         socket.emit('viewDataSet', $scope.selection);
     };
@@ -484,7 +484,7 @@ HeatmapApp.controller('UploadController', function($scope){
         $scope.datasets = [];
         socket.emit('getDatasetNames');
         
-        document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
+        document.querySelector('#placeholder').style.display="none"; //hides the placeholder div
         $('.collapse').collapse("show");
         socket.emit('viewDataSet', $scope.tempName);
     };
@@ -562,7 +562,7 @@ HeatmapApp.controller('UploadController', function($scope){
        $scope.vectorData = [];
        $scope.displayName = "";
        $('.collapse').collapse("hide");
-       document.querySelector('#placeholder').style.visibility="visible"; //hides the placeholder div
+       document.querySelector('#placeholder').style.display="block";
        $scope.datasets = [];
        socket.emit('getDatasetNames');
     });
