@@ -222,13 +222,11 @@ HeatmapApp.controller('UploadController', function($scope){
     $scope.datasets = [{'name': 'Select Data Set'}];  
     
     socket.on('connect', function() {
-        //console.log('Connected');
         $scope.gridReady = false;
         $scope.setRows = "1";
         $scope.setCols = "1";
         $scope.datasets = [];
         socket.emit('getDatasetNames');
-        //console.log($scope.datasets);
         $scope.rowsInt = 0;
         $scope.colsInt = 0;
         $scope.locationMap = [];
@@ -238,7 +236,6 @@ HeatmapApp.controller('UploadController', function($scope){
     });
     
     socket.on('datasetnamelist', function(ser) {
-       console.log("Adding " + ser.name + " to list...");
        $scope.datasets.push(ser);
        $scope.$apply();
     });
@@ -246,10 +243,26 @@ HeatmapApp.controller('UploadController', function($scope){
     socket.on('haveSetName', function(setName) {
        $scope.thisFileName=setName; 
        $scope.$apply();
+       
+       var dataSetNames = [];
+        
+       for(var key in $scope.datasets){
+            dataSetNames.push($scope.datasets[key].name);
+       }
+       if($scope.thisFileName==""){
+           document.getElementById('completeUpload').setAttribute("disabled","true");
+       }
+       else if(dataSetNames.indexOf($scope['thisFileName']) != -1){
+           document.getElementById('completeUpload').setAttribute("disabled","true");
+       }
+       else{
+           document.getElementById('completeUpload').removeAttribute("disabled");
+       }
     });
     
     socket.on('finishedUploading', function(){
-        //socket.emit('getDatasetNames');
+        $scope.datasets = [];
+        socket.emit('getDatasetNames');
     });
     
     $scope.popup_show = function popup_show(passedDiv) {
@@ -269,39 +282,13 @@ HeatmapApp.controller('UploadController', function($scope){
         document.getElementById(passedDiv).style.opacity = 0;
     };
     
-    $scope.testPopUp = function testPopUp() {
-        console.log("HI THERE!");
-    }; 
-    
-    // to emit to python you need to call:
-    //socket.emit('keyword'); 
-    // or if you want a parameter
-    //$scope.parameter = "";
-    //socket.emit('keyword', $scope.parameter);
-    
-    // In python to catch this emit call your function header should look like this:
-    // @socketio.on('keyword', namespace='/heatmap')
-    // def pythonFunction(parameter):
-    
-    // you can call $scope functions in javascript like this: $scope.exampleFunction();
-    
-    // if you want to push data to an array you need to call "$apply()"
-    // example:
-    //$scope.array = [];
-    //$scope.array.push({'data': "data"});
-    //$scope.$apply();
-    
     socket.on('checkedUploading', function(uploading){
-        console.log("I made it here");
-        console.log(uploading)
         if(uploading==true){
-            console.log("bool worked.");
             $scope.popup_show("gridOptionPopUp");
         }
     });
     
     socket.on('setMimicGrid', function(grid){
-       console.log(grid);
        $scope.colsInt = parseInt(grid["columns"]);
        $scope.rowsInt = parseInt(grid["rows"]);
        for(var i=0; i < $scope.rowsInt; i++){
@@ -312,18 +299,17 @@ HeatmapApp.controller('UploadController', function($scope){
            }
        }
        socket.emit('getSetName');
+       
        $scope.popup_show("finalizeUpload");
     });
     
     $scope.defineGrid = function defineGrid() {
         $scope.popup_hide("gridOptionPopUp");
-        console.log("Let's define a grid ...");
         $scope.popup_show('setDimensionsPopUp');
     };
     
     $scope.mimicGrid = function mimicGrid() {
         $scope.popup_hide("gridOptionPopUp");
-        console.log("Let's mimic a grid ...");
         $scope.popup_show('mimicGridPopUp');
     };
     
@@ -333,9 +319,6 @@ HeatmapApp.controller('UploadController', function($scope){
     };
     
     $scope.validateMimic = function validateMimic(){
-        console.log("validating.");
-        console.log(document.getElementById('submitMimicGrid'));
-        console.log($scope.mimicedGrid);
         if($scope.mimicedGrid != ""){
             document.getElementById('submitMimicGrid').removeAttribute("disabled");
         }
@@ -366,20 +349,35 @@ HeatmapApp.controller('UploadController', function($scope){
     
     $scope.getGridSelector = function getGridSelector(){
         $scope.popup_hide("setDimensionsPopUp");
-        console.log("Parsing ... ");
-        console.log($scope.setRows);
-        console.log($scope.setCols);
         $scope.rowsInt = parseInt($scope.setRows, 10);
         $scope.colsInt = parseInt($scope.setCols, 10);
-        console.log($scope.locationMap);
         $scope.popup_show("defineGridPopUp");
     };
     
+    $scope.checkName = function checkName(){
+        
+        var dataSetNames = [];
+        for(var key in $scope.datasets){
+            dataSetNames.push($scope.datasets[key].name);
+        }
+        
+        if($scope.thisFileName==""){
+            document.getElementById('completeUpload').setAttribute("disabled","true");
+        }
+        else if(dataSetNames.indexOf($scope['thisFileName']) != -1){
+            console.log("Duplicate file name.");
+            document.getElementById('completeUpload').setAttribute("disabled","true");
+        }
+        else{
+            document.getElementById('completeUpload').removeAttribute("disabled");
+        }
+    };
+    
+    
     $scope.confirmGridDef = function confirmGridDef(){
         $scope.popup_hide("defineGridPopUp");
-        socket.emit('getSetName');
-        console.log($scope.locationMap);
         $scope.popup_show("finalizeUpload");
+        socket.emit('getSetName');
     };
     
     $scope.dontFinalize = function dontFinalize(){
@@ -402,24 +400,11 @@ HeatmapApp.controller('UploadController', function($scope){
         socket.emit('finishUpload', finalOutput);
     };
     
-    $scope.checkName = function checkName(){
-        if($scope.thisFileName==""){
-            document.getElementById('completeUpload').setAttribute("disabled","true");
-        }
-        else if($scope.datasets.indexOf($scope.thisFileName) != -1){
-            console.log("Duplicate file name.");
-            document.getElementById('completeUpload').setAttribute("disabled","true");
-        }
-        else{
-            document.getElementById('completeUpload').removeAttribute("disabled");
-        }
-    };
     
     $scope.checkGrid = function checkGrid(){
         var holdLocs = [];
         for(var key in $scope.locationMap){
             holdLocs.push(key.toString());
-            console.log(key.toString());
         }
         var failed = false;
         for(var i = 0; i < $scope.rowsInt; i++){
@@ -433,10 +418,8 @@ HeatmapApp.controller('UploadController', function($scope){
         }
         if(!failed){
             var holdValues = [];
-            console.log("step 1.");
             for(var keyS in $scope.locationMap){
                 if($scope.locationMap[keyS.toString()] != "---"){
-                    console.log(holdValues);
                     if(holdValues.indexOf($scope.locationMap[keyS.toString()]) == -1){
                         holdValues.push($scope.locationMap[keyS.toString()]);
                     }
@@ -456,7 +439,167 @@ HeatmapApp.controller('UploadController', function($scope){
         }
     };
     
+    $scope.loadDataset = function loadDataset() {
+        document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
+        $('.collapse').collapse("show");
+        socket.emit('viewDataSet', $scope.selection);
+    };
     
+    $scope.showDelete = function showDelete(){
+        $scope.popup_show("deletePopUp");
+    };
+    
+    $scope.cancelDelete = function cancelDelete(){
+        $scope.popup_hide("deletePopUp");  
+    };
+    
+    $scope.deleteSet = function deleteSet(){
+        socket.emit("deleteSet", $scope.displayName);  
+    };
+    
+    $scope.cancelEdit = function cancelEdit(){
+        $scope.popup_hide("editPopUp");
+    }
+    
+    $scope.editSet = function editSet(){
+        $scope.popup_show("editPopUp");
+        $scope.tempName = $scope.displayName;
+        socket.emit("loadGrid", $scope.displayName);
+    };
+    
+    $scope.saveEdits = function saveEdits(){
+        $scope.popup_hide("editPopUp");
+        var finalOutput = [];
+        finalOutput.push($scope.tempName);
+        finalOutput.push($scope.rowsInt);
+        finalOutput.push($scope.colsInt);
+        var locMap = [];
+        for(var keyS in $scope.locationMap){
+            locMap.push($scope.locationMap[keyS.toString()]);
+        }
+        finalOutput.push(locMap);
+        finalOutput.push($scope.displayName)
+        socket.emit('finishUpdate', finalOutput);
+        
+        $scope.datasets = [];
+        socket.emit('getDatasetNames');
+        
+        document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
+        $('.collapse').collapse("show");
+        socket.emit('viewDataSet', $scope.tempName);
+    };
+        
+    $scope.checkEdit = function checkEdit(){
+        var holdLocs = [];
+        for(var key in $scope.locationMap){
+            holdLocs.push(key.toString());
+        }
+        var failed = false;
+        for(var i = 0; i < $scope.rowsInt; i++){
+            for(var j = 0; j < $scope.colsInt; j ++){
+               if(holdLocs.indexOf((i + "," + j).toString()) == -1){
+                   failed = true;
+                   i = $scope.rowsInt;
+                   j = $scope.colsInt;
+               }
+            }
+        }
+        if(!failed){
+            var holdValues = [];
+            for(var keyS in $scope.locationMap){
+                if($scope.locationMap[keyS.toString()] != "---"){
+                    if(holdValues.indexOf($scope.locationMap[keyS.toString()]) == -1){
+                        holdValues.push($scope.locationMap[keyS.toString()]);
+                    }
+                    else{
+                        failed = true;
+                        //document.getElementById('dupRFID').style.visibility = "visible";
+                    }
+                }
+            }
+        }
+        
+        if(!failed){
+            var dataSetNames = [];
+            for(var key in $scope.datasets){
+                if($scope.datasets[key].name != $scope.tempName){
+                    dataSetNames.push($scope.datasets[key].name);
+                }
+            }
+            
+            if($scope.tempName ==""){
+                failed=true;
+            }
+            else if(dataSetNames.indexOf($scope.tempName) != -1){
+                failed=true;
+            }
+        }
+        
+        if(!failed){
+            document.getElementById('saveEditsButton').removeAttribute("disabled");
+        }
+        else{
+            document.getElementById('saveEditsButton').setAttribute("disabled","true");
+        }
+    };
+    
+    socket.on('setLoadedGrid', function(grid){
+       $scope.colsInt = parseInt(grid["columns"]);
+       $scope.rowsInt = parseInt(grid["rows"]);
+       for(var i=0; i < $scope.rowsInt; i++){
+           for(var j = 0; j < $scope.colsInt; j ++){
+               var thisKey = ((i * $scope.colsInt) + j);
+               var thisValue = grid[thisKey];
+               $scope.locationMap[[i,j]] = thisValue;
+           }
+       }
+    });
+    
+    
+    socket.on('deletedSet', function(){
+       $scope.popup_hide("deletePopUp");  
+       $scope.heatData = [];
+       $scope.vectorData = [];
+       $scope.displayName = "";
+       $('.collapse').collapse("hide");
+       document.querySelector('#placeholder').style.visibility="visible"; //hides the placeholder div
+       $scope.datasets = [];
+       socket.emit('getDatasetNames');
+    });
+    
+    $scope.heatData = [];
+    $scope.vectorData = [];
+    $scope.displayName = "";
+    
+    socket.on('returnSetData', function(setData){
+        $scope.heatData = [];
+        $scope.vectorData = [];
+        $scope.displayName = "";
+        
+        $scope.displayName = setData[0];
+        
+        for(var key in setData[1]){
+            for(var innerkey in setData[1][key]){
+                var thisLine = [];
+                thisLine["subject"] = key;
+                thisLine["location"] = innerkey;
+                thisLine["time"] = setData[1][key][innerkey];
+                $scope.heatData.push(thisLine);
+            }
+        }
+        
+        for (var key in setData[2]){
+            for(var x = 0; x < setData[2][key].length; x++){
+                var thisLine = [];
+                thisLine["subject"] = key;
+                thisLine["location"] = setData[2][key][x][0];
+                thisLine["time"] = setData[2][key][x][1];
+                $scope.vectorData.push(thisLine);
+            }
+        }
+        
+        $scope.$apply();
+    });
 });
 
 HeatmapApp.controller('UserController', function($scope){

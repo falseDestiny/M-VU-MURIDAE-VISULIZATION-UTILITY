@@ -613,6 +613,16 @@ hr {
 	left: 0;
 }
 
+#viewpanel {
+	z-index: 0;
+}
+
+.vp {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+
 #heatmap {
 	z-index: 0;
 }
@@ -642,7 +652,7 @@ hr {
 }
 
 .databody{
-	height: 600px;
+	height: 10px;
 	overflow-y: auto;
 }
 
@@ -656,9 +666,14 @@ hr {
 	width: 100px;
 }
 
+
+
+
+
+
 /* START USER MANAGEMENT */
 /* POPUP BOX */
-#deleteUserPopup, #createUserPopup, #changePasswordPopup, #headerHide, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp {
+#deleteUserPopup, #createUserPopup, #changePasswordPopup, #headerHide, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp, #deletePopUp, #editPopUp {
 	position: fixed;
 	width: 100%;
 	top: 0;
@@ -672,7 +687,7 @@ hr {
 	overflow:auto;
 }
 
-#deleteUserPopup, #createUserPopup, #changePasswordPopup, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp {
+#deleteUserPopup, #createUserPopup, #changePasswordPopup, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp, #deletePopUp, #editPopUp {
 	height: 100%;
 	z-index:1000;
 }
