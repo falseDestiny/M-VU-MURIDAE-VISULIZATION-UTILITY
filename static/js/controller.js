@@ -236,6 +236,21 @@ HeatmapApp.controller('UploadController', function($scope){
     socket.on('haveSetName', function(setName) {
        $scope.thisFileName=setName; 
        $scope.$apply();
+       
+       var dataSetNames = [];
+        
+       for(var key in $scope.datasets){
+            dataSetNames.push($scope.datasets[key].name);
+       }
+       if($scope.thisFileName==""){
+           document.getElementById('completeUpload').setAttribute("disabled","true");
+       }
+       else if(dataSetNames.indexOf($scope['thisFileName']) != -1){
+           document.getElementById('completeUpload').setAttribute("disabled","true");
+       }
+       else{
+           document.getElementById('completeUpload').removeAttribute("disabled");
+       }
     });
     
     socket.on('finishedUploading', function(){
@@ -259,10 +274,6 @@ HeatmapApp.controller('UploadController', function($scope){
         document.getElementById(passedDiv).style.opacity = 0;
     };
     
-    $scope.testPopUp = function testPopUp() {
-        console.log("HI THERE!");
-    }; 
-    
     socket.on('checkedUploading', function(uploading){
         if(uploading==true){
             $scope.popup_show("gridOptionPopUp");
@@ -282,22 +293,6 @@ HeatmapApp.controller('UploadController', function($scope){
        socket.emit('getSetName');
        
        $scope.popup_show("finalizeUpload");
-       
-       var dataSetNames = [];
-        
-       for(var key in $scope.datasets){
-            dataSetNames.push($scope.datasets[key].name);
-       }
-       if($scope.thisFileName==""){
-           document.getElementById('completeUpload').setAttribute("disabled","true");
-       }
-       else if(dataSetNames.indexOf($scope['thisFileName']) != -1){
-           console.log("Duplicate file name.");
-           document.getElementById('completeUpload').setAttribute("disabled","true");
-       }
-       else{
-           document.getElementById('completeUpload').removeAttribute("disabled");
-       }
     });
     
     $scope.defineGrid = function defineGrid() {
@@ -373,24 +368,10 @@ HeatmapApp.controller('UploadController', function($scope){
     
     $scope.confirmGridDef = function confirmGridDef(){
         $scope.popup_hide("defineGridPopUp");
-        socket.emit('getSetName');
-        var dataSetNames = [];
-        
-        for(var key in $scope.datasets){
-            dataSetNames.push($scope.datasets[key].name);
-        }
-        
-        if($scope.thisFileName==""){
-            document.getElementById('completeUpload').setAttribute("disabled","true");
-        }
-        else if(dataSetNames.indexOf($scope['thisFileName']) != -1){
-            document.getElementById('completeUpload').setAttribute("disabled","true");
-        }
-        else{
-            document.getElementById('completeUpload').removeAttribute("disabled");
-        }
         
         $scope.popup_show("finalizeUpload");
+        
+        socket.emit('getSetName');
     };
     
     $scope.dontFinalize = function dontFinalize(){
