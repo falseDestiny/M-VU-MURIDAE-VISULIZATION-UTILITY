@@ -146,13 +146,14 @@
 							</table>
 		                	
 		                	<h3>Change the data set name (or the original file name will be used)</h3>
+		                	<h3>Note a data set name must be unique in the database.</h3>
 		                	<div class="btn-flex-submit">
-								<input type="text" class="form-control" ng-model="thisFileName" ng-change="checkName()">
+								<input type="text" id="fileNameButton" class="form-control" ng-model="thisFileName" ng-change="checkName()">
 							</div>
 							
 		                	
 		                	<div class="btn-group btn-flex">
-                                <button id="completeUpload" type="button" class="btn btn-default" ng-click="completeUpload()" >COMPLETE UPLOAD</button>
+                                <button id="completeUpload" type="button" class="btn btn-default" ng-click="completeUpload()" disabled="True">COMPLETE UPLOAD</button>
                         	</div>
 		                	<div class="btn-group btn-flex">
                                 <button type="button" class="btn btn-default" ng-click="dontFinalize()" >CANCEL</button>

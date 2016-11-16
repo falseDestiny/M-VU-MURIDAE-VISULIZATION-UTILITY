@@ -210,26 +210,16 @@ HeatmapApp.controller('UploadController', function($scope){
     
     var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
     
-    
-    
     $scope.sensors=["---","RFID01","RFID02","RFID03","RFID04","RFID05","RFID06","RFID07","RFID08","RFID09","RFID10","RFID11","RFID12","RFID13","RFID14","RFID15","RFID16","RFID17","RFID18","RFID19","RFID20","RFID21","RFID22","RFID23","RFID24","RFID25","RFID26","RFID27","RFID28","RFID29","RFID30","RFID31","RFID32","RFID33","RFID34","RFID35","RFID36",]
-    
-    // This is a scope variable - if you want to access a variable from the html page, it needs to be a scope variable.
-    //$scope.variable = ""; // in javascript there is no type declaration, just like python. the variable will be whatever type you init it to.
-    
-    // This is a normal variable:
-    //var normalVariable = "";
     
     $scope.datasets = [{'name': 'Select Data Set'}];  
     
     socket.on('connect', function() {
-        //console.log('Connected');
         $scope.gridReady = false;
         $scope.setRows = "1";
         $scope.setCols = "1";
         $scope.datasets = [];
         socket.emit('getDatasetNames');
-        //console.log($scope.datasets);
         $scope.rowsInt = 0;
         $scope.colsInt = 0;
         $scope.locationMap = [];
@@ -238,24 +228,7 @@ HeatmapApp.controller('UploadController', function($scope){
         socket.emit('checkUploading');
     });
     
-    // This is an example function that you can use to emit to from the server file.
-    // in server.py just call: emit('keyword')
-    // if you want a parameter do: emit('keyword', parameter)
-    // the function header will need to be like this: socket.on('keyword', function(parameter) {
-    // I think you can only pass one parameter to these functions. However if you put your parameters into a array of some sort (JSON) you can just pass that.
-    socket.on('keyword', function() {
-        console.log('Whatd Up?');
-    }); // these functions need a semi-colon here
-    
-    // This is an example function that you can call from the html page like: ng-click="exampleFunction()" or ng-submit="exampleFunction()"
-    // you can give the function parameters if you want to pass things.
-    $scope.exampleFunction = function exampleFunction() {
-        console.log("HI THERE!");
-    }; // these functions need a semi-colon here
-    
-    
     socket.on('datasetnamelist', function(ser) {
-       console.log("Adding " + ser.name + " to list...");
        $scope.datasets.push(ser);
        $scope.$apply();
     });
@@ -290,35 +263,13 @@ HeatmapApp.controller('UploadController', function($scope){
         console.log("HI THERE!");
     }; 
     
-    // to emit to python you need to call:
-    //socket.emit('keyword'); 
-    // or if you want a parameter
-    //$scope.parameter = "";
-    //socket.emit('keyword', $scope.parameter);
-    
-    // In python to catch this emit call your function header should look like this:
-    // @socketio.on('keyword', namespace='/heatmap')
-    // def pythonFunction(parameter):
-    
-    // you can call $scope functions in javascript like this: $scope.exampleFunction();
-    
-    // if you want to push data to an array you need to call "$apply()"
-    // example:
-    //$scope.array = [];
-    //$scope.array.push({'data': "data"});
-    //$scope.$apply();
-    
     socket.on('checkedUploading', function(uploading){
-        console.log("I made it here");
-        console.log(uploading)
         if(uploading==true){
-            console.log("bool worked.");
             $scope.popup_show("gridOptionPopUp");
         }
     });
     
     socket.on('setMimicGrid', function(grid){
-       console.log(grid);
        $scope.colsInt = parseInt(grid["columns"]);
        $scope.rowsInt = parseInt(grid["rows"]);
        for(var i=0; i < $scope.rowsInt; i++){
@@ -329,18 +280,33 @@ HeatmapApp.controller('UploadController', function($scope){
            }
        }
        socket.emit('getSetName');
+       
        $scope.popup_show("finalizeUpload");
+       
+       var dataSetNames = [];
+        
+       for(var key in $scope.datasets){
+            dataSetNames.push($scope.datasets[key].name);
+       }
+       if($scope.thisFileName==""){
+           document.getElementById('completeUpload').setAttribute("disabled","true");
+       }
+       else if(dataSetNames.indexOf($scope['thisFileName']) != -1){
+           console.log("Duplicate file name.");
+           document.getElementById('completeUpload').setAttribute("disabled","true");
+       }
+       else{
+           document.getElementById('completeUpload').removeAttribute("disabled");
+       }
     });
     
     $scope.defineGrid = function defineGrid() {
         $scope.popup_hide("gridOptionPopUp");
-        console.log("Let's define a grid ...");
         $scope.popup_show('setDimensionsPopUp');
     };
     
     $scope.mimicGrid = function mimicGrid() {
         $scope.popup_hide("gridOptionPopUp");
-        console.log("Let's mimic a grid ...");
         $scope.popup_show('mimicGridPopUp');
     };
     
@@ -350,9 +316,6 @@ HeatmapApp.controller('UploadController', function($scope){
     };
     
     $scope.validateMimic = function validateMimic(){
-        console.log("validating.");
-        console.log(document.getElementById('submitMimicGrid'));
-        console.log($scope.mimicedGrid);
         if($scope.mimicedGrid != ""){
             document.getElementById('submitMimicGrid').removeAttribute("disabled");
         }
@@ -383,19 +346,50 @@ HeatmapApp.controller('UploadController', function($scope){
     
     $scope.getGridSelector = function getGridSelector(){
         $scope.popup_hide("setDimensionsPopUp");
-        console.log("Parsing ... ");
-        console.log($scope.setRows);
-        console.log($scope.setCols);
         $scope.rowsInt = parseInt($scope.setRows, 10);
         $scope.colsInt = parseInt($scope.setCols, 10);
-        console.log($scope.locationMap);
         $scope.popup_show("defineGridPopUp");
     };
+    
+    $scope.checkName = function checkName(){
+        
+        var dataSetNames = [];
+        for(var key in $scope.datasets){
+            dataSetNames.push($scope.datasets[key].name);
+        }
+        
+        if($scope.thisFileName==""){
+            document.getElementById('completeUpload').setAttribute("disabled","true");
+        }
+        else if(dataSetNames.indexOf($scope['thisFileName']) != -1){
+            console.log("Duplicate file name.");
+            document.getElementById('completeUpload').setAttribute("disabled","true");
+        }
+        else{
+            document.getElementById('completeUpload').removeAttribute("disabled");
+        }
+    };
+    
     
     $scope.confirmGridDef = function confirmGridDef(){
         $scope.popup_hide("defineGridPopUp");
         socket.emit('getSetName');
-        console.log($scope.locationMap);
+        var dataSetNames = [];
+        
+        for(var key in $scope.datasets){
+            dataSetNames.push($scope.datasets[key].name);
+        }
+        
+        if($scope.thisFileName==""){
+            document.getElementById('completeUpload').setAttribute("disabled","true");
+        }
+        else if(dataSetNames.indexOf($scope['thisFileName']) != -1){
+            document.getElementById('completeUpload').setAttribute("disabled","true");
+        }
+        else{
+            document.getElementById('completeUpload').removeAttribute("disabled");
+        }
+        
         $scope.popup_show("finalizeUpload");
     };
     
@@ -419,24 +413,11 @@ HeatmapApp.controller('UploadController', function($scope){
         socket.emit('finishUpload', finalOutput);
     };
     
-    $scope.checkName = function checkName(){
-        if($scope.thisFileName==""){
-            document.getElementById('completeUpload').setAttribute("disabled","true");
-        }
-        else if($scope.datasets.indexOf($scope.thisFileName) != -1){
-            console.log("Duplicate file name.");
-            document.getElementById('completeUpload').setAttribute("disabled","true");
-        }
-        else{
-            document.getElementById('completeUpload').removeAttribute("disabled");
-        }
-    };
     
     $scope.checkGrid = function checkGrid(){
         var holdLocs = [];
         for(var key in $scope.locationMap){
             holdLocs.push(key.toString());
-            console.log(key.toString());
         }
         var failed = false;
         for(var i = 0; i < $scope.rowsInt; i++){
@@ -450,10 +431,8 @@ HeatmapApp.controller('UploadController', function($scope){
         }
         if(!failed){
             var holdValues = [];
-            console.log("step 1.");
             for(var keyS in $scope.locationMap){
                 if($scope.locationMap[keyS.toString()] != "---"){
-                    console.log(holdValues);
                     if(holdValues.indexOf($scope.locationMap[keyS.toString()]) == -1){
                         holdValues.push($scope.locationMap[keyS.toString()]);
                     }
@@ -472,8 +451,6 @@ HeatmapApp.controller('UploadController', function($scope){
             document.getElementById('checkedGrid').setAttribute("disabled","true");
         }
     };
-    
-    
 });
 
 HeatmapApp.controller('UserController', function($scope){
