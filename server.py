@@ -401,6 +401,7 @@ def loadGrid(gridName):
     cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (gridName))
     result = cur.fetchone()
     finalResult = convertLocationString(result[0])
+    print(finalResult)
     emit('setLoadedGrid', finalResult)
     
 @socketio.on('viewDataSet', namespace='/heatmap')

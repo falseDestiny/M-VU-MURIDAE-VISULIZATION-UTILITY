@@ -285,10 +285,10 @@ HeatmapApp.controller('UploadController', function($scope){
        $scope.colsInt = parseInt(grid["columns"]);
        $scope.rowsInt = parseInt(grid["rows"]);
        for(var i=0; i < $scope.rowsInt; i++){
+           $scope.locationMap[i] = [];
            for(var j = 0; j < $scope.colsInt; j ++){
-               var thisKey = ((i * $scope.colsInt) + j);
-               var thisValue = grid[thisKey];
-               $scope.locationMap[[i,j]] = thisValue;
+               var thisKey = ((i * $scope.colsInt) + j).toString();
+               $scope.locationMap[i][j] = grid[thisKey];
            }
        }
        socket.emit('getSetName');
@@ -344,6 +344,12 @@ HeatmapApp.controller('UploadController', function($scope){
         $scope.popup_hide("setDimensionsPopUp");
         $scope.rowsInt = parseInt($scope.setRows, 10);
         $scope.colsInt = parseInt($scope.setCols, 10);
+        for(var i = 0; i < $scope.rowsInt; i++){
+            $scope.locationMap[i] = [];
+            for(var j = 0; j < $scope.colsInt; j++){
+                $scope.locationMap[i][j] = "";
+            }        
+        }
         $scope.popup_show("defineGridPopUp");
     };
     
@@ -385,8 +391,10 @@ HeatmapApp.controller('UploadController', function($scope){
         finalOutput.push($scope.rowsInt);
         finalOutput.push($scope.colsInt);
         var locMap = [];
-        for(var keyS in $scope.locationMap){
-            locMap.push($scope.locationMap[keyS.toString()]);
+        for(var i = 0; i < $scope.rowsInt; i++){
+            for(var j = 0; j < $scope.colsInt; j++){
+                locMap.push($scope.locationMap[i][j]);
+            }
         }
         
         finalOutput.push(locMap);
@@ -395,30 +403,30 @@ HeatmapApp.controller('UploadController', function($scope){
     
     
     $scope.checkGrid = function checkGrid(){
-        var holdLocs = [];
-        for(var key in $scope.locationMap){
-            holdLocs.push(key.toString());
-        }
+        
         var failed = false;
+        
         for(var i = 0; i < $scope.rowsInt; i++){
             for(var j = 0; j < $scope.colsInt; j ++){
-               if(holdLocs.indexOf((i + "," + j).toString()) == -1){
-                   failed = true;
-                   i = $scope.rowsInt;
-                   j = $scope.colsInt;
-               }
-            }
-        }
-        if(!failed){
-            var holdValues = [];
-            for(var keyS in $scope.locationMap){
-                if($scope.locationMap[keyS.toString()] != "---"){
-                    if(holdValues.indexOf($scope.locationMap[keyS.toString()]) == -1){
-                        holdValues.push($scope.locationMap[keyS.toString()]);
-                    }
-                    else{
-                        failed = true;
-                        document.getElementById('dupRFID').style.visibility = "visible";
+                if($scope.locationMap[i][j] == ""){
+                    failed = true;
+                    i = $scope.rowsInt;
+                    j = $scope.colsInt;
+                }
+                else if($scope.locationMap[i][j] != "---"){
+                    for(var k = 0; k < $scope.rowsInt; k++){
+                        for(var l = 0; l < $scope.colsInt; l++){
+                            
+                            if(!(k==i && l==j)){
+                                if($scope.locationMap[k][l] == $scope.locationMap[i][j]){
+                                    failed = true;
+                                    i = $scope.rowsInt;
+                                    k = $scope.rowsInt;
+                                    j = $scope.colsInt;
+                                    l = $scope.colsInt;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -455,9 +463,9 @@ HeatmapApp.controller('UploadController', function($scope){
     }
     
     $scope.editSet = function editSet(){
-        $scope.popup_show("editPopUp");
-        $scope.tempName = $scope.displayName;
         socket.emit("loadGrid", $scope.displayName);
+        $scope.tempName = $scope.displayName;
+        $scope.popup_show("editPopUp");
     };
     
     $scope.saveEdits = function saveEdits(){
@@ -467,9 +475,12 @@ HeatmapApp.controller('UploadController', function($scope){
         finalOutput.push($scope.rowsInt);
         finalOutput.push($scope.colsInt);
         var locMap = [];
-        for(var keyS in $scope.locationMap){
-            locMap.push($scope.locationMap[keyS.toString()]);
+        for (var i = 0; i < $scope.rowsInt; i++){
+            for(var j = 0; j < $scope.colsInt; j++){
+                locMap.push($scope.locationMap[i][j]);
+            }
         }
+        
         finalOutput.push(locMap);
         finalOutput.push($scope.displayName)
         socket.emit('finishUpdate', finalOutput);
@@ -483,30 +494,30 @@ HeatmapApp.controller('UploadController', function($scope){
     };
         
     $scope.checkEdit = function checkEdit(){
-        var holdLocs = [];
-        for(var key in $scope.locationMap){
-            holdLocs.push(key.toString());
-        }
+        
         var failed = false;
+        
         for(var i = 0; i < $scope.rowsInt; i++){
             for(var j = 0; j < $scope.colsInt; j ++){
-               if(holdLocs.indexOf((i + "," + j).toString()) == -1){
-                   failed = true;
-                   i = $scope.rowsInt;
-                   j = $scope.colsInt;
-               }
-            }
-        }
-        if(!failed){
-            var holdValues = [];
-            for(var keyS in $scope.locationMap){
-                if($scope.locationMap[keyS.toString()] != "---"){
-                    if(holdValues.indexOf($scope.locationMap[keyS.toString()]) == -1){
-                        holdValues.push($scope.locationMap[keyS.toString()]);
-                    }
-                    else{
-                        failed = true;
-                        //document.getElementById('dupRFID').style.visibility = "visible";
+                if($scope.locationMap[i][j] == ""){
+                    failed = true;
+                    i = $scope.rowsInt;
+                    j = $scope.colsInt;
+                }
+                else if($scope.locationMap[i][j] != "---"){
+                    for(var k = 0; k < $scope.rowsInt; k++){
+                        for(var l = 0; l < $scope.colsInt; l++){
+                            
+                            if(!(k==i && l==j)){
+                                if($scope.locationMap[k][l] == $scope.locationMap[i][j]){
+                                    failed = true;
+                                    i = $scope.rowsInt;
+                                    k = $scope.rowsInt;
+                                    j = $scope.colsInt;
+                                    l = $scope.colsInt;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -537,13 +548,14 @@ HeatmapApp.controller('UploadController', function($scope){
     };
     
     socket.on('setLoadedGrid', function(grid){
+       
        $scope.colsInt = parseInt(grid["columns"]);
        $scope.rowsInt = parseInt(grid["rows"]);
        for(var i=0; i < $scope.rowsInt; i++){
+           $scope.locationMap[i] = [];
            for(var j = 0; j < $scope.colsInt; j ++){
-               var thisKey = ((i * $scope.colsInt) + j);
-               var thisValue = grid[thisKey];
-               $scope.locationMap[[i,j]] = thisValue;
+               var thisKey = ((i * $scope.colsInt) + j).toString();
+               $scope.locationMap[i][j] = grid[thisKey];
            }
        }
     });

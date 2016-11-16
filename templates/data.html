@@ -47,7 +47,7 @@
 										<tbody>
 											<tr ng-repeat="i in [] | range:rowsInt">
 												<td ng-repeat="j in [] | range:colsInt">
-													<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[[$parent.$index, $index]]" ng-change="checkEdit()" >
+													<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[$parent.$index][$index]" ng-change="checkEdit()" >
 														<option ng-repeat="rf in sensors" value="{% raw %}{{rf}}{% endraw %}">{% raw %}{{ rf }}{% endraw %}</option>
 													</select>
 												</td>
@@ -163,7 +163,7 @@
 										<tbody>
 											<tr ng-repeat="i in [] | range:rowsInt">
 												<td ng-repeat="j in [] | range:colsInt">
-													<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[[$parent.$index, $index]]" ng-change="checkGrid()" >
+													<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[$parent.$index][$index]" ng-change="checkGrid()" >
 														<option ng-repeat="rf in sensors" value="{% raw %}{{rf}}{% endraw %}">{% raw %}{{ rf }}{% endraw %}</option>
 													</select>
 												</td>
@@ -190,7 +190,7 @@
 										<tbody>
 											<tr ng-repeat="i in [] | range:rowsInt">
 												<td ng-repeat="j in [] | range:colsInt">
-													{% raw %} {{ locationMap[[i,j]] }} {% endraw %}
+													{% raw %} {{ locationMap[i][j] }} {% endraw %}
 												</td>
 											</tr>
 										</tbody>
