@@ -289,8 +289,8 @@ HeatmapApp.controller('UploadController', function($scope){
     });
     
     socket.on('setMimicGrid', function(grid){
-       $scope.colsInt = parseInt(grid["columns"]);
-       $scope.rowsInt = parseInt(grid["rows"]);
+       $scope.colsInt = parseInt(grid["columns"], 10);
+       $scope.rowsInt = parseInt(grid["rows"], 10);
        for(var i=0; i < $scope.rowsInt; i++){
            for(var j = 0; j < $scope.colsInt; j ++){
                var thisKey = ((i * $scope.colsInt) + j);
@@ -459,7 +459,7 @@ HeatmapApp.controller('UploadController', function($scope){
     
     $scope.cancelEdit = function cancelEdit(){
         $scope.popup_hide("editPopUp");
-    }
+    };
     
     $scope.editSet = function editSet(){
         $scope.popup_show("editPopUp");
@@ -478,7 +478,7 @@ HeatmapApp.controller('UploadController', function($scope){
             locMap.push($scope.locationMap[keyS.toString()]);
         }
         finalOutput.push(locMap);
-        finalOutput.push($scope.displayName)
+        finalOutput.push($scope.displayName);
         socket.emit('finishUpdate', finalOutput);
         
         $scope.datasets = [];
@@ -544,8 +544,8 @@ HeatmapApp.controller('UploadController', function($scope){
     };
     
     socket.on('setLoadedGrid', function(grid){
-       $scope.colsInt = parseInt(grid["columns"]);
-       $scope.rowsInt = parseInt(grid["rows"]);
+       $scope.colsInt = parseInt(grid["columns"], 10);
+       $scope.rowsInt = parseInt(grid["rows"], 10);
        for(var i=0; i < $scope.rowsInt; i++){
            for(var j = 0; j < $scope.colsInt; j ++){
                var thisKey = ((i * $scope.colsInt) + j);
@@ -707,13 +707,10 @@ HeatmapApp.controller('UserController', function($scope){
         $scope.$apply();
         
         setTimeout($scope.popup_show, 300, "MessageBox", null);
-        setTimeout($scope.popup_hide, 5000, "MessageBox");
+        setTimeout($scope.popup_hide, 3500, "MessageBox");
         
         socket.emit('getUsers');
     });
-    
-    
-
 });
 
 HeatmapApp.filter('range', function() {
