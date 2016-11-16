@@ -52,7 +52,7 @@
 						<a href="javascript:void(0);" onclick="openLinks()">&#9776;</a>
 					</li>
 					<li><a href="/maps" {% if currentpage == 'maps' %}class="active"{% endif %}><i class="fa fa-map-o fa-1x"></i></a></li>
-                    {% if admin == [true] %}
+                    {% if current_user.admin %}
 					<li><a href="/data" {% if currentpage == 'data' %}class="active"{% endif %}><i class="fa fa-database fa-1x"></i></a></li>
 					<li><a href="/users" {% if currentpage == 'users' %}class="active"{% endif %}><i class="fa fa-user fa-1x"></i></a></li>
 					{% endif %}

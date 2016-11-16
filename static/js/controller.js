@@ -5,7 +5,7 @@ var HeatmapApp = angular.module('HeatmapApp', []);
 
 HeatmapApp.controller('HeatmapController', function($scope){
    
-    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
   
     // VARIABLES
     $scope.testdata = []; // heatmap data
@@ -58,12 +58,19 @@ HeatmapApp.controller('HeatmapController', function($scope){
         vectorData = JSON.parse(data.data.vectdata);
         mapping = JSON.parse(data.data.mapping);
         
+        console.log(heatData);
+        console.log(heatData.length);
         console.log(vectorData);
         
-        // GET SIZE OF GRID
-        size = Object.keys(mapping).length - 1;
+        console.log(mapping);
+        console.log(Object.keys(mapping).length);
         
-        // GET LIST OF MICE IN DATASET
+        // // GET SIZE OF GRID (subtract rows and columns entries)
+        size = Object.keys(mapping).length - 3;
+        
+        console.log(size);
+        
+        // // GET LIST OF MICE IN DATASET
         keys = Object.keys(heatData);
 
         $scope.mice = [];
@@ -89,27 +96,27 @@ HeatmapApp.controller('HeatmapController', function($scope){
             return heatData[key][propertyName];
         };
         
-        for(var key = 0; key < Object.keys(keys).length; key++) {
-            for(var r in rfidlist) {
-                if (typeof getProperty(keys[key], rfidlist[r]) == 'undefined') {
-                    heatData[keys[key]][rfidlist[r]] = 0;
-                }
-            }
-        }
+        // for(var key = 0; key < Object.keys(keys).length; key++) {
+        //     for(var r in rfidlist) {
+        //         if (typeof getProperty(keys[key], rfidlist[r]) == 'undefined') {
+        //             heatData[keys[key]][rfidlist[r]] = 0;
+        //         }
+        //     }
+        // }
         
-        // CONVERT MAPPING TO USABLE FORMAT
-        newMap = [];
-        for(i in mapping) {
-            newMap.push(mapping[i]);
-        }
-        newMap.splice(0, 0, "null");
-        newMap.splice(2, 0, "null");
-        newMap.splice(3, 0, "null");
+        // // CONVERT MAPPING TO USABLE FORMAT
+        // newMap = [];
+        // for(i in mapping) {
+        //     newMap.push(mapping[i]);
+        // }
+        // newMap.splice(0, 0, "null");
+        // newMap.splice(2, 0, "null");
+        // newMap.splice(3, 0, "null");
         
-        if (size == 36) { // 6x6 grid
-            newMap.splice(4, 0, "null");
-            newMap.splice(5, 0, "null");
-        }
+        // if (size == 36) { // 6x6 grid
+        //     newMap.splice(4, 0, "null");
+        //     newMap.splice(5, 0, "null");
+        // }
     });
     
     $scope.showVectorMap = function showVectorMap() {
@@ -208,9 +215,9 @@ HeatmapApp.controller('HeatmapController', function($scope){
 
 HeatmapApp.controller('UploadController', function($scope){
     
-    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
-    
-    $scope.sensors=["---","RFID01","RFID02","RFID03","RFID04","RFID05","RFID06","RFID07","RFID08","RFID09","RFID10","RFID11","RFID12","RFID13","RFID14","RFID15","RFID16","RFID17","RFID18","RFID19","RFID20","RFID21","RFID22","RFID23","RFID24","RFID25","RFID26","RFID27","RFID28","RFID29","RFID30","RFID31","RFID32","RFID33","RFID34","RFID35","RFID36",]
+    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+  
+    $scope.sensors=["---","RFID01","RFID02","RFID03","RFID04","RFID05","RFID06","RFID07","RFID08","RFID09","RFID10","RFID11","RFID12","RFID13","RFID14","RFID15","RFID16","RFID17","RFID18","RFID19","RFID20","RFID21","RFID22","RFID23","RFID24","RFID25","RFID26","RFID27","RFID28","RFID29","RFID30","RFID31","RFID32","RFID33","RFID34","RFID35","RFID36",];
     
     $scope.datasets = [{'name': 'Select Data Set'}];  
     
@@ -282,8 +289,8 @@ HeatmapApp.controller('UploadController', function($scope){
     });
     
     socket.on('setMimicGrid', function(grid){
-       $scope.colsInt = parseInt(grid["columns"]);
-       $scope.rowsInt = parseInt(grid["rows"]);
+       $scope.colsInt = parseInt(grid["columns"], 10);
+       $scope.rowsInt = parseInt(grid["rows"], 10);
        for(var i=0; i < $scope.rowsInt; i++){
            $scope.locationMap[i] = [];
            for(var j = 0; j < $scope.colsInt; j ++){
@@ -441,7 +448,7 @@ HeatmapApp.controller('UploadController', function($scope){
     };
     
     $scope.loadDataset = function loadDataset() {
-        document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
+        document.querySelector('#placeholder').style.display="none"; //hides the placeholder div
         $('.collapse').collapse("show");
         socket.emit('viewDataSet', $scope.selection);
     };
@@ -460,7 +467,7 @@ HeatmapApp.controller('UploadController', function($scope){
     
     $scope.cancelEdit = function cancelEdit(){
         $scope.popup_hide("editPopUp");
-    }
+    };
     
     $scope.editSet = function editSet(){
         socket.emit("loadGrid", $scope.displayName);
@@ -482,13 +489,13 @@ HeatmapApp.controller('UploadController', function($scope){
         }
         
         finalOutput.push(locMap);
-        finalOutput.push($scope.displayName)
+        finalOutput.push($scope.displayName);
         socket.emit('finishUpdate', finalOutput);
         
         $scope.datasets = [];
         socket.emit('getDatasetNames');
         
-        document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
+        document.querySelector('#placeholder').style.display="none"; //hides the placeholder div
         $('.collapse').collapse("show");
         socket.emit('viewDataSet', $scope.tempName);
     };
@@ -548,9 +555,8 @@ HeatmapApp.controller('UploadController', function($scope){
     };
     
     socket.on('setLoadedGrid', function(grid){
-       
-       $scope.colsInt = parseInt(grid["columns"]);
-       $scope.rowsInt = parseInt(grid["rows"]);
+       $scope.colsInt = parseInt(grid["columns"], 10);
+       $scope.rowsInt = parseInt(grid["rows"], 10);
        for(var i=0; i < $scope.rowsInt; i++){
            $scope.locationMap[i] = [];
            for(var j = 0; j < $scope.colsInt; j ++){
@@ -567,7 +573,7 @@ HeatmapApp.controller('UploadController', function($scope){
        $scope.vectorData = [];
        $scope.displayName = "";
        $('.collapse').collapse("hide");
-       document.querySelector('#placeholder').style.visibility="visible"; //hides the placeholder div
+       document.querySelector('#placeholder').style.display="block";
        $scope.datasets = [];
        socket.emit('getDatasetNames');
     });
@@ -609,7 +615,7 @@ HeatmapApp.controller('UploadController', function($scope){
 
 HeatmapApp.controller('UserController', function($scope){
     
-    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
     
     $scope.users = [];
     $scope.MessageBoxMessage = "";
@@ -712,13 +718,10 @@ HeatmapApp.controller('UserController', function($scope){
         $scope.$apply();
         
         setTimeout($scope.popup_show, 300, "MessageBox", null);
-        setTimeout($scope.popup_hide, 5000, "MessageBox");
+        setTimeout($scope.popup_hide, 3500, "MessageBox");
         
         socket.emit('getUsers');
     });
-    
-    
-
 });
 
 HeatmapApp.filter('range', function() {

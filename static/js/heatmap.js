@@ -30,10 +30,8 @@ function heatmap(canvasId, dataset, options) {
     };
     
     // Check Options against default option set
-    console.log("HI 1");
     options = checkDefaults(options);
-    console.log(options);
-    console.log("HI 2");
+    
     // set colors
     color.setSpectrum(options.colors.low, options.colors.high);
     color.setNumberRange(0, getMaxValue(dataset));
@@ -53,7 +51,7 @@ function heatmap(canvasId, dataset, options) {
 function checkDefaults(options)
 {
     "use strict";
-    console.log("HI THERE");
+    
     // DEFAULT OPTIONS
     var properties = ["rows", "cols", "border", "gutterWidth", "gutterHeight", "colors", "radius", "stroke"];
     

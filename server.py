@@ -1,18 +1,32 @@
+# IMPORTS FOR POSTGRESQL
 import psycopg2
 import psycopg2.extras
+
 import os, uuid, re
+
+# IMPORT FLASK
 from flask import Flask, render_template, request, redirect, url_for, session, Markup, json, send_from_directory
-import flask_login
-from flask_login import current_user
+
+# IMPORT FLASK LOGIN
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
+
+# IMPORT FLASK SOCKETIO
 from flask_socketio import SocketIO, emit
+
+# IMPORTS FOR FILE UPLOAD
 from werkzeug import secure_filename
 from parse import Parser
 from sim import Simulation
+
+# IMPORT FLASK MAIL
 from flask_mail import Mail, Message
-  
+
+################################## Create App ##################################
 app = Flask(__name__)
 app.secret_key = os.urandom(24).encode('hex')
 
+
+############################## Config Flask Mail ###############################
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'mvuwebapp@gmail.com'
@@ -20,6 +34,8 @@ app.config['MAIL_PASSWORD'] = 'mvuwebapppass'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
+
+################################ Config Upload #################################
 # This is the path to the upload directory, In cloud9 it sends the file to a folder named uploads
 # Not needed since a parser will be used
 # app.config['UPLOAD_FOLDER'] = 'uploads/'
@@ -27,18 +43,15 @@ app.config['MAIL_USE_SSL'] = True
 # Only files containing these extensions will be accepted
 app.config['ALLOWED_EXTENSIONS'] = set(['xls', 'xlsx', 'csv', 'xlsm', 'xlt', 'xml'])
 
+
+################################ Set Variables #################################
 mail = Mail(app)
 socketio = SocketIO(app)
-
-login_manager = flask_login.LoginManager()
-login_manager.init_app(app)
 
 dataUploadStorage = {}
 
 
-class User(flask_login.UserMixin):
-    pass
-    
+############################# Connect to Database ##############################
 def connectToDB():
     connectionString = 'dbname=mousedb user=owner password=41PubBNmfQhmfCNy host=localhost'
     #print connectionString
@@ -47,11 +60,76 @@ def connectToDB():
     except:
         print("Can't connect to database")
 
-# setup all of the values from the users table for the current user
-def setup_User(user, data):
-    user.id = data['username']
 
+################################################################################
+########################### USER CLASS AND FUNCTIONS ###########################
+################################################################################
+
+# Setup Login Manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# User Class
+class User():
+    def __init__(self, data):
+        self.id = data['username']
+        self.email = data['email']
+        self.admin = data['admin']
+        
+    def is_authenticated(self):
+        return True
     
+    def is_active(self):
+        return True
+    
+    def is_anonymous(self):
+        return True
+
+    def get_id(self):
+        return unicode(self.id)
+    
+    def __repr__(self):
+        return '<User %r>' % (self.id)
+
+# User Loader
+@login_manager.user_loader
+def load_user(id):
+    db = connectToDB()
+    cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    # grab user
+    cur.execute("SELECT * FROM users WHERE username = %s;", (id,))
+    user = cur.fetchone()
+    
+    if user is not None:
+        return User(user)
+    
+    return None # no user
+
+# Handle Logout
+@app.route('/logout')
+def logout():
+    # logout user
+    logout_user()
+    
+    # clear session variables
+    for key in session.keys():
+        if key is not "remember":
+            session.pop(key)
+    
+    # return to index page
+    return redirect(url_for('index')) 
+
+# Unauthorized Handler
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return render_template('login.html', login_failed = 'true', currentpage = 'login')
+
+
+################################################################################
+############################### PARSER FUNCTIONS ###############################
+################################################################################
+
 # This is a function to help bring a location map json back from the database and turn it back into a dictionary   
 def convertLocationString(longstring):
     final = {}
@@ -157,10 +235,10 @@ def convertVectorString(longstring):
     
     
     # For a given file, return whether it's an allowed type or not
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
-
 
 def parseLocations(rows, cols, setData):
     locations = {}
@@ -172,35 +250,17 @@ def parseLocations(rows, cols, setData):
             locations[str(thisIndex)] = str(setData[thisIndex])
     return locations         
 
-@login_manager.user_loader
-def user_loader(user_id):
-    db = connectToDB()
-    cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM users WHERE username = %s;", (user_id,))
-    data = cur.fetchone()
-    if data is not None:
-        user = User()
-        setup_User(user, data)
-        return user
-        
-    return #no user
 
-@app.route('/logout')
-def logout():
-    flask_login.logout_user()
-    return redirect(url_for('index'))
-
-# the page to go to if a login is required and no one is loged in.
-@login_manager.unauthorized_handler
-def unauthorized_handler():
-    return render_template('login.html', login_failed = 'true', currentpage='login')
+################################################################################
+#################################### ROUTES ####################################
+################################################################################
         
 @app.route('/', methods=['GET', 'POST']) #handle login
 def index():
-    
+   
     if request.method == 'GET':
         if current_user.is_authenticated:
-            return render_template('index.html', login_failed='false', currentpage='home', admin=session["admin"])
+            return render_template('index.html', login_failed='false', currentpage='home')
         else:
             return render_template('login.html', login_failed='false', currentpage='login')
 
@@ -212,32 +272,22 @@ def index():
     passwordinput = request.form['password']
    
     cur.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(%s) AND password = crypt(%s, password);", (usernameinput, passwordinput))
-    if cur.fetchone():
-        user = User()
-        user.id = usernameinput
-        flask_login.login_user(user)
-        
-        cur.execute("SELECT admin FROM users WHERE LOWER(username) = LOWER(%s) AND password = crypt(%s, password);", (usernameinput, passwordinput))
-        admin = cur.fetchall()
-        for row in admin:
-            print "   xxx   xxx   xxx", admin[0]
-        session["admin"]=admin[0]    
-        return render_template('index.html', login_failed='false', currentpage='login', admin=session["admin"])
+    user = cur.fetchone()
+    if user is not None:
+        login_user(User(user), remember=True)
+        return render_template('index.html', login_failed='false', currentpage='login')
 
     #login failed
     return render_template('login.html', login_failed = 'true', currentpage='login')
 
 
 @app.route('/maps')
-@flask_login.login_required
+@login_required
 def maps():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    return render_template('maps.html', currentpage='maps', admin=session["admin"])
+    return render_template('maps.html', currentpage='maps')
     
 @app.route('/data', methods=["GET", "POST"])
-@flask_login.login_required
+@login_required
 def data():
     if request.method == 'POST':
         file = request.files['file']
@@ -269,19 +319,12 @@ def data():
         session["currentlyUploading"] = False
         if session["user_id"] in dataUploadStorage.keys():
             del dataUploadStorage[session["user_id"]]
-    return render_template('data.html', currentpage='data', admin=session["admin"])
+    return render_template('data.html', currentpage='data')
     
-@app.route('/users', methods=['GET', 'POST'])
-@flask_login.login_required
+@app.route('/users')
+@login_required
 def manageusers():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    cur.execute("SELECT * FROM users")
-    userdata = cur.fetchall()
-    session["userdata"]=userdata
-    
-    return render_template('users.html', currentpage='users', userdata=userdata, admin=session["admin"])
+    return render_template('users.html', currentpage='users')
 
 @app.route('/sendpassword', methods=['GET', 'POST'])
 def send_password():
@@ -319,21 +362,18 @@ def send_password():
             
     return render_template('password_sent.html', currentpage='send_password', email=email, bad_account='unknown')
 
-################################################################################
-############################ File Upload Functions #############################
-################################################################################
-
 
 ################################################################################
 ################################## SOCKET IO ###################################
 ################################################################################
 
-
 @socketio.on('connect', namespace='/heatmap')
 def makeConnection(): 
     print('connected')
     
-#UPLOAD FUNCTIONS
+############################################################
+#################### UPLOAD FUNCTIONS ######################
+############################################################
 @socketio.on('finishUpload', namespace='/heatmap')
 def uploadData(setData):
     mySimulation = Simulation()
@@ -401,7 +441,6 @@ def loadGrid(gridName):
     cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (gridName))
     result = cur.fetchone()
     finalResult = convertLocationString(result[0])
-    print(finalResult)
     emit('setLoadedGrid', finalResult)
     
 @socketio.on('viewDataSet', namespace='/heatmap')
@@ -428,7 +467,11 @@ def deleteSet(setName):
     db.commit()
     emit('deletedSet')
 
-#USER FUNCTIONS
+
+############################################################
+##################### USER FUNCTIONS #######################
+############################################################
+
 @socketio.on('getUsers', namespace='/heatmap')
 def getUsers():
     db = connectToDB()
@@ -559,6 +602,7 @@ def deleteUser(username):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     testDeletion = True
+    savedUser = current_user
     
     # Make sure user exists in database
     print("Checking for username in database....")
@@ -579,7 +623,7 @@ def deleteUser(username):
         # Check to see if current user is deleting themself
         selfdeletion = False
         if current_user.id == username:
-            flask_login.logout_user()
+            logout_user()
             selfdeletion = True
         
         # Check to see if more than one admin
@@ -604,9 +648,8 @@ def deleteUser(username):
     except:
         print("Error deleting user...")
         if selfdeletion:
-            user = User()
-            user.id = username
-            flask_login.login_user(user)
+            login_user(savedUser, remember=True)
+            
         # send message alerting user to error
         message = "Error deleting user " + username + " from database."
         emit('loadMessageBox', message)
@@ -628,12 +671,20 @@ def deleteUser(username):
             print("User deleted")
             if selfdeletion:
                 print("I DELETED MYSELF")
+                
+                # clear session variables
+                for key in session.keys():
+                    if key is not "remember":
+                        session.pop(key)
+                        
                 emit('redirect', {'url': url_for('index')})
             else:
                 message = username + " has been deleted!"
                 emit('loadMessageBox', message)
 
-#MAP FUNCTIONS
+############################################################
+###################### MAP FUNCTIONS #######################
+############################################################
 @socketio.on('getDatasetNames', namespace='/heatmap')
 def getDatasetNames():
     db = connectToDB()
@@ -660,162 +711,16 @@ def loadMice(dataset):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     # grab the dataset for the passed selection
-    getDataset = "SELECT heatdata FROM datasets WHERE datasetname = %s;"
-    #print(getDataset % ("%%" + dataset + "%%"))
-    # cur.execute(getDataset, ("%%" + dataset + "%%"))
-    cur.execute("SELECT heatdata FROM datasets WHERE datasetname = '%s';" % (dataset))
+    cur.execute("SELECT heatdata, vectordata, locationmap FROM datasets WHERE datasetname = %s;", (dataset,))
     result = cur.fetchone()
-    cur.execute("SELECT vectordata FROM datasets WHERE datasetname = '%s';" % (dataset))
-    vecresult = cur.fetchone()
-    cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (dataset))
-    locresult = cur.fetchone()
     
     emit('returnDataset', {
         'data': {
-            'heatdata': result,
-            'vectdata': vecresult,
-            'mapping': locresult
+            'heatdata': result['heatdata'],
+            'vectdata': result['vectordata'],
+            'mapping': result['locationmap']
         }
     })
 
 if __name__ == '__main__':
     socketio.run(app, host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)), debug = True)
-    
-    
-
-# Stuff I'm saving ... but can probably delete - Justin
-
-    
-#def getAllDataSets():
-#    db = connectToDB()
-#    cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#    cur.execute("SELECT datasetname FROM datasets;", )
-#    holddata = cur.fetchall()
-#    allsets = []
-#    for line in holddata:
-#        allsets.append(line[0])
-#    return allsets
-
-    
-#def parseUploadForm(form):
-#    parsedData = {}
-#    locations = {}
-#    oldSet = False
-#    if "oldSet" in form.keys():
-#        oldSetName = str(form["prevSetName"])
-#        oldSet = True
-#        locations["oldSet"] = oldSetName
-#    else:
-#        for i in range(7):
-#            for j in range(7):
-#                oldKey = "[" + str(i) + ", " + str(j) + "]"
-#                newKey = (i * 7) + j
-#                value = form[oldKey]
-#                if str(value) != "-1":
-#                    locations[str(newKey)] = str(value)
-#                
-#    parsedData["locations"] = locations
-#    parsedData["filename"] = str(form["setName"])
-#    parsedData["datalines"] = User.uploadingData
-#    return parsedData  
-    
-#def parseUpdatedForm(form):
-#    parsedData = {}
-#    locations = {}
-#    oldSet = False
-#    if "oldSet" in form.keys():
-#        oldSetName = str(form["prevSetName"])
-#        db = connectToDB()
-#        cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#        cur.execute("SELECT locationmap from datasets where datasetname=%s", (oldSetName,))
-#        holdlocations = cur.fetchall()
-#        tempLocations = holdlocations[0][0]
-#        locations = convertString(tempLocations)  
-#    else:
-#        for i in range(49):
-#            value = form[str(i)]
-#            if str(value) != "-1":
-#                locations[str(i)]=str(value)
-                
-    #print(form["setName"])
-#    if form["setName"] == "":
-#        parsedData["setName"] = User.viewingData
-#    else:
-#        parsedData["setName"] = form["setName"]
-        
-#    parsedData["locations"] = locations
-#    return parsedData
-
-#@app.route('/setDataUpload', methods=['POST'])
-#def setDataUpload():
-#    myData = parseUploadForm(request.form)
-#    mySimulation = Simulation()
-#    mySimulation.setUp(myData["datalines"])
-#    mySimulation.runFullSim()
-#    thesePaths = mySimulation.getAllPaths()
-#    theseHeatMaps = mySimulation.getAllHeatData()
-#    if myData["filename"] == "":
-#        myData["filename"] = User.uploadingFileName
-    
-#    db = connectToDB()
-#    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#    print(myData["locations"].keys())
-#    if "oldSet" in myData["locations"].keys():
-#        print(myData["locations"]["oldSet"])
-#        oldLoc = myData["locations"]["oldSet"]
-#        cur.execute("SELECT locationmap from datasets where datasetname=%s", (oldLoc,))
-#        holdlocations = cur.fetchall()
-#        tempLocations = holdlocations[0][0]
-#        getLocations = convertString(tempLocations)
-#    else:
-#        getLocations = myData["locations"]
-    
-#    db = connectToDB()
-#    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#    cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)",(myData["filename"], 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations)))
-#    db.commit()
-#    return viewDataPage(getDataToView(myData["filename"]))
-    
-#def viewDataPage(data):
-#    return render_template('viewdata.html', myData=data, otherDataSets=getAllDataSets(), admin=session["admin"])
-
-#def getDataToView(setName):
-#    db = connectToDB()
-#    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#    cur.execute("SELECT * from datasets WHERE datasetname = %s", (setName,))
-#    thisData = cur.fetchall()
-#    if len(thisData) != 1:
-#        otherDataSets = getAllDataSets()
-#        return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
-#    User.viewingData=setName
-#    formattedData = {}
-#    formattedData["setName"] = str(setName)
-#    formattedData["heatData"] = convertHeatString(thisData[0][3])
-#    formattedData["vectorData"] = convertVectorString(thisData[0][4])
-#    formattedData["datasetname"] = thisData[0][6]
-#    allLocations = []
-#    for i in range(1, 26):
-#            if i < 10:
-#                allLocations.append("RFID0" + str(i))
-#            else:
-#                allLocations.append("RFID" + str(i))
-#    formattedData["alllocations"] = allLocations
-#    assembleMap = []
-#    rowCounter = 0
-#    rowNames = ["firstRow", "secondRow", "thirdRow", "fourthRow", "fifthRow", "sixthRow", "seventhRow"]
-#    rawLocations = convertString(thisData[0][5])
-    
-#    formattedData["rowMap"] = {}
-#    for name in rowNames:
-#        formattedData["rowMap"][name] = []
-#    for i in range (49):
-#        if i > 0 and i % 7 == 0:
-#            rowCounter += 1
-#        entry = {}
-#        entry["index"] = i
-#        if str(i) in rawLocations.keys():
-#            entry["value"] = rawLocations[str(i)]
-#        else:
-#            entry["value"] = "--"
-#        formattedData["rowMap"][rowNames[rowCounter]].append(entry)
-#    return formattedData
