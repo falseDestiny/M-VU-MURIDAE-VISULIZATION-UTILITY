@@ -53,7 +53,7 @@ def setup_User(user, data):
 
     
 # This is a function to help bring a location map json back from the database and turn it back into a dictionary   
-def convertString(longstring):
+def convertLocationString(longstring):
     final = {}
     done = False
     counter = 0
@@ -372,6 +372,15 @@ def clearUpload():
     session["currentlyUploading"] = False
     del dataUploadStorage[session["user_id"]]
     session["uploadingFileName"] = ""
+    
+@socketio.on('getGridToMimic', namespace='/heatmap')
+def getGridToMimic(gridName):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (gridName))
+    result = cur.fetchone()
+    finalResult = convertLocationString(result[0])
+    emit('setMimicGrid', finalResult)
 
 #USER FUNCTIONS
 @socketio.on('getUsers', namespace='/heatmap')

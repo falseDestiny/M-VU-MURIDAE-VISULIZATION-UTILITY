@@ -44,6 +44,27 @@
                     </div>
                     <!--GRID OPTIONS POPUP ENDS HERE -->
                     
+                    <!--GRID OPTIONS POPUP STARTS HERE -->
+                    <div id="mimicGridPopUp">
+		                <div class="panel loginbox popupdiv wide-popupdiv">
+		                	<br />
+	                		<select name="mimicSelector" class="btn btn-default" ng-model="mimicedGrid" ng-change="validateMimic(this)">
+									<option ng-repeat="option in datasets" value="{% raw %}{{ option.name }}{% endraw %}" >{% raw %}{{ option.name }}{% endraw %}</option>
+							</select>
+		                	
+		                	
+		                	<div class="btn-group btn-flex">
+                                <button type="button" class="btn btn-default" id="submitMimicGrid" ng-click="loadMimicGrid()" disabled="True">MIMIC GRID</button>
+                            </div>
+		                	<div class="btn-group btn-flex">
+                                <button type="button" class="btn btn-default" ng-click="cancelMimic()" >CANCEL</button>
+                            </div>
+                            <br />
+		                </div>
+                    </div>
+                    <!--GRID OPTIONS POPUP ENDS HERE -->
+                    
+                    
                     
                     <!--SET DIMENSIONS POPUP STARTS HERE -->
                     <div id="setDimensionsPopUp">
