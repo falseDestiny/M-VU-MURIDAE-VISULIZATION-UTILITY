@@ -25,6 +25,57 @@
                     </div>
                     <!--GENERIC POPUP ENDS HERE -->
                     
+                    <!--DELETE POPUP STARTS HERE -->
+                    <div id="deletePopUp">
+                    	<div class="panel loginbox popupdiv">
+	                    	<h4 align="center"><br/>Are you sure you want to delete this data set? </h4>
+			                <div class="btn-group btn-flex">
+		                        <button type="button" class="btn btn-default" ng-click="deleteSet()" >CONFIRM DELETE</button>
+		                    </div>
+		                    <div class="btn-group btn-flex">
+	                            <button type="button" class="btn btn-default" ng-click="cancelDelete()" >CANCEL</button>
+	                        </div>
+	                         <br />
+		                </div>
+                    </div>
+                    <!--DELETE POPUP ENDS HERE -->
+                    
+                    <!--EDIT POPUP STARTS HERE -->
+                    <div id="editPopUp">
+                    	<div class="panel loginbox popupdiv wide-popupdiv" style="width:500px;">
+                    		<table class="table table-block table-responsive">
+										<tbody>
+											<tr ng-repeat="i in [] | range:rowsInt">
+												<td ng-repeat="j in [] | range:colsInt">
+													<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[[$parent.$index, $index]]" ng-change="checkEdit()" >
+														<option ng-repeat="rf in sensors" value="{% raw %}{{rf}}{% endraw %}">{% raw %}{{ rf }}{% endraw %}</option>
+													</select>
+												</td>
+											</tr>
+										</tbody>
+								</table>
+								
+							<h3>Note all locations must be set to an RFID or '---', and no RFID may be duplicated.</h3>	
+							
+							<h3>Change the data set name</h3>
+		                	<h3>Note a data set name must be unique in the database.</h3>
+		                	<div class="btn-flex-submit">
+								<input type="text" id="fileNameButton" class="form-control" ng-model="tempName" ng-change="checkEdit()">
+							</div>
+							
+                    		
+			                <div class="btn-group btn-flex">
+		                        <button type="button" id="saveEditsButton" class="btn btn-default" ng-click="saveEdits()" disabled="True">SAVE CHANGES</button>
+		                    </div>
+		                    <div class="btn-group btn-flex">
+	                            <button type="button" class="btn btn-default" ng-click="cancelEdit()" >CANCEL</button>
+	                        </div>
+	                         <br />
+		                </div>
+                    </div>
+                    <!--EDIT POPUP ENDS HERE -->
+                    
+                    
                     <!--GRID OPTIONS POPUP STARTS HERE -->
                     <div id="gridOptionPopUp">
 		                <div class="panel loginbox popupdiv wide-popupdiv">
@@ -162,12 +213,79 @@
                     </div>
                     <!--FINALIZE UPLOAD ENDS HERE -->
                     
-                    
-                    
-                    <div class="empty-panel">
-						<h1>MURIDAE<br>VISUALIZATION<br>UTILITY</h1>
+	            	<div class="panel" id="canvasContainer">
+	            		
+						<div class="well text-center collapse" >
+							<row>
+								
+								<table class="table-responsive" style="width:100%;">
+									
+									<tr>
+										<td style="width:66%; text-align:left; vertical-align:center;">
+											<h1>{% raw %}{{ displayName }}{% endraw %}</h1>
+										</td>
+										<td style="text-align:center; vertical-align:center;">
+											<div class="btn-group btn-flex">
+				                                <button type="button" class="btn btn-default" ng-click="showDelete()" >DELETE DATA SET</button>
+				                        	</div>
+										</td>
+										<td style="text-align:center; vertical-align:center;">
+											<div class="btn-group btn-flex">
+				                                <button type="button" class="btn btn-default" ng-click="editSet()" >EDIT DATA SET</button>
+				                        	</div>
+										</td>
+									</tr>
+								</table>
+							</row>
+							<row>
+								<h3>Heat Map Data</h3>
+								<div style="overflow:scroll; height:300px;">
+									<table class="table table-striped table-hover table-bordered">
+										<thead id="heathead">
+											<th class="align-center">Subject</th>
+											<th class="align-center">Location</th>
+											<th class="align-center">Time</th>
+										</thead>
+										
+										<tbody class="databody" height="50px">
+											<tr ng-repeat="heatRow in heatData">
+												<td ng-bind="heatRow.subject"></td>
+												<td ng-bind="heatRow.location"></td>
+												<td ng-bind="heatRow.time"></td>
+											</tr>
+										</tbody>
+										
+									</table>
+								</div>
+							</row>
+							<row>
+							<h3>Vector Map Data</h3>
+								<div style="overflow:scroll; height:300px;">
+									<table class="table table-striped table-hover table-bordered">
+										<thead id="heathead">
+											<th class="align-center">Subject</th>
+											<th class="align-center">Location</th>
+											<th class="align-center">Time</th>
+										</thead>
+										
+										<tbody class="databody" height="50px">
+											<tr ng-repeat="vectorRow in vectorData">
+												<td ng-bind="vectorRow.subject"></td>
+												<td ng-bind="vectorRow.location"></td>
+												<td ng-bind="vectorRow.time"></td>
+											</tr>
+										</tbody>
+										
+									</table>
+								</div>
+							</row>
+							
+						</div>
+						
+						<div id="placeholder" class="empty-panel">
+							<h1>MURIDAE<br>VISUALIZATION<br>UTILITY</h1>
+						</div>
 					</div>
-
 				</div><!-- end .panel -->
 			</div><!-- end content panel -->
 
@@ -218,6 +336,7 @@
 					  		</li>
 					  	</ul>
 					</div>
+					<br />
 
 				</div>
 			</div>

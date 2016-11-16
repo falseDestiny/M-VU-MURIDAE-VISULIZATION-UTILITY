@@ -254,7 +254,8 @@ HeatmapApp.controller('UploadController', function($scope){
     });
     
     socket.on('finishedUploading', function(){
-        //socket.emit('getDatasetNames');
+        $scope.datasets = [];
+        socket.emit('getDatasetNames');
     });
     
     $scope.popup_show = function popup_show(passedDiv) {
@@ -368,9 +369,7 @@ HeatmapApp.controller('UploadController', function($scope){
     
     $scope.confirmGridDef = function confirmGridDef(){
         $scope.popup_hide("defineGridPopUp");
-        
         $scope.popup_show("finalizeUpload");
-        
         socket.emit('getSetName');
     };
     
@@ -432,6 +431,168 @@ HeatmapApp.controller('UploadController', function($scope){
             document.getElementById('checkedGrid').setAttribute("disabled","true");
         }
     };
+    
+    $scope.loadDataset = function loadDataset() {
+        document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
+        $('.collapse').collapse("show");
+        socket.emit('viewDataSet', $scope.selection);
+    };
+    
+    $scope.showDelete = function showDelete(){
+        $scope.popup_show("deletePopUp");
+    };
+    
+    $scope.cancelDelete = function cancelDelete(){
+        $scope.popup_hide("deletePopUp");  
+    };
+    
+    $scope.deleteSet = function deleteSet(){
+        socket.emit("deleteSet", $scope.displayName);  
+    };
+    
+    $scope.cancelEdit = function cancelEdit(){
+        $scope.popup_hide("editPopUp");
+    }
+    
+    $scope.editSet = function editSet(){
+        $scope.popup_show("editPopUp");
+        $scope.tempName = $scope.displayName;
+        socket.emit("loadGrid", $scope.displayName);
+    };
+    
+    $scope.saveEdits = function saveEdits(){
+        $scope.popup_hide("editPopUp");
+        var finalOutput = [];
+        finalOutput.push($scope.tempName);
+        finalOutput.push($scope.rowsInt);
+        finalOutput.push($scope.colsInt);
+        var locMap = [];
+        for(var keyS in $scope.locationMap){
+            locMap.push($scope.locationMap[keyS.toString()]);
+        }
+        finalOutput.push(locMap);
+        finalOutput.push($scope.displayName)
+        socket.emit('finishUpdate', finalOutput);
+        
+        $scope.datasets = [];
+        socket.emit('getDatasetNames');
+        
+        document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
+        $('.collapse').collapse("show");
+        socket.emit('viewDataSet', $scope.tempName);
+    };
+        
+    $scope.checkEdit = function checkEdit(){
+        var holdLocs = [];
+        for(var key in $scope.locationMap){
+            holdLocs.push(key.toString());
+        }
+        var failed = false;
+        for(var i = 0; i < $scope.rowsInt; i++){
+            for(var j = 0; j < $scope.colsInt; j ++){
+               if(holdLocs.indexOf((i + "," + j).toString()) == -1){
+                   failed = true;
+                   i = $scope.rowsInt;
+                   j = $scope.colsInt;
+               }
+            }
+        }
+        if(!failed){
+            var holdValues = [];
+            for(var keyS in $scope.locationMap){
+                if($scope.locationMap[keyS.toString()] != "---"){
+                    if(holdValues.indexOf($scope.locationMap[keyS.toString()]) == -1){
+                        holdValues.push($scope.locationMap[keyS.toString()]);
+                    }
+                    else{
+                        failed = true;
+                        //document.getElementById('dupRFID').style.visibility = "visible";
+                    }
+                }
+            }
+        }
+        
+        if(!failed){
+            var dataSetNames = [];
+            for(var key in $scope.datasets){
+                if($scope.datasets[key].name != $scope.tempName){
+                    dataSetNames.push($scope.datasets[key].name);
+                }
+            }
+            
+            if($scope.tempName ==""){
+                failed=true;
+            }
+            else if(dataSetNames.indexOf($scope.tempName) != -1){
+                failed=true;
+            }
+        }
+        
+        if(!failed){
+            document.getElementById('saveEditsButton').removeAttribute("disabled");
+        }
+        else{
+            document.getElementById('saveEditsButton').setAttribute("disabled","true");
+        }
+    };
+    
+    socket.on('setLoadedGrid', function(grid){
+       $scope.colsInt = parseInt(grid["columns"]);
+       $scope.rowsInt = parseInt(grid["rows"]);
+       for(var i=0; i < $scope.rowsInt; i++){
+           for(var j = 0; j < $scope.colsInt; j ++){
+               var thisKey = ((i * $scope.colsInt) + j);
+               var thisValue = grid[thisKey];
+               $scope.locationMap[[i,j]] = thisValue;
+           }
+       }
+    });
+    
+    
+    socket.on('deletedSet', function(){
+       $scope.popup_hide("deletePopUp");  
+       $scope.heatData = [];
+       $scope.vectorData = [];
+       $scope.displayName = "";
+       $('.collapse').collapse("hide");
+       document.querySelector('#placeholder').style.visibility="visible"; //hides the placeholder div
+       $scope.datasets = [];
+       socket.emit('getDatasetNames');
+    });
+    
+    $scope.heatData = [];
+    $scope.vectorData = [];
+    $scope.displayName = "";
+    
+    socket.on('returnSetData', function(setData){
+        $scope.heatData = [];
+        $scope.vectorData = [];
+        $scope.displayName = "";
+        
+        $scope.displayName = setData[0];
+        
+        for(var key in setData[1]){
+            for(var innerkey in setData[1][key]){
+                var thisLine = [];
+                thisLine["subject"] = key;
+                thisLine["location"] = innerkey;
+                thisLine["time"] = setData[1][key][innerkey];
+                $scope.heatData.push(thisLine);
+            }
+        }
+        
+        for (var key in setData[2]){
+            for(var x = 0; x < setData[2][key].length; x++){
+                var thisLine = [];
+                thisLine["subject"] = key;
+                thisLine["location"] = setData[2][key][x][0];
+                thisLine["time"] = setData[2][key][x][1];
+                $scope.vectorData.push(thisLine);
+            }
+        }
+        
+        $scope.$apply();
+    });
 });
 
 HeatmapApp.controller('UserController', function($scope){

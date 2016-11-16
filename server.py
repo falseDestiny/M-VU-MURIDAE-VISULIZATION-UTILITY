@@ -353,6 +353,18 @@ def uploadData(setData):
     del dataUploadStorage[session["user_id"]]
     session["uploadingFileName"] = ""
     emit('finishedUploading')
+    
+@socketio.on('finishUpdate', namespace='/heatmap')
+def finishUpdate(setData):
+    newFileName = str(setData[0])
+    oldFileName = str(setData[4])
+    rows = str(setData[1])
+    cols = str(setData[2])
+    getLocations = parseLocations(rows, cols, setData[3])
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("UPDATE datasets SET datasetname = %s, locationmap = %s WHERE datasetname = %s", (newFileName,  json.dumps(getLocations), oldFileName))
+    db.commit()
         
 @socketio.on('getSetName', namespace='/heatmap')
 def getSetName():
@@ -381,6 +393,39 @@ def getGridToMimic(gridName):
     result = cur.fetchone()
     finalResult = convertLocationString(result[0])
     emit('setMimicGrid', finalResult)
+    
+@socketio.on('loadGrid', namespace='/heatmap')
+def loadGrid(gridName):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (gridName))
+    result = cur.fetchone()
+    finalResult = convertLocationString(result[0])
+    emit('setLoadedGrid', finalResult)
+    
+@socketio.on('viewDataSet', namespace='/heatmap')
+def viewDataSet(setName):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT heatdata FROM datasets WHERE datasetname = '%s';" % (setName))
+    result = cur.fetchone()
+    finalHeat = convertHeatString(result[0])
+    finalResults = []
+    finalResults.append(setName)
+    finalResults.append(finalHeat)
+    cur.execute("SELECT vectordata FROM datasets WHERE datasetname = '%s';" % (setName))
+    result = cur.fetchone()
+    finalvector = convertVectorString(result[0])
+    finalResults.append(finalvector)
+    emit('returnSetData', finalResults)
+    
+@socketio.on('deleteSet', namespace='/heatmap')
+def deleteSet(setName):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("DELETE FROM datasets WHERE datasetname = '%s';" % (setName))
+    db.commit()
+    emit('deletedSet')
 
 #USER FUNCTIONS
 @socketio.on('getUsers', namespace='/heatmap')
