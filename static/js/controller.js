@@ -5,7 +5,7 @@ var HeatmapApp = angular.module('HeatmapApp', []);
 
 HeatmapApp.controller('HeatmapController', function($scope){
    
-    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
   
     // VARIABLES
     $scope.testdata = []; // heatmap data
@@ -58,12 +58,19 @@ HeatmapApp.controller('HeatmapController', function($scope){
         vectorData = JSON.parse(data.data.vectdata);
         mapping = JSON.parse(data.data.mapping);
         
+        console.log(heatData);
+        console.log(heatData.length);
         console.log(vectorData);
         
-        // GET SIZE OF GRID
-        size = Object.keys(mapping).length - 1;
+        console.log(mapping);
+        console.log(Object.keys(mapping).length);
         
-        // GET LIST OF MICE IN DATASET
+        // // GET SIZE OF GRID (subtract rows and columns entries)
+        size = Object.keys(mapping).length - 3;
+        
+        console.log(size);
+        
+        // // GET LIST OF MICE IN DATASET
         keys = Object.keys(heatData);
 
         $scope.mice = [];
@@ -89,27 +96,27 @@ HeatmapApp.controller('HeatmapController', function($scope){
             return heatData[key][propertyName];
         };
         
-        for(var key = 0; key < Object.keys(keys).length; key++) {
-            for(var r in rfidlist) {
-                if (typeof getProperty(keys[key], rfidlist[r]) == 'undefined') {
-                    heatData[keys[key]][rfidlist[r]] = 0;
-                }
-            }
-        }
+        // for(var key = 0; key < Object.keys(keys).length; key++) {
+        //     for(var r in rfidlist) {
+        //         if (typeof getProperty(keys[key], rfidlist[r]) == 'undefined') {
+        //             heatData[keys[key]][rfidlist[r]] = 0;
+        //         }
+        //     }
+        // }
         
-        // CONVERT MAPPING TO USABLE FORMAT
-        newMap = [];
-        for(i in mapping) {
-            newMap.push(mapping[i]);
-        }
-        newMap.splice(0, 0, "null");
-        newMap.splice(2, 0, "null");
-        newMap.splice(3, 0, "null");
+        // // CONVERT MAPPING TO USABLE FORMAT
+        // newMap = [];
+        // for(i in mapping) {
+        //     newMap.push(mapping[i]);
+        // }
+        // newMap.splice(0, 0, "null");
+        // newMap.splice(2, 0, "null");
+        // newMap.splice(3, 0, "null");
         
-        if (size == 36) { // 6x6 grid
-            newMap.splice(4, 0, "null");
-            newMap.splice(5, 0, "null");
-        }
+        // if (size == 36) { // 6x6 grid
+        //     newMap.splice(4, 0, "null");
+        //     newMap.splice(5, 0, "null");
+        // }
     });
     
     $scope.showVectorMap = function showVectorMap() {
@@ -208,17 +215,9 @@ HeatmapApp.controller('HeatmapController', function($scope){
 
 HeatmapApp.controller('UploadController', function($scope){
     
-    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
-    
-    
-    
-    $scope.sensors=["---","RFID01","RFID02","RFID03","RFID04","RFID05","RFID06","RFID07","RFID08","RFID09","RFID10","RFID11","RFID12","RFID13","RFID14","RFID15","RFID16","RFID17","RFID18","RFID19","RFID20","RFID21","RFID22","RFID23","RFID24","RFID25","RFID26","RFID27","RFID28","RFID29","RFID30","RFID31","RFID32","RFID33","RFID34","RFID35","RFID36",]
-    
-    // This is a scope variable - if you want to access a variable from the html page, it needs to be a scope variable.
-    //$scope.variable = ""; // in javascript there is no type declaration, just like python. the variable will be whatever type you init it to.
-    
-    // This is a normal variable:
-    //var normalVariable = "";
+    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+  
+    $scope.sensors=["---","RFID01","RFID02","RFID03","RFID04","RFID05","RFID06","RFID07","RFID08","RFID09","RFID10","RFID11","RFID12","RFID13","RFID14","RFID15","RFID16","RFID17","RFID18","RFID19","RFID20","RFID21","RFID22","RFID23","RFID24","RFID25","RFID26","RFID27","RFID28","RFID29","RFID30","RFID31","RFID32","RFID33","RFID34","RFID35","RFID36",];
     
     $scope.datasets = [{'name': 'Select Data Set'}];  
     
@@ -236,22 +235,6 @@ HeatmapApp.controller('UploadController', function($scope){
         $scope.locationMap = [];
         $scope.thisFileName = "thisisasamplefilename";
     });
-    
-    // This is an example function that you can use to emit to from the server file.
-    // in server.py just call: emit('keyword')
-    // if you want a parameter do: emit('keyword', parameter)
-    // the function header will need to be like this: socket.on('keyword', function(parameter) {
-    // I think you can only pass one parameter to these functions. However if you put your parameters into a array of some sort (JSON) you can just pass that.
-    socket.on('keyword', function() {
-        console.log('Whatd Up?');
-    }); // these functions need a semi-colon here
-    
-    // This is an example function that you can call from the html page like: ng-click="exampleFunction()" or ng-submit="exampleFunction()"
-    // you can give the function parameters if you want to pass things.
-    $scope.exampleFunction = function exampleFunction() {
-        console.log("HI THERE!");
-    }; // these functions need a semi-colon here
-    
     
     socket.on('datasetnamelist', function(ser) {
        console.log("Adding " + ser.name + " to list...");
@@ -288,24 +271,6 @@ HeatmapApp.controller('UploadController', function($scope){
     $scope.testPopUp = function testPopUp() {
         console.log("HI THERE!");
     }; 
-    
-    // to emit to python you need to call:
-    //socket.emit('keyword'); 
-    // or if you want a parameter
-    //$scope.parameter = "";
-    //socket.emit('keyword', $scope.parameter);
-    
-    // In python to catch this emit call your function header should look like this:
-    // @socketio.on('keyword', namespace='/heatmap')
-    // def pythonFunction(parameter):
-    
-    // you can call $scope functions in javascript like this: $scope.exampleFunction();
-    
-    // if you want to push data to an array you need to call "$apply()"
-    // example:
-    //$scope.array = [];
-    //$scope.array.push({'data': "data"});
-    //$scope.$apply();
     
     $scope.defineGrid = function defineGrid() {
         $scope.popup_hide("gridOptionPopUp");
@@ -428,7 +393,7 @@ HeatmapApp.controller('UploadController', function($scope){
 
 HeatmapApp.controller('UserController', function($scope){
     
-    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
     
     $scope.users = [];
     $scope.MessageBoxMessage = "";

@@ -1,9 +1,12 @@
 import psycopg2
 import psycopg2.extras
 import os, uuid, re
-from flask import Flask, render_template, request, redirect, url_for, session, Markup, json, send_from_directory
-import flask_login
-from flask_login import current_user
+from flask import Flask, render_template, request, redirect, url_for, session, Markup, json, send_from_directory, g
+
+#import Flask-Login
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
+
+#imprt Flask-SocketIO
 from flask_socketio import SocketIO, emit
 from werkzeug import secure_filename
 from parse import Parser
@@ -30,13 +33,7 @@ app.config['ALLOWED_EXTENSIONS'] = set(['xls', 'xlsx', 'csv', 'xlsm', 'xlt', 'xm
 mail = Mail(app)
 socketio = SocketIO(app)
 
-login_manager = flask_login.LoginManager()
-login_manager.init_app(app)
-
-class User(flask_login.UserMixin):
-    uploadingData = ""
-    viewingData = ""
-    
+# Connect to Database
 def connectToDB():
     connectionString = 'dbname=mousedb user=owner password=41PubBNmfQhmfCNy host=localhost'
     print connectionString
@@ -45,9 +42,73 @@ def connectToDB():
     except:
         print("Can't connect to database")
 
-# setup all of the values from the users table for the current user
-def setup_User(user, data):
-    user.id = data['username']
+################################################################################
+########################### USER CLASS AND FUNCTIONS ###########################
+################################################################################
+
+# Setup Login Manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# User Class
+class User():
+    def __init__(self, data):
+        self.id = data['username']
+        self.email = data['email']
+        self.admin = data['admin']
+        
+    def is_authenticated(self):
+        return True
+    
+    def is_active(self):
+        return True
+    
+    def is_anonymous(self):
+        return True
+
+    def get_id(self):
+        return unicode(self.id)
+    
+    def __repr__(self):
+        return '<User %r>' % (self.id)
+
+# User Loader
+@login_manager.user_loader
+def load_user(id):
+    db = connectToDB()
+    cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    # grab user
+    cur.execute("SELECT * FROM users WHERE username = %s;", (id,))
+    user = cur.fetchone()
+    
+    if user is not None:
+        return User(user)
+    
+    return None # no user
+
+# Handle Logout
+@app.route('/logout')
+def logout():
+    # logout user
+    logout_user()
+    
+    # clear session variables
+    for key in session.keys():
+        if key is not "remember":
+            session.pop(key)
+    
+    # return to index page
+    return redirect(url_for('index')) 
+
+# Unauthorized Handler
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return render_template('login.html', login_failed = 'true', currentpage = 'login')
+
+################################################################################
+######################### END USER CLASS AND FUNCTIONS #########################
+################################################################################
     
 def getAllDataSets():
     db = connectToDB()
@@ -58,7 +119,6 @@ def getAllDataSets():
     for line in holddata:
         allsets.append(line[0])
     return allsets
-    
     
 def parseLocations(rows, cols, setData):
     locations = {}
@@ -221,36 +281,13 @@ def convertVectorString(longstring):
             counter += 3
     #print(final)
     return final
-
-@login_manager.user_loader
-def user_loader(user_id):
-    db = connectToDB()
-    cur= db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM users WHERE username = %s;", (user_id,))
-    data = cur.fetchone()
-    if data is not None:
-        user = User()
-        setup_User(user, data)
-        return user
-        
-    return #no user
-
-@app.route('/logout')
-def logout():
-    flask_login.logout_user()
-    return redirect(url_for('index'))
-
-# the page to go to if a login is required and no one is loged in.
-@login_manager.unauthorized_handler
-def unauthorized_handler():
-    return render_template('login.html', login_failed = 'true', currentpage='login')
         
 @app.route('/', methods=['GET', 'POST']) #handle login
 def index():
     
     if request.method == 'GET':
         if current_user.is_authenticated:
-            return render_template('index.html', login_failed='false', currentpage='home', admin=session["admin"])
+            return render_template('index.html', login_failed='false', currentpage='home')
         else:
             return render_template('login.html', login_failed='false', currentpage='login')
 
@@ -262,56 +299,32 @@ def index():
     passwordinput = request.form['password']
    
     cur.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(%s) AND password = crypt(%s, password);", (usernameinput, passwordinput))
-    if cur.fetchone():
-        user = User()
-        user.id = usernameinput
-        flask_login.login_user(user)
-        
-        cur.execute("SELECT admin FROM users WHERE LOWER(username) = LOWER(%s) AND password = crypt(%s, password);", (usernameinput, passwordinput))
-        admin = cur.fetchall()
-        for row in admin:
-            print "   xxx   xxx   xxx", admin[0]
-        session["admin"]=admin[0]    
-        return render_template('index.html', login_failed='false', currentpage='login', admin=session["admin"])
+    user = cur.fetchone()
+    if user is not None:
+        login_user(User(user), remember=True)
+        return render_template('index.html', login_failed='false', currentpage='login')
 
     #login failed
     return render_template('login.html', login_failed = 'true', currentpage='login')
 
 
 @app.route('/maps')
-@flask_login.login_required
+@login_required
 def maps():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    return render_template('maps.html', currentpage='maps', admin=session["admin"])
+    return render_template('maps.html', currentpage='maps')
     
 @app.route('/data')
-@flask_login.login_required
+@login_required
 def data():
-    return render_template('data.html', currentpage='data', admin=session["admin"])
-    
-    
-#@app.route('/data')
-#@flask_login.login_required
-#def data():
-#    db = connectToDB()
-#    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-#    otherDataSets = getAllDataSets()
-#    User.viewingData=""
-#    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
+    return render_template('data.html', currentpage='data')
 
-@app.route('/users', methods=['GET', 'POST'])
-@flask_login.login_required
+@app.route('/users')
+@login_required
 def manageusers():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    cur.execute("SELECT * FROM users")
-    userdata = cur.fetchall()
-    session["userdata"]=userdata
-    
-    return render_template('users.html', currentpage='users', userdata=userdata, admin=session["admin"])
+    return render_template('users.html', currentpage='users')
 
 @app.route('/sendpassword', methods=['GET', 'POST'])
 def send_password():
@@ -413,7 +426,7 @@ def setDataUpload():
     return viewDataPage(getDataToView(myData["filename"]))
     
 def viewDataPage(data):
-    return render_template('viewdata.html', myData=data, otherDataSets=getAllDataSets(), admin=session["admin"])
+    return render_template('viewdata.html', myData=data, otherDataSets=getAllDataSets())
 
 def getDataToView(setName):
     db = connectToDB()
@@ -422,7 +435,7 @@ def getDataToView(setName):
     thisData = cur.fetchall()
     if len(thisData) != 1:
         otherDataSets = getAllDataSets()
-        return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
+        return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets())
     User.viewingData=setName
     formattedData = {}
     formattedData["setName"] = str(setName)
@@ -483,12 +496,11 @@ def deleteData():
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("DELETE from datasets WHERE datasetname=%s",(User.viewingData,))
     db.commit()
-    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets(), admin=session["admin"])
-
+    return render_template('data.html', currentpage='data', otherDataSets=getAllDataSets())
+    
 ################################################################################
 ################################## SOCKET IO ###################################
 ################################################################################
-
 
 @socketio.on('connect', namespace='/heatmap')
 def makeConnection(): 
@@ -512,7 +524,6 @@ def uploadData(setData):
     db.commit()
     emit('finishedUploading')
         
-
 @socketio.on('getSetName', namespace='/heatmap')
 def getSetName():
     print("Tried to get a set name.")
@@ -650,6 +661,7 @@ def deleteUser(username):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     testDeletion = True
+    savedUser = current_user
     
     # Make sure user exists in database
     print("Checking for username in database....")
@@ -670,7 +682,7 @@ def deleteUser(username):
         # Check to see if current user is deleting themself
         selfdeletion = False
         if current_user.id == username:
-            flask_login.logout_user()
+            logout_user()
             selfdeletion = True
         
         # Check to see if more than one admin
@@ -695,9 +707,8 @@ def deleteUser(username):
     except:
         print("Error deleting user...")
         if selfdeletion:
-            user = User()
-            user.id = username
-            flask_login.login_user(user)
+            login_user(savedUser, remember=True)
+            
         # send message alerting user to error
         message = "Error deleting user " + username + " from database."
         emit('loadMessageBox', message)
@@ -719,6 +730,13 @@ def deleteUser(username):
             print("User deleted")
             if selfdeletion:
                 print("I DELETED MYSELF")
+                
+                # clear session variables
+                for key in session.keys():
+                    if key is not "remember":
+                        session.pop(key)
+                
+                # emit redirect to index page
                 emit('redirect', {'url': url_for('index')})
             else:
                 message = username + " has been deleted!"
@@ -752,21 +770,14 @@ def loadMice(dataset):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     # grab the dataset for the passed selection
-    getDataset = "SELECT heatdata FROM datasets WHERE datasetname = %s;"
-    #print(getDataset % ("%%" + dataset + "%%"))
-    # cur.execute(getDataset, ("%%" + dataset + "%%"))
-    cur.execute("SELECT heatdata FROM datasets WHERE datasetname = '%s';" % (dataset))
+    cur.execute("SELECT heatdata, vectordata, locationmap FROM datasets WHERE datasetname = %s;", (dataset,))
     result = cur.fetchone()
-    cur.execute("SELECT vectordata FROM datasets WHERE datasetname = '%s';" % (dataset))
-    vecresult = cur.fetchone()
-    cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (dataset))
-    locresult = cur.fetchone()
     
     emit('returnDataset', {
         'data': {
-            'heatdata': result,
-            'vectdata': vecresult,
-            'mapping': locresult
+            'heatdata': result['heatdata'],
+            'vectdata': result['vectordata'],
+            'mapping': result['locationmap']
         }
     })
 
