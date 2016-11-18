@@ -634,6 +634,12 @@ hr {
 	z-index: 1;
 }
 
+#vectorTogglegap {
+	display: none;
+	padding-top: 10px;
+	padding-bottom: 15px;
+}
+
 /* DATA TABLE */
 .datatable {
     width: 100%;

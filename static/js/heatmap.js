@@ -43,8 +43,16 @@ function heatmap(canvasId, dataset, options) {
     var grid = new Grid();
     grid.render(myCanvas, options);
     
+    var handler = function() {
+        grid.render(myCanvas, options);
+    };
+    
+    this.getHandler = function() {
+        return handler;
+    };
+    
     // add window listener to resize grid as window resizes
-    window.addEventListener('resize', function() { grid.render(myCanvas, options); }, true);
+    // window.addEventListener('resize', handler, true);
 }
 
 /* Checks for missing options - if found, adds in default values */
@@ -133,18 +141,9 @@ function Grid()
         canvas.width = 0;
         canvas.height = 0;
         
-        if (window.innerWidth > 1200)
-        {
-            canvas.width = canvas.parentNode.clientWidth;
-            // canvas.parentNode.style.height = canvas.width + "px";
-            canvas.height = canvas.clientWidth;
-        }
-        else
-        {
-            canvas.width = canvas.parentNode.clientWidth;
-            // canvas.parentNode.style.height = canvas.width + "px";
-            canvas.height = canvas.clientWidth;
-        }
+        canvas.parentNode.style.height = document.getElementById("canvasContainer").clientWidth + "px";
+        canvas.width = document.getElementById("canvasContainer").clientWidth;
+        canvas.height = canvas.clientWidth;
         
         return {width: canvas.width, height: canvas.height};
     };

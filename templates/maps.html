@@ -63,35 +63,10 @@
 								<input class="{{ mouse.list }}" name="{{ mouse.zindex }}" type="checkbox" data-size="small" data-label-text="{{ mouse.list }}">
 								{% endraw %}
 							</div>
-						  	
-							<!-- MOUSE SELECT DROPDOWN -->
-							<!--<div class="btn-group btn-flex">-->
-							<!--  	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
-							<!--    	Select Mouse <span class="caret"></span>-->
-							<!--  	</button>-->
-							<!--  	<ul class="dropdown-menu bullet pull-center">-->
-							<!--    	<li ng-repeat="option in mice">-->
-							<!--    		<input -->
-							<!--    			type="radio"-->
-							<!--    			id="{% raw %}{{option.list}}{% endraw %}"-->
-							<!--    			name="mouselist"-->
-							<!--    			ng-model="$parent.mouseselection"-->
-							<!--    			value="{% raw %}{{option.list}}{% endraw %}"-->
-							<!--    		/>-->
-							<!--    		<label for="{% raw %}{{option.list}}{% endraw %}">{% raw %}{{option.list}}{% endraw %}</label>-->
-							<!--    	</li>-->
-							<!--  	</ul>-->
-							<!--</div>-->
-
 							
-							<!--<div class="btn-group btn-flex">-->
-							<!--	<button type="button" class="btn btn-default" ng-click="showHeatMap()">Display Heat Map</button>-->
-							<!--</div>-->
-
-							<!-- VECTOR MAP -->
-							<!--<div class="btn-group btn-flex btn-flex-last">-->
-							<!--	<button type="button" class="btn btn-default" ng-click="showVectorMap()">Display Vector Map</button>-->
-							<!--</div>-->
+							<div id="vectorTogglegap">
+								<input class="vectorToggle" name="vectorToggle" type="checkbox" data-size="normal" data-label-text="Vector Maps">
+						  	</div>
 						</div>
 					</div>
 

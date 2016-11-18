@@ -10,8 +10,8 @@ HeatmapApp.controller('HeatmapController', function($scope){
     // VARIABLES
     $scope.testdata = []; // heatmap data
     
-    var sampleChart = null;
-    var vectorChart = null;
+    var heatmapChart = null;
+    var vectorChart = {};
 
     $scope.datasets = [{'name': 'Select Data Set'}];    
     $scope.selection = $scope.datasets[0].name;
@@ -26,21 +26,21 @@ HeatmapApp.controller('HeatmapController', function($scope){
     var size = 0;
     var keys = [];
     var rfidlist = [];
-    var newMap = [];
+    var gridMapping = [];
+    var miceON = [];
     
     $scope.gridColumns = 0;
     $scope.gridRows = 0;
     
     var toggleLabelWidthOffset = 95;
+    var vectorToggleWidthOffset = toggleLabelWidthOffset + 12;
+    
+    $scope.vectorstate = false;
     
     // FUNCTIONS
     socket.on('connect', function(){
         console.log('Connected');
         socket.emit('getDatasetNames');
-    });
-    
-    socket.on('testUpload', function(){
-        console.log('I made it.');
     });
     
     socket.on('datasetnamelist', function(ser) {
@@ -63,28 +63,15 @@ HeatmapApp.controller('HeatmapController', function($scope){
         vectorData = JSON.parse(data.data.vectdata);
         mapping = JSON.parse(data.data.mapping);
         
+        console.log(heatData);
+        console.log(vectorData);
+        
         // GET SIZE OF GRID (subtract rows and columns entries)
         size = Object.keys(mapping).length - 3;
         
         // GET LIST OF MICE IN DATASET
         keys = Object.keys(heatData);
 
-        $scope.mice = [];
-        
-        var z_index = 1;
-        for(var i in keys) {
-            $scope.mice.push({'list': keys[i], 'zindex': z_index});
-            $scope.$apply();
-            
-            // Init Toggle Switches
-            $("." + $scope.mice[i].list).bootstrapSwitch('state', false);
-            $("." + $scope.mice[i].list).bootstrapSwitch('labelWidth', document.getElementById("optionpanel").clientWidth - toggleLabelWidthOffset);
-            $("." + $scope.mice[i].list).on('switchChange.bootstrapSwitch', function(e, state) {
-                toggleFunc(e, state);
-            });
-            z_index += 1;
-        }
-        
         // ADD MISSING RFIDs TO HEATDATA
         rfidlist = [];
         for(i = 1; i <= size + 1; i++) {
@@ -107,9 +94,28 @@ HeatmapApp.controller('HeatmapController', function($scope){
                 }
             }
         }
+
+        $scope.mice = [];
+        
+        var z_index = 1;
+        for(var i in keys) {
+            $scope.mice.push({'list': keys[i], 'zindex': z_index});
+            $scope.$apply();
+            
+            // Init Toggle Switches
+            $("." + $scope.mice[i].list).bootstrapSwitch('state', false);
+            $("." + $scope.mice[i].list).bootstrapSwitch('labelWidth', document.getElementById("optionpanel").clientWidth - toggleLabelWidthOffset);
+            $("." + $scope.mice[i].list).on('switchChange.bootstrapSwitch', function(e, state) {
+                toggleFunc(e, state);
+            });
+            z_index += 1;
+        }
+        
+        // Display Vector Map Toggle
+        document.getElementById("vectorTogglegap").style.display = "block";
         
         // CONVERT MAPPING TO USABLE FORMAT
-        newMap = [];
+        gridMapping = [];
         for(i in mapping) {
 
             if (i == "columns") {
@@ -119,30 +125,199 @@ HeatmapApp.controller('HeatmapController', function($scope){
                 $scope.gridRows = mapping[i];
             }
             else {
-                newMap.push(mapping[i]);
+                gridMapping.push(mapping[i]);
             }
         }
     });
     
+    $scope.showVectorMap = function showVectorMap(mouseID) {
+        
+        console.log("Loading vector map for " + mouseID + "...");
+        
+        var mousevecdata = vectorData[mouseID]; //$scope.mouseselection];
+        var mapping = Object.keys(gridMapping).map(function(k) { return gridMapping[k] });
+        
+        var newDataset = [];
+        
+        // console.log(mousevecdata[0]);
+        // console.log(mousevecdata);
+        
+        var rows = $scope.gridRows;
+        var cols = $scope.gridColumns;
+        
+        for(var i = 0; i < mousevecdata.length; i++)
+        {
+            for(var j in mapping)
+            {
+                if(mousevecdata[i][0] == mapping[j])
+                {
+                    // Get Row and Col from 1D array           
+                    rowcol:
+                    for(var row = 0; row < rows; row++) 
+                    {
+                        for(var col = 0; col < cols; col++) 
+                        {
+                            if(j == (row * cols + col)) 
+                            {
+                                newDataset.push({'x': row, 'y': col, 'value': mousevecdata[i][1]});
+                                break rowcol;
+                            }
+                        }
+                    }
+                }
+            }//End for j in mapping for loop
+        }//End for mousevecdata.length for loop
+        
+        var vectorGridResize;
+        
+        for(var i = 0; i < miceON.length; i++)
+        {
+            if (mouseID == miceON[i])
+            {
+                vectorChart[miceON[i]] = new vectormap(mouseID, newDataset, {
+                    border: 10,
+                    gutterHeight: 5,
+                    gutterWidth: 5,
+                    cols: cols,
+                    rows: rows
+                });
+                
+                vectorGridResize = vectorChart[miceON[i]].getHandler();
+                window.addEventListener('resize', vectorGridResize, true);
+            }
+        }
+        
+        console.log(vectorChart);
+        
+        console.log(document.getElementById("testme").style.height);
+
+    };
+    
+    $scope.showHeatMap = function showHeatMap() {
+        
+        console.log("Loading heatmap...");
+        
+        var mousedata = [];
+        
+        if (miceON.length == 1)
+        {
+            mousedata[0] = heatData[miceON[0]];    
+        }
+        else
+        {
+            for (var mouse = 0; mouse < miceON.length; mouse++)
+            {
+                mousedata[mouse] = heatData[miceON[mouse]];
+            }
+        }
+
+        var rfidMap = Object.keys(gridMapping).map(function(k) { return gridMapping[k] });
+
+        var convergeData = [];
+        
+        // create data array based on number of heat data sets selected
+        for (var x = 0; x < mousedata.length; x++)
+        {
+            var position = 0;
+            
+            for (var i in rfidMap)
+            {
+                if (mousedata[x].hasOwnProperty(rfidMap[i]))
+                {
+                    if (x > 0)
+                    {
+                        convergeData[position] = convergeData[position] + mousedata[x][rfidMap[i]];
+                    }
+                    else
+                    {
+                        convergeData.push(mousedata[x][rfidMap[i]]);
+                    }
+                }
+                else if (x == 0)
+                {
+                    convergeData.push(-1);
+                }
+                
+                position += 1;
+            }
+        }
+        
+        var GridResize;
+        
+        if (heatmapChart != null)
+        {
+            GridResize = heatmapChart.getHandler();
+            window.removeEventListener('resize', GridResize, true);
+        }
+        
+        heatmapChart = null;
+        heatmapChart = new heatmap('heatmap', convergeData, {
+            stroke: true,
+            radius: 0,
+            rows: $scope.gridRows,
+            cols: $scope.gridColumns
+        });
+        
+        GridResize = heatmapChart.getHandler();
+        window.addEventListener('resize', GridResize, true);
+        
+        document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
+    };
     
     // TOGGLE SWITCH FUNCTION
     function toggleFunc(e, state) {
+        
+        var mouseID = e.target.className;
+        console.log("Toggling " + mouseID);
         if(state) // Turning toggle on
         {
-            $scope.showHeatMap(e.target.className);
-            // $scope.showVectorMap(e.target.className);
-
+            miceON.push(mouseID);
+            
+            $scope.showHeatMap();
+            
             // re-adjust div height
-            var myCanvas = document.getElementById('heatmap');//e.target.className);
+            var myCanvas = document.getElementById('heatmap');
             document.getElementById('canvasContainer').style.height = myCanvas.height + "px";
             
-            document.getElementById(e.target.className).style.zIndex = e.target.name;
             
-            console.log(document.getElementById(e.target.className));
+            if ($scope.vectorstate) 
+            {
+                $scope.showVectorMap(mouseID);
+                document.getElementById(mouseID).style.zIndex = e.target.name;
+            }
         }
         else // Turning toggle off
         {
-            $scope.clearTest(e.target.className);
+            // remove mouse from miceON array
+            for (var m = 0; m < mouseID.length; m++) 
+            {
+                if (miceON[m] == mouseID)
+                {
+                    miceON.splice(m, 1);
+                }
+            }
+            
+            if ( Object.keys(vectorChart).length > 0 )
+            {
+                console.log("Deleting from vectorChart: " + mouseID);
+                var vectorGridResize = vectorChart[mouseID].getHandler();
+                window.removeEventListener('resize', vectorGridResize, true);
+                $scope.clearVectorMap(mouseID);
+                delete vectorChart[mouseID];
+            }
+            
+            console.log(vectorChart);
+            
+            console.log(miceON.length);
+            if (miceON.length > 0) 
+            {
+                //reload heatmap
+                $scope.showHeatMap();
+            }
+            else
+            {
+                $scope.clearHeatMap();        
+            }
         }
     }
     
@@ -151,115 +326,83 @@ HeatmapApp.controller('HeatmapController', function($scope){
         for (var mouse in $scope.mice) {
             $("." + $scope.mice[mouse].list).bootstrapSwitch('labelWidth', document.getElementById("optionpanel").clientWidth - toggleLabelWidthOffset);
         }
+        $(".vectorToggle").bootstrapSwitch('labelWidth', document.getElementById("optionpanel").clientWidth - vectorToggleWidthOffset);
     }, true);
     
-    
-    $scope.showVectorMap = function showVectorMap(mouseID) {
+    // VECTOR MAP TOGGLE
+    // Init Toggle Switches
+    $(".vectorToggle").bootstrapSwitch('state', false);
+    $(".vectorToggle").bootstrapSwitch('labelWidth', document.getElementById("optionpanel").clientWidth - vectorToggleWidthOffset);
+    $(".vectorToggle").on('switchChange.bootstrapSwitch', function(e, state) { 
+        $scope.vectorstate = state; 
         
-        // if($scope.mouseselection != $scope.mice[0].list) {
-            console.log("Loading vector map for " + mouseID + "..."); //$scope.mouseselection + "...");
-            
-            var mousevecdata = vectorData[mouseID]; //$scope.mouseselection];
-            var mapping = Object.keys(newMap).map(function(k) { return newMap[k] });
-            
-            var newDataset = [];
-            
-            // console.log(mousevecdata[0]);
-            // console.log(mousevecdata);
-            
-            var rows = $scope.gridRows;
-            var cols = $scope.gridColumns;
-            
-            for(var i = 0; i < mousevecdata.length; i++)
+        // if any mouse toggles are on
+        if (miceON.length > 0)
+        {
+            //loop thru and clear all vector map divs
+            for (var i = 0; i < miceON.length; i++)
             {
-                for(var j in mapping)
+                if ($scope.vectorstate) // TURN ON VECTOR MAPS
                 {
-                    if(mousevecdata[i][0] == mapping[j])
+                    for(var mouse in miceON)
                     {
-                        // Get Row and Col from 1D array           
-                        rowcol:
-                        for(var row = 0; row < rows; row++) 
-                        {
-                            for(var col = 0; col < cols; col++) 
-                            {
-                                if(j == (row * cols + col)) 
-                                {
-                                    newDataset.push({'x': row, 'y': col, 'value': mousevecdata[i][1]});
-                                    break rowcol;
-                                }
-                            }
-                        }
+                        $scope.showVectorMap(miceON[mouse]);
                     }
-                }//End for j in mapping for loop
-            }//End for mousevecdata.length for loop
-            
-            // console.log(newDataset);
-            
-            new vectormap(mouseID, newDataset, {
-                border: 10,
-                gutterHeight: 5,
-                gutterWidth: 5,
-                cols: cols,
-                rows: rows
-            });
-            
-            console.log(document.getElementById("testme").style.height);
-        // }  
-    };
-    
-    $scope.showHeatMap = function showHeatMap(mouseID) {
-        
-        // if($scope.mouseselection != $scope.mice[0].list) {
-            console.log("Loading heatmap for " + mouseID + "...");
-            
-            var mousedata = heatData[mouseID];
-            var arr = Object.keys(newMap).map(function(k) { return newMap[k] });
-            
-            var newarr = [];
-            
-            for (var i in arr)
-            {
-                if (mousedata.hasOwnProperty(arr[i]))
-                {
-                    newarr.push(mousedata[arr[i]]);
                 }
-                else
+                else // TURN OFF VECTOR MAPS
                 {
-                    newarr.push(-1);
+                    console.log("Deleting from vectorChart: " + miceON[i]);
+                    var vectorGridResize = vectorChart[miceON[i]].getHandler();
+                    window.removeEventListener('resize', vectorGridResize, true);
+                    $scope.clearVectorMap(miceON[i]);
+                    delete vectorChart[miceON[i]];
                 }
             }
-            
-            sampleChart = null;
-            sampleChart = new heatmap('heatmap', newarr, {
-                stroke: true,
-                radius: 0,
-                rows: $scope.gridRows,
-                cols: $scope.gridColumns
-            });
-            
-            document.querySelector('#placeholder').style.visibility="hidden"; //hides the placeholder div
-        // }
+        }
+        
+    });
+    
+    // CLEAR FUNCTIONS
+    $scope.clearVectorMap = function clearVectorMap(mouseID) {
+      
+      var vectorCanvas = document.getElementById(mouseID);
+      
+      $scope.clearCanvas(vectorCanvas);
+      
     };
     
-    $scope.clearTest = function clearTest(passedDiv) {
+    $scope.clearHeatMap = function clearHeatMap() {
+      
+        var heatCanvas = document.getElementById('heatmap');
         
-        console.log("PRESSING THE BUTTON");
-        var myCanvas = document.getElementById(passedDiv);
-        var ctx = myCanvas.getContext('2d');
+        $scope.clearCanvas(heatCanvas);
+        
+        var removeGridResize = heatmapChart.getHandler();
+        window.removeEventListener('resize', removeGridResize, true);
+        heatmapChart = null;
+        
+        // Because we are clearing the last heatmap - show the placeholder div
+        // reset placeholder div
+        document.getElementById("canvasContainer").removeAttribute("style");
+        document.getElementById("placeholder").style.visibility = "visible";
+    };
+    
+    $scope.clearCanvas = function clearCanvas(canvas) {
+        
+        var ctx = canvas.getContext('2d');
         
         // Store the current transformation matrix
         ctx.save();
         
         // Use the identity matrix while clearing the canvas
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // Restore the transform
         ctx.restore();
         
-        myCanvas.width = 0;
-        myCanvas.height = 0;
-        
+        canvas.width = 0;
+        canvas.height = 0;
     };
     
 });
