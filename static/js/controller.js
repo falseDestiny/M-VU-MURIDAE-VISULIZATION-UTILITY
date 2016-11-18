@@ -188,9 +188,6 @@ HeatmapApp.controller('HeatmapController', function($scope){
         }
         
         console.log(vectorChart);
-        
-        console.log(document.getElementById("testme").style.height);
-
     };
     
     $scope.showHeatMap = function showHeatMap() {
@@ -334,20 +331,19 @@ HeatmapApp.controller('HeatmapController', function($scope){
     $(".vectorToggle").bootstrapSwitch('state', false);
     $(".vectorToggle").bootstrapSwitch('labelWidth', document.getElementById("optionpanel").clientWidth - vectorToggleWidthOffset);
     $(".vectorToggle").on('switchChange.bootstrapSwitch', function(e, state) { 
-        $scope.vectorstate = state; 
-        
+        $scope.vectorstate = state;
+        console.log("IN VECTOR TOGGLE");
+        console.log(miceON);
         // if any mouse toggles are on
         if (miceON.length > 0)
         {
             //loop thru and clear all vector map divs
             for (var i = 0; i < miceON.length; i++)
             {
+                console.log("in for loop: " + i);
                 if ($scope.vectorstate) // TURN ON VECTOR MAPS
                 {
-                    for(var mouse in miceON)
-                    {
-                        $scope.showVectorMap(miceON[mouse]);
-                    }
+                    $scope.showVectorMap(miceON[i]);
                 }
                 else // TURN OFF VECTOR MAPS
                 {
