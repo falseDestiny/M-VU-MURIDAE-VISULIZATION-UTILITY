@@ -102,14 +102,14 @@ function VectorGrid() {
         if (window.innerWidth > 1200)
         {
             canvas.width = canvas.parentNode.clientWidth;
-            canvas.parentNode.style.height = canvas.width + "px";
-            canvas.height = canvas.parentNode.clientHeight;
+            // canvas.parentNode.style.height = canvas.width + "px";
+            canvas.height = canvas.clientWidth;
         }
         else
         {
             canvas.width = canvas.parentNode.clientWidth;
-            canvas.parentNode.style.height = canvas.width + "px";
-            canvas.height = canvas.parentNode.clientHeight;
+            // canvas.parentNode.style.height = canvas.width + "px";
+            canvas.height = canvas.clientWidth;
         }
         
         return {width: canvas.width, height: canvas.height};

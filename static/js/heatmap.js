@@ -8,7 +8,7 @@ required libraries:
   
 */
 
-var Rainbow = require('rainbowvis.js');
+/* global Rainbow */
 
 function heatmap(canvasId, dataset, options) {
     
@@ -62,7 +62,6 @@ function checkDefaults(options)
     
     for (var property in properties)
     {
-        console.log("PROP: " + properties[property]);
         if (typeof getProperty(properties[property]) == 'undefined')
         {
             // DEFAULT VALUES
@@ -84,7 +83,6 @@ function checkDefaults(options)
                     options.gutterHeight = 5;
                     break;
                 case "colors":
-                    console.log("TEST");
                     options.colors = {low: "blue", high: "red"};
                     break;
                 case "radius":
@@ -138,14 +136,14 @@ function Grid()
         if (window.innerWidth > 1200)
         {
             canvas.width = canvas.parentNode.clientWidth;
-            canvas.parentNode.style.height = canvas.width + "px";
-            canvas.height = canvas.parentNode.clientHeight;
+            // canvas.parentNode.style.height = canvas.width + "px";
+            canvas.height = canvas.clientWidth;
         }
         else
         {
             canvas.width = canvas.parentNode.clientWidth;
-            canvas.parentNode.style.height = canvas.width + "px";
-            canvas.height = canvas.parentNode.clientHeight;
+            // canvas.parentNode.style.height = canvas.width + "px";
+            canvas.height = canvas.clientWidth;
         }
         
         return {width: canvas.width, height: canvas.height};

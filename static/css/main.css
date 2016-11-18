@@ -460,6 +460,9 @@ hr {
 	padding-top: 0;
 }
 
+.btn-flex-gap {
+	padding-bottom: 10px;
+}
 .btn-flex-last {
 	padding: 15px;
 }

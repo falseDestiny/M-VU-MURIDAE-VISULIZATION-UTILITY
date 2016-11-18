@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-		<div class="container pagecontent" onclick="closeLinks()">
+		<div id="testme" class="container pagecontent" onclick="closeLinks()">
 
 			<div class="row">
 
@@ -24,16 +24,21 @@
 							</div>
 							
 							<canvas class="canvas" id="heatmap"></canvas>
-							<canvas class="canvas" id="vectormap"></canvas>
+							
+							<div ng-repeat="mouse in mice">
+								{% raw %}
+								<canvas class="canvas" id="{{ mouse.list }}"></canvas>
+								{% endraw %}
+							</div>
 						</div>
 					</div>
 
 					<!-- OPTION PANEL -->
 					<div class="col-xs-12 col-md-4 col-lg-3 align-center">
-						<div class="panel">
+						<div id="optionpanel" class="panel">
 							
 							<!-- DATASET SELECT DROPDOWN -->
-							<div class="btn-group btn-flex">
+							<div class="btn-group btn-flex btn-flex-gap">
 								<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 							    	Select Dataset <span class="caret"></span>
 							  	</button>
@@ -52,34 +57,41 @@
 							  	</ul>
 							</div>
 						  	
-							<!-- MOUSE SELECT DROPDOWN -->
-							<div class="btn-group btn-flex">
-							  	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							    	Select Mouse <span class="caret"></span>
-							  	</button>
-							  	<ul class="dropdown-menu bullet pull-center">
-							    	<li ng-repeat="option in mice">
-							    		<input 
-							    			type="radio"
-							    			id="{% raw %}{{option.list}}{% endraw %}"
-							    			name="mouselist"
-							    			ng-model="$parent.mouseselection"
-							    			value="{% raw %}{{option.list}}{% endraw %}"
-							    		/>
-							    		<label for="{% raw %}{{option.list}}{% endraw %}">{% raw %}{{option.list}}{% endraw %}</label>
-							    	</li>
-							  	</ul>
+						  	<!-- Mice Toggles -->
+						  	<div ng-repeat="mouse in mice">
+								{% raw %}
+								<input class="{{ mouse.list }}" name="{{ mouse.zindex }}" type="checkbox" data-size="small" data-label-text="{{ mouse.list }}">
+								{% endraw %}
 							</div>
+						  	
+							<!-- MOUSE SELECT DROPDOWN -->
+							<!--<div class="btn-group btn-flex">-->
+							<!--  	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+							<!--    	Select Mouse <span class="caret"></span>-->
+							<!--  	</button>-->
+							<!--  	<ul class="dropdown-menu bullet pull-center">-->
+							<!--    	<li ng-repeat="option in mice">-->
+							<!--    		<input -->
+							<!--    			type="radio"-->
+							<!--    			id="{% raw %}{{option.list}}{% endraw %}"-->
+							<!--    			name="mouselist"-->
+							<!--    			ng-model="$parent.mouseselection"-->
+							<!--    			value="{% raw %}{{option.list}}{% endraw %}"-->
+							<!--    		/>-->
+							<!--    		<label for="{% raw %}{{option.list}}{% endraw %}">{% raw %}{{option.list}}{% endraw %}</label>-->
+							<!--    	</li>-->
+							<!--  	</ul>-->
+							<!--</div>-->
 
 							
-							<div class="btn-group btn-flex">
-								<button type="button" class="btn btn-default" ng-click="showHeatMap()">Display Heat Map</button>
-							</div>
+							<!--<div class="btn-group btn-flex">-->
+							<!--	<button type="button" class="btn btn-default" ng-click="showHeatMap()">Display Heat Map</button>-->
+							<!--</div>-->
 
-							<div class="btn-group btn-flex btn-flex-last">
-								<button type="button" class="btn btn-default" ng-click="showVectorMap()">Display Vector Map</button>
-							</div>
-
+							<!-- VECTOR MAP -->
+							<!--<div class="btn-group btn-flex btn-flex-last">-->
+							<!--	<button type="button" class="btn btn-default" ng-click="showVectorMap()">Display Vector Map</button>-->
+							<!--</div>-->
 						</div>
 					</div>
 
@@ -95,4 +107,5 @@
 <script type="text/javascript" src="/static/js/rainbowvis.js"></script>
 <script type="text/javascript" src="/static/js/heatmap.js"></script>
 <script type="text/javascript" src="/static/js/vectormap.js"></script>
+<script type="text/javascript" src="/static/js/bootstrap-switch.min.js"></script>
 {% endblock %}
