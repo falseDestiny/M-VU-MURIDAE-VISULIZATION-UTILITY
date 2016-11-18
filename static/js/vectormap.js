@@ -132,8 +132,8 @@ function VectorGrid() {
         var centerPointY2 = 0;
         
         // draw the grid
-        ctx.lineWidth = 8;
-        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = options.lineColor;
         
         ctx.beginPath();
         for (var i = 0; i < options.vectorArray.length; i++)

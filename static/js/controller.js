@@ -8,16 +8,13 @@ HeatmapApp.controller('HeatmapController', function($scope){
     var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
     
     // VARIABLES
-    $scope.testdata = []; // heatmap data
-    
     var heatmapChart = null;
     var vectorChart = {};
 
     $scope.datasets = [{'name': 'Select Data Set'}];    
     $scope.selection = $scope.datasets[0].name;
     
-    $scope.mice = []; //[{'list': 'Select Mouse'}];
-    // $scope.mouseselection = ""; //$scope.mice[0].list;
+    $scope.mice = [];
     
     var heatData = [];
     var vectorData = [];
@@ -37,18 +34,33 @@ HeatmapApp.controller('HeatmapController', function($scope){
     
     $scope.vectorstate = false;
     
+    var mouseColors = {
+        "green": "#03AC00", 
+        "yellow": "#DCE16C", 
+        "purple": "#C86CE1", 
+        "lightblue": "#6CE1E1", 
+        "darkgrey": "#333", 
+        "lightgrey": "#A2A2A2", 
+        "brown": "#AC4E00", 
+        "teal": "#00AC78"
+    };
+    
     // FUNCTIONS
+    
+    // CONNECT TO SOCKET AND REQUEST DATASET NAMES
     socket.on('connect', function(){
         console.log('Connected');
         socket.emit('getDatasetNames');
     });
     
+    // PUSH DATASET NAMES TO DROPDOWN
     socket.on('datasetnamelist', function(ser) {
        console.log("Adding " + ser.name + " to list...");
        $scope.datasets.push(ser);
        $scope.$apply();
     });
     
+    // REQUEST SELECTED DATASET MICE
     $scope.loadDataset = function loadDataset() {
         if($scope.selection != $scope.datasets[0].name) {
             console.log("Loading " + $scope.selection + "...");
@@ -57,14 +69,12 @@ HeatmapApp.controller('HeatmapController', function($scope){
         }
     };
     
+    // LOAD, PARSE, AND ASSEMBLE DATA OBJECTS FOR MAPS
     socket.on('returnDataset', function(data) {
         
         heatData = JSON.parse(data.data.heatdata);
         vectorData = JSON.parse(data.data.vectdata);
         mapping = JSON.parse(data.data.mapping);
-        
-        console.log(heatData);
-        console.log(vectorData);
         
         // GET SIZE OF GRID (subtract rows and columns entries)
         size = Object.keys(mapping).length - 3;
@@ -95,23 +105,27 @@ HeatmapApp.controller('HeatmapController', function($scope){
             }
         }
 
+        // LOAD MICE TOGGLE SWITCHES
         $scope.mice = [];
         
         var z_index = 1;
+        var colorKeyArray = Object.keys(mouseColors);
         for(var i in keys) {
-            $scope.mice.push({'list': keys[i], 'zindex': z_index});
+            $scope.mice.push({'list': keys[i], 'zindex': z_index, 'color': colorKeyArray[z_index - 1]});
             $scope.$apply();
-            
+            console.log(Object.keys(mouseColors)[i]);
             // Init Toggle Switches
             $("." + $scope.mice[i].list).bootstrapSwitch('state', false);
             $("." + $scope.mice[i].list).bootstrapSwitch('labelWidth', document.getElementById("optionpanel").clientWidth - toggleLabelWidthOffset);
+            $("." + $scope.mice[i].list).bootstrapSwitch('offColor', 'danger');
+            $("." + $scope.mice[i].list).bootstrapSwitch('onColor', Object.keys(mouseColors)[i]);
             $("." + $scope.mice[i].list).on('switchChange.bootstrapSwitch', function(e, state) {
                 toggleFunc(e, state);
             });
             z_index += 1;
         }
         
-        // Display Vector Map Toggle
+        // DISPLAY VECTOR MAP TOGGLE
         document.getElementById("vectorTogglegap").style.display = "block";
         
         // CONVERT MAPPING TO USABLE FORMAT
@@ -130,6 +144,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
         }
     });
     
+    // DISPLAY VECTOR MAP
     $scope.showVectorMap = function showVectorMap(mouseID) {
         
         console.log("Loading vector map for " + mouseID + "...");
@@ -138,9 +153,6 @@ HeatmapApp.controller('HeatmapController', function($scope){
         var mapping = Object.keys(gridMapping).map(function(k) { return gridMapping[k] });
         
         var newDataset = [];
-        
-        // console.log(mousevecdata[0]);
-        // console.log(mousevecdata);
         
         var rows = $scope.gridRows;
         var cols = $scope.gridColumns;
@@ -170,6 +182,16 @@ HeatmapApp.controller('HeatmapController', function($scope){
         
         var vectorGridResize;
         
+        var mouseLineColor;
+        for (var c = 0; c < $scope.mice.length; c++)
+        {
+            if ($scope.mice[c].list == mouseID)
+            {
+                mouseLineColor = $scope.mice[c].color;
+                break;
+            }
+        }
+        
         for(var i = 0; i < miceON.length; i++)
         {
             if (mouseID == miceON[i])
@@ -179,17 +201,17 @@ HeatmapApp.controller('HeatmapController', function($scope){
                     gutterHeight: 5,
                     gutterWidth: 5,
                     cols: cols,
-                    rows: rows
+                    rows: rows,
+                    lineColor: mouseColors[mouseLineColor]
                 });
                 
                 vectorGridResize = vectorChart[miceON[i]].getHandler();
                 window.addEventListener('resize', vectorGridResize, true);
             }
         }
-        
-        console.log(vectorChart);
     };
     
+    // DISPLAY HEAT MAP
     $scope.showHeatMap = function showHeatMap() {
         
         console.log("Loading heatmap...");
@@ -265,7 +287,9 @@ HeatmapApp.controller('HeatmapController', function($scope){
     function toggleFunc(e, state) {
         
         var mouseID = e.target.className;
+        
         console.log("Toggling " + mouseID);
+        
         if(state) // Turning toggle on
         {
             miceON.push(mouseID);
@@ -303,9 +327,6 @@ HeatmapApp.controller('HeatmapController', function($scope){
                 delete vectorChart[mouseID];
             }
             
-            console.log(vectorChart);
-            
-            console.log(miceON.length);
             if (miceON.length > 0) 
             {
                 //reload heatmap
@@ -327,20 +348,19 @@ HeatmapApp.controller('HeatmapController', function($scope){
     }, true);
     
     // VECTOR MAP TOGGLE
-    // Init Toggle Switches
     $(".vectorToggle").bootstrapSwitch('state', false);
     $(".vectorToggle").bootstrapSwitch('labelWidth', document.getElementById("optionpanel").clientWidth - vectorToggleWidthOffset);
     $(".vectorToggle").on('switchChange.bootstrapSwitch', function(e, state) { 
         $scope.vectorstate = state;
-        console.log("IN VECTOR TOGGLE");
-        console.log(miceON);
+        
+        console.log("Toggling Vector Maps " + (state ? "on..." : "off..."));
+        
         // if any mouse toggles are on
         if (miceON.length > 0)
         {
             //loop thru and clear all vector map divs
             for (var i = 0; i < miceON.length; i++)
             {
-                console.log("in for loop: " + i);
                 if ($scope.vectorstate) // TURN ON VECTOR MAPS
                 {
                     $scope.showVectorMap(miceON[i]);
