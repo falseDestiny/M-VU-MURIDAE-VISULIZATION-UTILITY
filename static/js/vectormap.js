@@ -68,7 +68,7 @@ function checkVectorDefaults(options) {
     "use strict";
     
     // DEFAULT OPTIONS
-    var properties = [];
+    var properties = ["rows", "cols", "border", "gutterHeight", "gutterWidth", "lineColor", "mouseIndex"];
     
     var getProperty = function(propertyName)
     {
@@ -82,7 +82,26 @@ function checkVectorDefaults(options) {
             // DEFAULT VALUES
             switch (properties[property])
             {
-                case "":
+                case "rows":
+                    options.rows = 7;
+                    break;
+                case "cols":
+                    options.cols = 4;
+                    break;
+                case "border":
+                    options.border = 10;
+                    break;
+                case "gutterHeight":
+                    options.gutterHeight = 5;
+                    break;
+                case "gutterWidth":
+                    options.gutterWidth = 5;
+                    break;
+                case "lineColor":
+                    options.lineColor = "#000";
+                    break;
+                case "mouseIndex":
+                    options.mouseIndex = 0;
                     break;
             }
         }
@@ -132,8 +151,61 @@ function VectorGrid() {
         var centerPointY2 = 0;
         
         // draw the grid
-        ctx.lineWidth = 4;
         ctx.strokeStyle = options.lineColor;
+        
+        // calculate offset
+        var offset_x = 0;
+        var offset_y = 0;
+        
+        var offsetamount = 0;
+        if (window.innerWidth < 800)
+        {
+            ctx.lineWidth = 2;
+            offsetamount = 5;
+        }
+        else if(window.innerWidth < 1200)
+        {
+            ctx.lineWidth = 3;
+            offsetamount = 10;
+        }
+        else
+        {
+            ctx.lineWidth = 4;
+            offsetamount = 20;
+        }
+        
+        switch (options.mouseIndex) {
+            case 0:
+                offset_x = -offsetamount;
+                offset_y = -offsetamount;
+                break;
+            case 1:
+                offset_y = -(offsetamount + (offsetamount / 2));
+                break;
+            case 2:
+                offset_x = offsetamount;
+                offset_y = -(offsetamount + offsetamount);
+                break;
+            case 3:
+                offset_x = -(offsetamount + (offsetamount / 2));
+                break;
+            case 4:
+                offset_x = (offsetamount / 2);
+                offset_y = -(offsetamount / 2);
+                break;
+            case 5:
+                offset_x = -(offsetamount + offsetamount);
+                offset_y = offsetamount;
+                break;
+            case 6:
+                offset_x = -(offsetamount / 2);
+                offset_y = offsetamount + (offsetamount / 2);
+                break;
+            case 7:
+                offset_x = offsetamount + (offsetamount / 2);
+                offset_y = offsetamount / 2;
+                break;
+        }
         
         ctx.beginPath();
         for (var i = 0; i < options.vectorArray.length; i++)
@@ -143,8 +215,8 @@ function VectorGrid() {
             centerPointX2 = x + (boxWidth * options.vectorArray[i].y2) + (boxWidth / 2);
             centerPointY2 = y + (boxHeight * options.vectorArray[i].x2) + (boxHeight / 2);
             
-            ctx.moveTo(centerPointX, centerPointY);
-            ctx.lineTo(centerPointX2, centerPointY2);
+            ctx.moveTo(centerPointX + offset_x, centerPointY + offset_y);
+            ctx.lineTo(centerPointX2 + offset_x, centerPointY2 + offset_y);
         }
         ctx.stroke();
         

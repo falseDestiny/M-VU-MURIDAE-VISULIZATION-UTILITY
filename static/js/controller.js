@@ -113,7 +113,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
         for(var i in keys) {
             $scope.mice.push({'list': keys[i], 'zindex': z_index, 'color': colorKeyArray[z_index - 1]});
             $scope.$apply();
-            console.log(Object.keys(mouseColors)[i]);
+            
             // Init Toggle Switches
             $("." + $scope.mice[i].list).bootstrapSwitch('state', false);
             $("." + $scope.mice[i].list).bootstrapSwitch('labelWidth', document.getElementById("optionpanel").clientWidth - toggleLabelWidthOffset);
@@ -181,28 +181,25 @@ HeatmapApp.controller('HeatmapController', function($scope){
         }//End for mousevecdata.length for loop
         
         var vectorGridResize;
-        
         var mouseLineColor;
-        for (var c = 0; c < $scope.mice.length; c++)
+        var index;
+        
+        for (index = 0; index < $scope.mice.length; index++)
         {
-            if ($scope.mice[c].list == mouseID)
+            if ($scope.mice[index].list == mouseID)
             {
-                mouseLineColor = $scope.mice[c].color;
+                mouseLineColor = $scope.mice[index].color;
                 break;
             }
         }
-        
+        console.log(index);
         for(var i = 0; i < miceON.length; i++)
         {
             if (mouseID == miceON[i])
             {
                 vectorChart[miceON[i]] = new vectormap(mouseID, newDataset, {
-                    border: 10,
-                    gutterHeight: 5,
-                    gutterWidth: 5,
-                    cols: cols,
-                    rows: rows,
-                    lineColor: mouseColors[mouseLineColor]
+                    lineColor: mouseColors[mouseLineColor],
+                    mouseIndex: index
                 });
                 
                 vectorGridResize = vectorChart[miceON[i]].getHandler();
