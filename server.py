@@ -101,6 +101,9 @@ def load_user(id):
     cur.execute("SELECT * FROM users WHERE username = %s;", (id,))
     user = cur.fetchone()
     
+    cur.close()
+    db.close()
+    
     if user is not None:
         return User(user)
     
@@ -273,6 +276,10 @@ def index():
    
     cur.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(%s) AND password = crypt(%s, password);", (usernameinput, passwordinput))
     user = cur.fetchone()
+    
+    cur.close()
+    db.close()
+    
     if user is not None:
         login_user(User(user), remember=True)
         return render_template('index.html', login_failed='false', currentpage='login')
@@ -328,11 +335,12 @@ def manageusers():
 
 @app.route('/sendpassword', methods=['GET', 'POST'])
 def send_password():
-    db = connectToDB()
-    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+
     if request.method == 'GET':
         return render_template('send_password.html', currentpage = 'send_password')
+
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
         
     # get email from form
     email = request.form['email']
@@ -358,8 +366,12 @@ def send_password():
         
         print "Mail Sent."
     else:
+        cur.close()
+        db.close()
         return render_template('send_password.html', currentpage='change_password', bad_account='badusername', account_created='false')
-            
+    
+    cur.close()
+    db.close()
     return render_template('password_sent.html', currentpage='send_password', email=email, bad_account='unknown')
 
 
@@ -389,6 +401,8 @@ def uploadData(setData):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)", (thisFileName, 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations)))
     db.commit()
+    cur.close()
+    db.close()
     session["currentlyUploading"] = False
     del dataUploadStorage[session["user_id"]]
     session["uploadingFileName"] = ""
@@ -405,6 +419,8 @@ def finishUpdate(setData):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("UPDATE datasets SET datasetname = %s, locationmap = %s WHERE datasetname = %s", (newFileName,  json.dumps(getLocations), oldFileName))
     db.commit()
+    cur.close()
+    db.close()
         
 @socketio.on('getSetName', namespace='/heatmap')
 def getSetName():
@@ -433,6 +449,8 @@ def getGridToMimic(gridName):
     result = cur.fetchone()
     finalResult = convertLocationString(result[0])
     emit('setMimicGrid', finalResult)
+    cur.close()
+    db.close()
     
 @socketio.on('loadGrid', namespace='/heatmap')
 def loadGrid(gridName):
@@ -442,6 +460,8 @@ def loadGrid(gridName):
     result = cur.fetchone()
     finalResult = convertLocationString(result[0])
     emit('setLoadedGrid', finalResult)
+    cur.close()
+    db.close()
     
 @socketio.on('viewDataSet', namespace='/heatmap')
 def viewDataSet(setName):
@@ -458,6 +478,8 @@ def viewDataSet(setName):
     finalvector = convertVectorString(result[0])
     finalResults.append(finalvector)
     emit('returnSetData', finalResults)
+    cur.close()
+    db.close()
     
 @socketio.on('deleteSet', namespace='/heatmap')
 def deleteSet(setName):
@@ -466,6 +488,8 @@ def deleteSet(setName):
     cur.execute("DELETE FROM datasets WHERE datasetname = '%s';" % (setName))
     db.commit()
     emit('deletedSet')
+    cur.close()
+    db.close()
 
 
 ############################################################
@@ -479,6 +503,9 @@ def getUsers():
 
     cur.execute("SELECT * FROM users")
     results = cur.fetchall()
+    
+    cur.close()
+    db.close()
     
     userdata = []
     
@@ -552,6 +579,9 @@ def createDaUser(formdata):
                 errormessage = "Whoops! User Creation Failed!"
                 print(errormessage)
                 emit('loadMessageBox', errormessage)
+    
+    cur.close()
+    db.close()
 
 @socketio.on('changeUserPassword', namespace='/heatmap')
 def changeUserPassword(changeformdata):
@@ -595,6 +625,9 @@ def changeUserPassword(changeformdata):
         emit('loadMessageBox', errorMessage)
         db.rollback()
     db.commit()
+    
+    cur.close()
+    db.close()
         
 @socketio.on('deleteUser', namespace='/heatmap')
 def deleteUser(username):
@@ -681,6 +714,9 @@ def deleteUser(username):
             else:
                 message = username + " has been deleted!"
                 emit('loadMessageBox', message)
+    
+    cur.close()
+    db.close()
 
 ############################################################
 ###################### MAP FUNCTIONS #######################
@@ -705,6 +741,9 @@ def getDatasetNames():
         for i in test:
             emit('datasetnamelist', i)
             
+    cur.close()
+    db.close()
+            
 @socketio.on('loadMice', namespace='/heatmap')
 def loadMice(dataset):
     db = connectToDB()
@@ -721,6 +760,9 @@ def loadMice(dataset):
             'mapping': result['locationmap']
         }
     })
+    
+    cur.close()
+    db.close()
 
 if __name__ == '__main__':
     socketio.run(app, host=os.getenv('IP', '0.0.0.0'), port=int(os.getenv('PORT', 8080)), debug = True)
