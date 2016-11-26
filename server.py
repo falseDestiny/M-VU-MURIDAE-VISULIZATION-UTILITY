@@ -3,6 +3,8 @@ import psycopg2
 import psycopg2.extras
 
 import os, uuid, re
+import string
+import random
 
 # IMPORT FLASK
 from flask import Flask, render_template, request, redirect, url_for, session, Markup, json, send_from_directory
@@ -34,6 +36,9 @@ app.config['MAIL_PASSWORD'] = 'mvuwebapppass'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
+mail = Mail(app)
+socketio = SocketIO(app)
+globalAccess = {'accessCode': ''}
 
 ################################ Config Upload #################################
 # This is the path to the upload directory, In cloud9 it sends the file to a folder named uploads
@@ -333,46 +338,96 @@ def data():
 def manageusers():
     return render_template('users.html', currentpage='users')
 
-@app.route('/sendpassword', methods=['GET', 'POST'])
-def send_password():
 
-    if request.method == 'GET':
-        return render_template('send_password.html', currentpage = 'send_password')
+################################################################################
+############################## RESET PASSWORD ##################################
+################################################################################
 
+@app.route('/sendAccessCode', methods=['GET', 'POST'])
+def sendAccessCode():
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    accessCode = ''.join(random.SystemRandom().choice(chars) for _ in range(10))
+    globalAccess['accessCode'] = accessCode
+    
+    print accessCode
+    session["accessCode"]=accessCode   
+    if request.method == 'GET':
+        return render_template('sendaccesscode.html', currentpage = 'sendaccesscode')
         
     # get email from form
-    email = request.form['email']
-    print "User email is ."+email
+    session["email"] = request.form['email']
+    print "User email is ."+session["email"]
 
     # check to see if user exists
     print "Checking username...."
-    cur.execute("SELECT email FROM users WHERE email = %s;", (email,))
+    cur.execute("SELECT email FROM users WHERE email = %s;", (session["email"],))
     if cur.fetchone():
-        print "Checking password...."
-        # cur.execute("SELECT INTO users password VALUES (crypt(%s, gen_salt('bf')) WHERE username = %s);", (password, username,))
-
-        cur.execute("SELECT password = crypt('password', gen_salt('bf')) FROM users WHERE email = %s;", (email,))
-        password = cur.fetchall()
-        print password
-        print password
-        print password
-        print password
+        print "Checking message...."
             
-        msg = Message('MVU Password', sender = 'mvuwebapp@yahoo.com', recipients = [email])
-        msg.body = "Hello, this is yot password- "+str(password) 
+        # prepare the email to be sent, include message with random access code  
+        msg = Message('MVU Password', sender = 'mvuwebapp@yahoo.com', recipients = [session["email"]])
+        msg.body =  "A password reset has been requested.\n\n" + \
+            "If you did not make this request, you can ignore this email. This password reset can only be made by those who have access to the login site. " + \
+            "It does not indicate that the application is in any danger of being accessed by someone else.\n\n" + \
+            "The access code to reset your password is: " +str(accessCode) 
         mail.send(msg)
-        
         print "Mail Sent."
     else:
-        cur.close()
-        db.close()
-        return render_template('send_password.html', currentpage='change_password', bad_account='badusername', account_created='false')
+        return render_template('sendaccesscode.html', currentpage='sendaccesscode', bad_account='bademail', account_created='false')
+            
+    return render_template('confirmaccesscode.html', currentpage='confirmaccesscode', email=session["email"], bad_account='unknown', accessCode=accessCode)
+
+@app.route('/confirmAccessCode', methods=['GET', 'POST'])
+def confirmAccessCode():
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    cur.close()
-    db.close()
-    return render_template('password_sent.html', currentpage='send_password', email=email, bad_account='unknown')
+    if request.method == 'GET':
+        return render_template('confirmaccesscode.html', currentpage = 'confirmaccesscode')
+    
+    inputcode = request.form['inputCode']
+    
+    # check to see codes match
+    print "Checking access code...."
+    if (inputcode == session["accessCode"]):
+        print "YAHYAYAYAY"
+    else:
+        return render_template('confirmaccesscode.html', currentpage='confirmaccesscode', email=session["email"], bad_account='badcode', access_code_match='false')
+            
+    return render_template('createnewpassword.html', currentpage='createnewpassword', bad_account='unknown')
+
+@app.route('/createNewPassword', methods=['GET', 'POST'])
+def createNewPassword():
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if request.method == 'GET':
+        return render_template('createnewpassword.html', currentpage = 'confirmaccesscode')
+    
+    # get passwords from the form
+    print "Get matching passwords...."
+    password = request.form['password']
+    retypepassword = request.form['retypepassword']
+    
+    # check to see if passwords match
+    print "Checking for matching passwords...."
+    if (password != retypepassword):
+        return render_template('createnewpassword.html', currentpage='createnewpassword', bad_account='passwords_dont_match', account_created='false')
+            
+    # try to insert new password        
+    try:
+        print("Inserting password...")
+        passwordInsertQuery = "UPDATE users SET password = crypt(%s, gen_salt('bf')) WHERE email = %s;"
+        cur.execute(passwordInsertQuery, (password, session["email"]))
+    except:
+        print("Error Inserting password...")
+        db.rollback()
+    db.commit()
+    
+    return render_template('login.html', currentpage='login', bad_account='unknown')
 
 
 ################################################################################

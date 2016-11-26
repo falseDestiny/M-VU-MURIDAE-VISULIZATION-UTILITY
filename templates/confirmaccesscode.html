@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block bodyTag %}
+<body>
+{% endblock %}
+
+{% block content %}
+<div class="container pagecontent" onclick="closeLinks()">
+
+	<div class="row">
+
+		<div id="intro" class="col-xs-12 align-center">
+			<a href="/" class="logo pagelogo"><img src="static/images/mlogo.png" alt="" /></a>
+		</div>
+
+		<div class="col-lg-12">
+
+			<!-- CONTENT PANEL -->
+
+            <div class="panel clearfix">
+            <br>
+					<div class="row">
+                        {% if access_code_match == 'false' %}
+	                    <p><h2 align="center"><font color="red">The access code you have entered is incorrect. Please try again.</font></h2></p>
+			            {% endif %}
+	            </div>
+
+			<!--<div class="col-md-10 center">-->
+				<form method="POST" action="/confirmAccessCode">
+                    <h2 align="center">A reset access code has been sent.</h2>
+					<div class="row">
+						<div class="col-md-4 col-md-offset-4">
+							<h3>Enter The Access Code that has been sent to {{ email }}:</h3>
+							<p class="input-group input-group-lg">
+						    	<span class="input-group-addon" id="email-addon1"><i class="fa fa-key"></i></span>
+						    	<input type="text" name="inputCode" class="form-control" placeholder="QjaY98ka8R" aria-describedby="email-addon1" />
+					    	</p>
+				    	</div>
+			    	</div>
+                    <div class="col-md-4 col-md-offset-5">
+					    <p><input type="submit" value="Submit Access Code" name="submit" class="btn btn-primary btn-lg outline" /></p>
+                    </div>
+				</form>
+
+			<!--</div>-->
+			
+		</div>
+	</div>
+	
+{% endblock %}
