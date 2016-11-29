@@ -316,7 +316,8 @@ def data():
             
             myData = Parser(file).getData()
             session["currentlyUploading"] = True
-            print(session.keys())
+            #print(session.keys())
+            #print(myData)
             dataUploadStorage[session["user_id"]] = myData["data"]
             
             #print(myData["data"])
@@ -443,9 +444,12 @@ def makeConnection():
 ############################################################
 @socketio.on('finishUpload', namespace='/heatmap')
 def uploadData(setData):
-    mySimulation = Simulation()
-    mySimulation.setUp(dataUploadStorage[session["user_id"]])
-    mySimulation.runFullSim()
+    try:
+        mySimulation = Simulation()
+        mySimulation.setUp(dataUploadStorage[session["user_id"]])
+        mySimulation.runFullSim()
+    except:
+        print("Simulation failed.")
     thesePaths = mySimulation.getAllPaths()
     theseHeatMaps = mySimulation.getAllHeatData()
     thisFileName = str(setData[0])

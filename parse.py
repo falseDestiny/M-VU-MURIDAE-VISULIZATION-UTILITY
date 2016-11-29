@@ -53,13 +53,15 @@ class Parser:
                 "location":location,
                 "duration":duration
             }
+            #print(line)
             #if location not in listofLocs:
             #    listofLocs.append(location)
             # Add a new mouse if this mouseID isn't already in the data
-            if (mouseID not in data.keys()):
+            if (mouseID not in data.keys() and (mouseID != "")):
                 data[mouseID] = []
             # Add this data line to this particular subject
-            data[mouseID].append(line)
+            if mouseID != "":
+                data[mouseID].append(line)
         metaInfo["data"] = data
         for i in range(1, 26):
             if i < 10:
