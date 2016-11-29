@@ -97,13 +97,88 @@ HeatmapApp.controller('HeatmapController', function($scope){
             return heatData[key][propertyName];
         };
         
+        var rfidTest = "RFID17";
+        var numberTest = "041940A1C3";
+        
         for(var key = 0; key < Object.keys(keys).length; key++) {
             for(var r in rfidlist) {
                 if (typeof getProperty(keys[key], rfidlist[r]) == 'undefined') {
                     heatData[keys[key]][rfidlist[r]] = 0;
                 }
+                
+                // test code - print out RFID01
+                if (rfidlist[r] == rfidTest) {
+                    // if(keys[key] == numberTest) {
+                        console.log("Heatmap " + rfidTest + " (" + keys[key] + "): " + heatData[keys[key]][rfidlist[r]]);
+                    // }
+                }
+                // end of test code
             }
         }
+        
+        // test code
+        console.log(heatData);
+        console.log(vectorData);
+        
+        for(key = 0; key < Object.keys(keys).length; key++) {
+        
+            var rfid01vectotal = 0;
+            var stopcount = 0;
+            var totalHeatData = 0;
+            
+            for(i = 1; i <= size + 1; i++) 
+            {
+                if(i < 10) 
+                {
+                    totalHeatData += heatData[keys[key]]["RFID0" + i];
+                }
+                else 
+                {
+                    totalHeatData += heatData[keys[key]]["RFID" + i];
+                }
+            }
+            
+            if(keys[key] == numberTest) {
+                // console.log("TOTAL HEAT DATA FOR " + rfidTest + " of " + keys[key] + ": " + totalHeatData);
+            }
+            
+            for (var a = 0; a < vectorData[keys[key]].length; a++) {
+                if (vectorData[keys[key]][a][0] == rfidTest) 
+                {
+                    if ((a + 1) != vectorData[keys[key]].length) {
+                        rfid01vectotal += (vectorData[keys[key]][a + 1][1] - vectorData[keys[key]][a][1]);
+                        stopcount += 1;
+                        // console.log(keys[key] + " " + rfidTest);
+                        // if (keys[key] == numberTest)
+                        // {
+                        //     console.log(keys[key] + " " + rfidTest + " - array position [" + a + "]: " + vectorData[keys[key]][a][1]);
+                        //     console.log("following position [" + (a + 1) + "]: " + vectorData[keys[key]][a + 1][1]);
+                        
+                        // }
+                    }
+                    else
+                    {
+                        // if(keys[key] == numberTest) {
+                        //     console.log("HeatData of " + rfidTest + " for " + keys[key] + ": " + heatData[keys[key]][rfidTest]);
+                        //     console.log("VectorData of position [" + a + "]: " + vectorData[keys[key]][a][1]);
+                        // }
+                        rfid01vectotal += (totalHeatData - vectorData[keys[key]][a][1]);
+                    }
+                }
+                
+            }
+            
+            rfid01vectotal -= stopcount;
+            if(rfidTest == vectorData[keys[key]][vectorData[keys[key]].length - 1][0]) {
+                rfid01vectotal += (vectorData[keys[key]].length - 1);
+            }
+            
+            
+            console.log("Vectormap " + rfidTest + " (" + keys[key] + "): " + rfid01vectotal);
+            // console.log("Stop Count: " + stopcount);
+            
+        }
+        // end of test code
 
         // LOAD MICE TOGGLE SWITCHES
         $scope.mice = [];
@@ -199,7 +274,9 @@ HeatmapApp.controller('HeatmapController', function($scope){
             {
                 vectorChart[miceON[i]] = new vectormap(mouseID, newDataset, {
                     lineColor: mouseColors[mouseLineColor],
-                    mouseIndex: index
+                    mouseIndex: index,
+                    rows: $scope.gridRows,
+                    cols: $scope.gridColumns
                 });
                 
                 vectorGridResize = vectorChart[miceON[i]].getHandler();
