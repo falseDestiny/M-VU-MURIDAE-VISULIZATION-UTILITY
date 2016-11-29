@@ -216,8 +216,12 @@ function VectorGrid() {
             centerPointY2 = y + (boxHeight * options.vectorArray[i].x2) + (boxHeight / 2);
             
             ctx.moveTo(centerPointX + offset_x, centerPointY + offset_y);
+            ctx.arc(centerPointX + offset_x, centerPointY + offset_y, ctx.lineWidth * 2, 0, 2*Math.PI);
+            ctx.moveTo(centerPointX + offset_x, centerPointY + offset_y);
             ctx.lineTo(centerPointX2 + offset_x, centerPointY2 + offset_y);
         }
+        ctx.fillStyle = options.lineColor;
+        ctx.fill();
         ctx.stroke();
         
     };
