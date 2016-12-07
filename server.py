@@ -322,7 +322,8 @@ def data():
             
             #print(myData["data"])
             #session["uploadingData"] = myData["data"] 
-            session["uploadingFileName"] = myData["filename"] 
+            #session["uploadingFileName"] = myData["filename"] 
+            session["uploadingFileName"] = filename
             #print("Done parsing.")
     #        print(session["currentlyUploading"])
     #        print(session["uploadingData"])
@@ -447,7 +448,7 @@ def uploadData(setData):
     try:
         mySimulation = Simulation()
         mySimulation.setUp(dataUploadStorage[session["user_id"]])
-        mySimulation.runFullSim()
+        mySimulation.runNewSim()
     except:
         print("Simulation failed.")
     thesePaths = mySimulation.getAllPaths()
@@ -497,7 +498,8 @@ def checkIfUploading():
 @socketio.on('clearUpload', namespace='/heatmap')
 def clearUpload():
     session["currentlyUploading"] = False
-    del dataUploadStorage[session["user_id"]]
+    if session['user_id'] in dataUploadStorage.keys():
+        del dataUploadStorage[session["user_id"]]
     session["uploadingFileName"] = ""
     
 @socketio.on('getGridToMimic', namespace='/heatmap')

@@ -1,3 +1,5 @@
+from sim import Simulation
+
 # Parser class exists to parse a data file into a dictionary
 # The dictionary could then be pushed into the database
 # Or returned as a dictionary for other uses
@@ -24,44 +26,47 @@ class Parser:
         data = {}
         linecount = 0
         for line in dataFile:
-            # We want to skip the first 27 lines of the data file.
-            linecount += 1
-            if linecount < 28:
-                continue
-            # We also want to ignore blank lines
-            if len(line) < 2:
-                continue
-            # Split the line
-            lineSplit = (line.strip()).split(";")
-            # All the words need to run through the cleanText function.
-            # Also, we're adding trailing zeros to time stamps to make
-            # them all the same length
-            timeStamp = cleanText(lineSplit[0].strip())    
-            while (len(timeStamp) < 16):
-                timeStamp += "0"
-            mouseID = cleanText(lineSplit[1].strip())
-            label = cleanText(lineSplit[2].strip())
-            location = cleanText(lineSplit[3].strip())
-            if len(location) < 6:
-                location = "RFID0" + location[4];
-            
-            
-            duration = cleanText(lineSplit[4].strip())
-            # Build a dictionary for this line
-            line = {"timeStamp":timeStamp, 
-                "label":label,
-                "location":location,
-                "duration":duration
-            }
             #print(line)
-            #if location not in listofLocs:
-            #    listofLocs.append(location)
-            # Add a new mouse if this mouseID isn't already in the data
-            if (mouseID not in data.keys() and (mouseID != "")):
-                data[mouseID] = []
-            # Add this data line to this particular subject
-            if mouseID != "":
+            try:
+                # We want to skip the first 27 lines of the data file.
+                linecount += 1
+                if linecount < 28:
+                    continue
+                # We also want to ignore blank lines
+                if len(line) < 2:
+                    continue
+                # Split the line
+                lineSplit = (line.strip()).split(";")
+                # All the words need to run through the cleanText function.
+                # Also, we're adding trailing zeros to time stamps to make
+                # them all the same length
+                timeStamp = cleanText(lineSplit[0].strip())    
+                while (len(timeStamp) < 16):
+                    timeStamp += "0"
+                mouseID = cleanText(lineSplit[1].strip())
+                label = cleanText(lineSplit[2].strip())
+                location = cleanText(lineSplit[3].strip())
+                if len(location) < 6:
+                    location = "RFID0" + location[4];
+                
+                
+                duration = cleanText(lineSplit[4].strip())
+                # Build a dictionary for this line
+                line = {"timeStamp":timeStamp, 
+                    "label":label,
+                    "location":location,
+                    "duration":duration
+                }
+                #if location not in listofLocs:
+                #    listofLocs.append(location)
+                # Add a new mouse if this mouseID isn't already in the data
+                if (mouseID not in data.keys() and (mouseID != "")):
+                    data[mouseID] = []
+                # Add this data line to this particular subject
                 data[mouseID].append(line)
+            except:
+                print("*** Error ***")
+                print("linecount: %s line: %s", (str(linecount), str(line)))
         metaInfo["data"] = data
         for i in range(1, 26):
             if i < 10:
@@ -70,12 +75,16 @@ class Parser:
                 listofLocs.append("RFID" + str(i))
         listofLocs.sort();
         metaInfo["locations"] = listofLocs
-        metaInfo["filename"] = dataFile.filename
+        #metaInfo["filename"] = dataFile.name
         return metaInfo
 
     def __init__(self, file):
-        self.fileName = file.name
+    #    self.fileName = file.name
+    #    self.data = self.openFile(file)
+        print("Parser created.")
+        self.fileName = file.filename
         self.data = self.openFile(file)
 
     def getData(self):
+        print("Geting Data")
         return self.data

@@ -10,6 +10,8 @@ class Simulation:
             self.mice.append(newMouse)
 
     def tickAll(self):
+        if self.totalTime % 100000 == 0:
+            print(self.totalTime)
         for mouse in self.mice:
             if not mouse.isDone():
                 mouse.tick()
@@ -31,6 +33,9 @@ class Simulation:
         for mouse in self.mice:
             if (not mouse.isDone()):
                 return False
+            else:
+                pass
+                #print(str(mouse.idNum) + " is done. ")
         return True
 
     def keepTime(self, time):
@@ -40,3 +45,15 @@ class Simulation:
     def runFullSim(self):
         while not self.isDone():
             self.tickAll()
+            
+    def runNewSim(self):
+        for mouse in self.mice:
+            #print("Running " + mouse.idNum)
+            mouse.runNewSim()
+            #print("Vector data: ")
+            #print(mouse.getPath())
+            #print("Heat data: ")
+            #print(mouse.getHeatData())
+        print("*************************************")
+        print("I'm done simming.")
+        print("*************************************")

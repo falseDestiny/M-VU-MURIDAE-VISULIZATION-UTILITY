@@ -1,5 +1,4 @@
 
-
 class Mouse:
     def __init__(self, idNum):
         self.moveIndex = 0
@@ -16,24 +15,31 @@ class Mouse:
 
     def setUp(self, data):
         self.data = data
-        self.path.append((self.getLocation(), self.totalTime))  
+        #    if "location" in self.data[self.moveIndex].keys():
+        #        self.path.append((self.getLocation(), self.totalTime))  
+        #except:
+        #    pass
 
     def tick(self):
+        
 #        print("tick ... %s", self.timeCounter)
         self.totalTime += 1
-        if self.timeCounter == int(self.data[self.moveIndex]["duration"]):
-            self.moveIndex += 1
-            if self.moveIndex == len(self.data):
-                self.done = True
-               # print("%s is done",self.idNum)
+        try:
+            if self.timeCounter == int(self.data[self.moveIndex]["duration"]):
+                self.moveIndex += 1
+                if self.moveIndex == len(self.data):
+                    self.done = True
+                # print("%s is done",self.idNum)
+                else:
+                    move = (self.data[self.moveIndex]["location"],self.totalTime)
+                    #print(self.idNum + " " +str(move))
+                    self.path.append(move)
+                    self.timeCounter = 0
             else:
-                move = (self.data[self.moveIndex]["location"],self.totalTime)
-               # print(self.idNum + " " +str(move))
-                self.path.append(move)
-                self.timeCounter = 0
-        else:
-            self.timeCounter += 1
-            self.tickHeatData()
+                self.timeCounter += 1
+                self.tickHeatData()
+        except:
+            pass
 
     def tickHeatData(self):
         location = self.data[self.moveIndex]["location"]
@@ -49,3 +55,17 @@ class Mouse:
 
     def isDone(self):
         return self.done
+        
+    def runNewSim(self):
+        runningTime = 0
+        x = 0
+        #print("Lines: " + str(len(self.data)))
+        while x < (len(self.data)):
+            location = self.data[x]["location"]
+            move = (location,(int(self.data[x]["duration"]) + runningTime))
+            self.path.append(move)
+            runningTime += int(self.data[x]["duration"])
+            if location not in self.heatData.keys():
+                self.heatData[location] = 0
+            self.heatData[location] += int(self.data[x]["duration"])
+            x += 1
