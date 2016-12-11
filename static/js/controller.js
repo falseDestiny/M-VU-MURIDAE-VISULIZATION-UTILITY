@@ -50,13 +50,13 @@ HeatmapApp.controller('HeatmapController', function($scope){
     
     // CONNECT TO SOCKET AND REQUEST DATASET NAMES
     socket.on('connect', function(){
-        console.log('Connected');
+        //console.log('Connected');
         socket.emit('getDatasetNames');
     });
     
     // PUSH DATASET NAMES TO DROPDOWN
     socket.on('datasetnamelist', function(ser) {
-       console.log("Adding " + ser.name + " to list...");
+       //console.log("Adding " + ser.name + " to list...");
        $scope.datasets.push(ser);
        $scope.$apply();
     });
@@ -64,7 +64,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
     // REQUEST SELECTED DATASET MICE
     $scope.loadDataset = function loadDataset() {
         if($scope.selection != $scope.datasets[0].name) {
-            console.log("Loading " + $scope.selection + "...");
+            //console.log("Loading " + $scope.selection + "...");
             
             socket.emit('loadMice', $scope.selection);
         }
@@ -72,6 +72,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
     
     // LOAD, PARSE, AND ASSEMBLE DATA OBJECTS FOR MAPS
     socket.on('returnDataset', function(data) {
+        subjectMap = [];
         
         heatData = JSON.parse(data.data.heatdata);
         vectorData = JSON.parse(data.data.vectdata);
@@ -119,8 +120,8 @@ HeatmapApp.controller('HeatmapController', function($scope){
         }
         
         // test code
-        console.log(heatData);
-        console.log(vectorData);
+        //console.log(heatData);
+        //console.log(vectorData);
         
         for(key = 0; key < Object.keys(keys).length; key++) {
         
@@ -176,7 +177,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
             }
             
             
-            console.log("Vectormap " + rfidTest + " (" + keys[key] + "): " + rfid01vectotal);
+            //console.log("Vectormap " + rfidTest + " (" + keys[key] + "): " + rfid01vectotal);
             // console.log("Stop Count: " + stopcount);
             
         }
@@ -188,7 +189,9 @@ HeatmapApp.controller('HeatmapController', function($scope){
         var z_index = 1;
         var colorKeyArray = Object.keys(mouseColors);
         for(var i in keys) {
-            $scope.mice.push({'list': keys[i], 'label': subjectMap[keys[i]], 'zindex': z_index, 'color': colorKeyArray[z_index - 1]});
+            //console.log("Key: " +String(keys[i]));
+            //console.log(subjectMap[String(keys[i])]);
+            $scope.mice.push({'list': keys[i], 'label': subjectMap[String(keys[i])], 'zindex': z_index, 'color': colorKeyArray[z_index - 1]});
             $scope.$apply();
             
             // Init Toggle Switches
@@ -224,7 +227,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
     // DISPLAY VECTOR MAP
     $scope.showVectorMap = function showVectorMap(mouseID) {
         
-        console.log("Loading vector map for " + mouseID + "...");
+        //console.log("Loading vector map for " + mouseID + "...");
         
         var mousevecdata = vectorData[mouseID]; //$scope.mouseselection];
         var mapping = Object.keys(gridMapping).map(function(k) { return gridMapping[k] });
@@ -269,7 +272,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
                 break;
             }
         }
-        console.log(index);
+        //console.log(index);
         for(var i = 0; i < miceON.length; i++)
         {
             if (mouseID == miceON[i])
@@ -290,7 +293,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
     // DISPLAY HEAT MAP
     $scope.showHeatMap = function showHeatMap() {
         
-        console.log("Loading heatmap...");
+        //console.log("Loading heatmap...");
         
         var mousedata = [];
         
@@ -364,7 +367,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
         
         var mouseID = e.target.className;
         
-        console.log("Toggling " + mouseID);
+        //console.log("Toggling " + mouseID);
         
         if(state) // Turning toggle on
         {
@@ -396,7 +399,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
             
             if ( Object.keys(vectorChart).length > 0 )
             {
-                console.log("Deleting from vectorChart: " + mouseID);
+                //console.log("Deleting from vectorChart: " + mouseID);
                 var vectorGridResize = vectorChart[mouseID].getHandler();
                 window.removeEventListener('resize', vectorGridResize, true);
                 $scope.clearVectorMap(mouseID);
@@ -429,7 +432,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
     $(".vectorToggle").on('switchChange.bootstrapSwitch', function(e, state) { 
         $scope.vectorstate = state;
         
-        console.log("Toggling Vector Maps " + (state ? "on..." : "off..."));
+        //console.log("Toggling Vector Maps " + (state ? "on..." : "off..."));
         
         // if any mouse toggles are on
         if (miceON.length > 0)
@@ -443,7 +446,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
                 }
                 else // TURN OFF VECTOR MAPS
                 {
-                    console.log("Deleting from vectorChart: " + miceON[i]);
+                    //console.log("Deleting from vectorChart: " + miceON[i]);
                     var vectorGridResize = vectorChart[miceON[i]].getHandler();
                     window.removeEventListener('resize', vectorGridResize, true);
                     $scope.clearVectorMap(miceON[i]);
@@ -548,6 +551,7 @@ HeatmapApp.controller('UploadController', function($scope){
     });
     
     socket.on('finishedUploading', function(){
+        $scope.popup_hide("processingPopUp");
         $scope.datasets = [];
         socket.emit('getDatasetNames');
     });
@@ -590,7 +594,7 @@ HeatmapApp.controller('UploadController', function($scope){
     
     
     socket.on('showSubjectMap', function(subjects){
-        console.log("Showing subjects ...");
+       // console.log("Showing subjects ...");
         for(var item in subjects){
             var thisItem = {};
             thisItem["subject"] = subjects[item][0];
@@ -601,7 +605,7 @@ HeatmapApp.controller('UploadController', function($scope){
         //$scope.subjectMap = subjects;
         //console.log(subjects.length);
         //$scope.numberOfSubjects = subjects.length;
-        console.log($scope.subjectMap);
+        //console.log($scope.subjectMap);
         $scope.popup_show("subjectsPopUp");
     });
     
@@ -679,7 +683,7 @@ HeatmapApp.controller('UploadController', function($scope){
             document.getElementById('completeUpload').setAttribute("disabled","true");
         }
         else if(dataSetNames.indexOf($scope['thisFileName']) != -1){
-            console.log("Duplicate file name.");
+            //console.log("Duplicate file name.");
             document.getElementById('completeUpload').setAttribute("disabled","true");
         }
         else{
@@ -710,6 +714,7 @@ HeatmapApp.controller('UploadController', function($scope){
     
     $scope.completeUpload = function completeUpload(){
         $scope.popup_hide("finalizeUpload");
+        $scope.popup_show("processingPopUp")
         var finalOutput = [];
         finalOutput.push($scope.thisFileName);
         finalOutput.push($scope.rowsInt);
@@ -788,9 +793,8 @@ HeatmapApp.controller('UploadController', function($scope){
     };
     
     $scope.editSet = function editSet(){
-        socket.emit("loadGrid", $scope.displayName);
         $scope.tempName = $scope.displayName;
-        $scope.popup_show("editPopUp");
+        socket.emit("loadGrid", $scope.displayName);
     };
     
     $scope.saveEdits = function saveEdits(){
@@ -808,6 +812,7 @@ HeatmapApp.controller('UploadController', function($scope){
         
         finalOutput.push(locMap);
         finalOutput.push($scope.displayName);
+        finalOutput.push($scope.subjectMap);
         socket.emit('finishUpdate', finalOutput);
         
         $scope.datasets = [];
@@ -865,6 +870,14 @@ HeatmapApp.controller('UploadController', function($scope){
         }
         
         if(!failed){
+            for(var item in $scope.subjectMap){
+                if($scope.subjectMap[item].label==""){
+                    failed=true;
+                }
+            }
+        }
+        
+        if(!failed){
             document.getElementById('saveEditsButton').removeAttribute("disabled");
         }
         else{
@@ -882,8 +895,24 @@ HeatmapApp.controller('UploadController', function($scope){
                $scope.locationMap[i][j] = grid[thisKey];
            }
        }
+       $scope.$apply();
+       socket.emit("loadSubMap", $scope.displayName);
     });
     
+    socket.on('setLoadedSubMap', function(grid){
+        $scope.subjectMap = [];
+        
+        for (var line in grid) {
+            if (grid.hasOwnProperty(line)) {
+                var thisItem = {};
+                thisItem["subject"] = line;
+                thisItem["label"] = grid[line];
+                $scope.subjectMap.push(thisItem);
+            }
+        }
+        $scope.$apply();
+        $scope.popup_show("editPopUp");
+    });
     
     socket.on('deletedSet', function(){
        $scope.popup_hide("deletePopUp");  
@@ -949,12 +978,12 @@ HeatmapApp.controller('UserController', function($scope){
     $scope.changeformdata = {};
     
     socket.on('connect', function(){
-        console.log('Connected');
+        //console.log('Connected');
         socket.emit('getUsers');
     });
     
     socket.on('returnUsers', function(users) {
-       console.log('Retrieving Users...');
+       //console.log('Retrieving Users...');
        
        $scope.users = [];
        for (var user in users)
@@ -963,7 +992,7 @@ HeatmapApp.controller('UserController', function($scope){
            $scope.$apply();
        }
        
-       console.log($scope.users);
+       //console.log($scope.users);
     });
     
     socket.on('redirect', function (data) {
@@ -997,7 +1026,7 @@ HeatmapApp.controller('UserController', function($scope){
         }
         else if(passedDiv == "changePasswordPopup") {
             $scope.passName = value;
-            console.log("changing password for " + $scope.passName);
+            //console.log("changing password for " + $scope.passName);
             
             // Reset the form
             angular.copy({}, $scope.changeformdata);
@@ -1024,14 +1053,14 @@ HeatmapApp.controller('UserController', function($scope){
     
     // DELETE USER
     $scope.delete_user = function delete_user() {
-        console.log("Deleting " + $scope.deleteName + "...");
+        //console.log("Deleting " + $scope.deleteName + "...");
         socket.emit('deleteUser', $scope.deleteName);
         $scope.popup_hide("deleteUserPopup");
     };
     
     // MESSAGE BOX
     socket.on('loadMessageBox', function(message) {
-        console.log(message);
+       // console.log(message);
         $scope.MessageBoxMessage = message;
         $scope.$apply();
         

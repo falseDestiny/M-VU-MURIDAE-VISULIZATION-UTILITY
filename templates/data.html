@@ -56,12 +56,25 @@
 								</table>
 							<h3>Note all locations must be set to an RFID or '---', and no RFID may be duplicated.</h3>	
 							
+							<h3> Set subject labels </h3>
+			                <table class="table table-block table-responsive">
+								<tbody>
+									<tr ng-repeat="sub in subjectMap">
+										<td>
+											{% raw %} {{sub.subject}}{% endraw %}
+										</td>
+										<td>
+											<input name="{% raw %} {{sub.subject}}{% endraw %}" class="btn btn-default" ng-model="sub.label" ng-change="checkEdit()" >
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							
 							<h3>Change the data set name</h3>
 		                	<h3>Note a data set name must be unique in the database.</h3>
 		                	<div class="btn-flex-submit">
 								<input type="text" id="fileNameButton" class="form-control" ng-model="tempName" ng-change="checkEdit()">
 							</div>
-							
 	                		
 			                <div class="btn-group btn-flex">
 		                        <button type="button" id="saveEditsButton" class="btn btn-default" ng-click="saveEdits()" disabled="True">SAVE CHANGES</button>
@@ -92,6 +105,15 @@
 	                </div>
                 </div>
                 <!--GRID OPTIONS POPUP ENDS HERE -->
+                
+                <!--PROCESSING POPUP STARTS HERE -->
+                <div id="processingPopUp">
+	                <div class="panel loginbox popupdiv wide-popupdiv">
+	                	<h1>Processing. Please wait ... </h1>
+	                	<br />
+	                </div>
+                </div>
+                <!--PROCESSING POPUP ENDS HERE -->
                 
                 <!--MIMIC GRID POPUP STARTS HERE -->
                 <div id="mimicGridPopUp">

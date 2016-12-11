@@ -241,6 +241,19 @@ def convertVectorString(longstring):
     #print(final)
     return final
     
+def convertSubjectString(longstring):
+    finalDict = {}
+    trimmedStr = longstring[3:-3]
+    trimmedSplit = trimmedStr.split(", ")
+    for string in trimmedSplit:
+        strSplit = string.split(": ")
+        holdSub = strSplit[0].strip('"')
+        while len(holdSub) < 10:
+            holdSub = str(0) + holdSub
+        finalDict[holdSub] = strSplit[1].strip('"')
+    return finalDict
+        
+    
     
     # For a given file, return whether it's an allowed type or not
 
@@ -489,9 +502,10 @@ def finishUpdate(setData):
     rows = str(setData[1])
     cols = str(setData[2])
     getLocations = parseLocations(rows, cols, setData[3])
+    getSubjectMap = parseSubjectMap(setData[5])
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("UPDATE datasets SET datasetname = %s, locationmap = %s WHERE datasetname = %s", (newFileName,  json.dumps(getLocations), oldFileName))
+    cur.execute("UPDATE datasets SET datasetname = %s, locationmap = %s, subjectmap = %s WHERE datasetname = %s", (newFileName,  json.dumps(getLocations), json.dumps(getSubjectMap), oldFileName))
     db.commit()
     cur.close()
     db.close()
@@ -539,6 +553,17 @@ def loadGrid(gridName):
     result = cur.fetchone()
     finalResult = convertLocationString(result[0])
     emit('setLoadedGrid', finalResult)
+    cur.close()
+    db.close()
+    
+@socketio.on('loadSubMap', namespace='/heatmap')
+def loadSubMap(gridName):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT subjectmap FROM datasets WHERE datasetname = '%s';" % (gridName))
+    result = cur.fetchone()
+    finalResult = convertSubjectString(result[0])
+    emit('setLoadedSubMap', finalResult)
     cur.close()
     db.close()
     
@@ -832,6 +857,8 @@ def loadMice(dataset):
     # grab the dataset for the passed selection
     cur.execute("SELECT heatdata, vectordata, locationmap, subjectmap FROM datasets WHERE datasetname = %s;", (dataset,))
     result = cur.fetchone()
+    
+    print(result['subjectmap'])
     
     emit('returnDataset', {
         'data': {
