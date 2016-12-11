@@ -24,6 +24,8 @@ class Parser:
         listofLocs = []
         
         data = {}
+        subjectAdded = []
+        subjectMap = []
         linecount = 0
         for line in dataFile:
             #print(line)
@@ -63,11 +65,21 @@ class Parser:
                 if (mouseID not in data.keys() and (mouseID != "")):
                     data[mouseID] = []
                 # Add this data line to this particular subject
+                if (str(mouseID) not in subjectAdded):
+                    subjectAdded.append(str(mouseID))
+                    thisSub = []
+                    thisSub.append(str(mouseID))
+                    if (str(label)).lower()=="unknown":
+                        thisSub.append(str(mouseID))
+                    else:
+                        thisSub.append(str(label))
+                    subjectMap.append(thisSub)
                 data[mouseID].append(line)
             except:
                 print("*** Error ***")
                 print("linecount: %s line: %s", (str(linecount), str(line)))
         metaInfo["data"] = data
+        metaInfo["subjects"] = subjectMap
         for i in range(1, 26):
             if i < 10:
                 listofLocs.append("RFID0" + str(i))

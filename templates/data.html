@@ -205,6 +205,30 @@
             	</div>
         	</div>
             <!--FINALIZE UPLOAD ENDS HERE -->
+            
+            
+            <!--LABEL SUBJECTS STARTS HERE -->
+                <div id="subjectsPopUp">
+	                <div class="panel loginbox popupdiv extrawide-popupdiv">
+	                	<h1> Set subject labels </h1>
+		                <table class="table table-block table-responsive">
+							<tbody>
+								<tr ng-repeat="sub in subjectMap">
+									<td>
+										{% raw %} {{sub.subject}}{% endraw %}
+									</td>
+									<td>
+										<input name="{% raw %} {{sub.subject}}{% endraw %}" class="btn btn-default" ng-model="sub.label" ng-change="checkLabels()" >
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div class="btn-group btn-flex">
+                        	<button id="setSubjectLabels" ng-click="finalizeSubjectLabels()" type="button" class="btn btn-default" >Set Labels</button>
+                		</div>
+                	</div>
+	        	</div>
+            <!--LABEL SUBJECTS ENDS HERE -->
                 
                 <!-- ##################### END POPUPS ###################### -->
                     

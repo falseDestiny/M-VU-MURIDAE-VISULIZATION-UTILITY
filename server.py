@@ -258,6 +258,19 @@ def parseLocations(rows, cols, setData):
             locations[str(thisIndex)] = str(setData[thisIndex])
     return locations         
 
+def parseSubjectMap(data):
+    subjectMap = {}
+    for entry in data:
+        thisSubject = ""
+        thisValue = ""
+        for key in entry.keys():
+            if (str(key)) == "subject":
+                thisSubject = str(entry[key])
+            if (str(key)) == "label":
+                thisValue = str(entry[key])
+        subjectMap[thisSubject] = thisValue
+    return subjectMap
+
 
 ################################################################################
 #################################### ROUTES ####################################
@@ -318,7 +331,7 @@ def data():
             session["currentlyUploading"] = True
             #print(session.keys())
             #print(myData)
-            dataUploadStorage[session["user_id"]] = myData["data"]
+            dataUploadStorage[session["user_id"]] = myData
             
             #print(myData["data"])
             #session["uploadingData"] = myData["data"] 
@@ -447,7 +460,7 @@ def makeConnection():
 def uploadData(setData):
     try:
         mySimulation = Simulation()
-        mySimulation.setUp(dataUploadStorage[session["user_id"]])
+        mySimulation.setUp(dataUploadStorage[session["user_id"]]["data"])
         mySimulation.runNewSim()
     except:
         print("Simulation failed.")
@@ -457,9 +470,10 @@ def uploadData(setData):
     rows = str(setData[1])
     cols = str(setData[2])
     getLocations = parseLocations(rows, cols, setData[3])
+    getSubjectMap = parseSubjectMap(setData[4])
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap) VALUES (%s, %s, %s, %s, %s)", (thisFileName, 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations)))
+    cur.execute("INSERT INTO datasets (datasetname, userid, heatdata, vectordata, locationmap, subjectmap) VALUES (%s, %s, %s, %s, %s, %s)", (thisFileName, 1, json.dumps(theseHeatMaps), json.dumps(thesePaths), json.dumps(getLocations), json.dumps(getSubjectMap)))
     db.commit()
     cur.close()
     db.close()
@@ -513,6 +527,10 @@ def getGridToMimic(gridName):
     cur.close()
     db.close()
     
+@socketio.on('getSubjectMap', namespace='/heatmap')
+def getSubjectMap():
+    emit('showSubjectMap', dataUploadStorage[session["user_id"]]["subjects"])
+    
 @socketio.on('loadGrid', namespace='/heatmap')
 def loadGrid(gridName):
     db = connectToDB()
@@ -551,6 +569,7 @@ def deleteSet(setName):
     emit('deletedSet')
     cur.close()
     db.close()
+    
 
 
 ############################################################
@@ -811,14 +830,15 @@ def loadMice(dataset):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     # grab the dataset for the passed selection
-    cur.execute("SELECT heatdata, vectordata, locationmap FROM datasets WHERE datasetname = %s;", (dataset,))
+    cur.execute("SELECT heatdata, vectordata, locationmap, subjectmap FROM datasets WHERE datasetname = %s;", (dataset,))
     result = cur.fetchone()
     
     emit('returnDataset', {
         'data': {
             'heatdata': result['heatdata'],
             'vectdata': result['vectordata'],
-            'mapping': result['locationmap']
+            'mapping': result['locationmap'],
+            'subjects': result['subjectmap']
         }
     })
     

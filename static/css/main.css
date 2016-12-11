@@ -682,7 +682,7 @@ hr {
 
 /* START USER MANAGEMENT */
 /* POPUP BOX */
-#deleteUserPopup, #createUserPopup, #changePasswordPopup, #headerHide, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp, #deletePopUp, #editPopUp {
+#deleteUserPopup, #createUserPopup, #changePasswordPopup, #headerHide, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp, #deletePopUp, #editPopUp, #subjectsPopUp {
 	position: fixed;
 	width: 100%;
 	top: 0;
@@ -696,7 +696,7 @@ hr {
 	overflow:auto;
 }
 
-#deleteUserPopup, #createUserPopup, #changePasswordPopup, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp, #deletePopUp, #editPopUp {
+#deleteUserPopup, #createUserPopup, #changePasswordPopup, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp, #deletePopUp, #editPopUp, #subjectsPopUp {
 	height: 100%;
 	z-index:1000;
 }

@@ -36,6 +36,7 @@ CREATE TABLE datasets (
     vectorData json NOT NULL,
     locationMap json NOT NULL,
     datasetName text NOT NULL,
+    subjectMap json NOT NULL,
     UNIQUE (datasetID)
 );
 

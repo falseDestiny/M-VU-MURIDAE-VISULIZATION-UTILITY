@@ -19,6 +19,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
     var heatData = [];
     var vectorData = [];
     var mapping = [];
+    var subjectMap = [];
     
     var size = 0;
     var keys = [];
@@ -75,6 +76,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
         heatData = JSON.parse(data.data.heatdata);
         vectorData = JSON.parse(data.data.vectdata);
         mapping = JSON.parse(data.data.mapping);
+        subjectMap = JSON.parse(data.data.subjects);
         
         // GET SIZE OF GRID (subtract rows and columns entries)
         size = Object.keys(mapping).length - 3;
@@ -186,7 +188,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
         var z_index = 1;
         var colorKeyArray = Object.keys(mouseColors);
         for(var i in keys) {
-            $scope.mice.push({'list': keys[i], 'zindex': z_index, 'color': colorKeyArray[z_index - 1]});
+            $scope.mice.push({'list': keys[i], 'label': subjectMap[keys[i]], 'zindex': z_index, 'color': colorKeyArray[z_index - 1]});
             $scope.$apply();
             
             // Init Toggle Switches
@@ -514,6 +516,7 @@ HeatmapApp.controller('UploadController', function($scope){
         $scope.rowsInt = 0;
         $scope.colsInt = 0;
         $scope.locationMap = [];
+        $scope.subjectMap = [];
         $scope.mimicedGrid = "";
         $scope.thisFileName = "thisisasamplefilename";
         socket.emit('checkUploading');
@@ -582,10 +585,31 @@ HeatmapApp.controller('UploadController', function($scope){
                $scope.locationMap[i][j] = grid[thisKey];
            }
        }
-       socket.emit('getSetName');
-       
-       $scope.popup_show("finalizeUpload");
+       socket.emit('getSubjectMap');
     });
+    
+    
+    socket.on('showSubjectMap', function(subjects){
+        console.log("Showing subjects ...");
+        for(var item in subjects){
+            var thisItem = {};
+            thisItem["subject"] = subjects[item][0];
+            thisItem["label"] = subjects[item][1];
+            $scope.subjectMap.push(thisItem);
+            $scope.$apply();
+        }
+        //$scope.subjectMap = subjects;
+        //console.log(subjects.length);
+        //$scope.numberOfSubjects = subjects.length;
+        console.log($scope.subjectMap);
+        $scope.popup_show("subjectsPopUp");
+    });
+    
+    $scope.finalizeSubjectLabels = function finalizeSubjectLabels(){
+        $scope.popup_hide("subjectsPopUp");
+        socket.emit('getSetName');
+        $scope.popup_show("finalizeUpload");
+    };
     
     $scope.defineGrid = function defineGrid() {
         $scope.popup_hide("gridOptionPopUp");
@@ -663,11 +687,20 @@ HeatmapApp.controller('UploadController', function($scope){
         }
     };
     
+        
+    $scope.checkLabels = function checkLabels(){
+        document.getElementById('setSubjectLabels').removeAttribute("disabled");
+        for(var item in $scope.subjectMap){
+            if($scope.subjectMap[item].label==""){
+                document.getElementById('setSubjectLabels').setAttribute("disabled", "true");
+            }
+        }
+    };
+    
     
     $scope.confirmGridDef = function confirmGridDef(){
         $scope.popup_hide("defineGridPopUp");
-        $scope.popup_show("finalizeUpload");
-        socket.emit('getSetName');
+        socket.emit('getSubjectMap');
     };
     
     $scope.dontFinalize = function dontFinalize(){
@@ -689,6 +722,7 @@ HeatmapApp.controller('UploadController', function($scope){
         }
         
         finalOutput.push(locMap);
+        finalOutput.push($scope.subjectMap);
         socket.emit('finishUpload', finalOutput);
     };
     
