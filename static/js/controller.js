@@ -592,7 +592,6 @@ HeatmapApp.controller('UploadController', function($scope){
        socket.emit('getSubjectMap');
     });
     
-    
     socket.on('showSubjectMap', function(subjects){
        // console.log("Showing subjects ...");
         for(var item in subjects){
@@ -690,7 +689,6 @@ HeatmapApp.controller('UploadController', function($scope){
             document.getElementById('completeUpload').removeAttribute("disabled");
         }
     };
-    
         
     $scope.checkLabels = function checkLabels(){
         document.getElementById('setSubjectLabels').removeAttribute("disabled");
@@ -700,7 +698,6 @@ HeatmapApp.controller('UploadController', function($scope){
             }
         }
     };
-    
     
     $scope.confirmGridDef = function confirmGridDef(){
         $scope.popup_hide("defineGridPopUp");
@@ -730,7 +727,6 @@ HeatmapApp.controller('UploadController', function($scope){
         finalOutput.push($scope.subjectMap);
         socket.emit('finishUpload', finalOutput);
     };
-    
     
     $scope.checkGrid = function checkGrid(){
         
@@ -911,6 +907,23 @@ HeatmapApp.controller('UploadController', function($scope){
             }
         }
         $scope.$apply();
+        
+        // fix width of popup
+        var editDiv = document.getElementById("editPopupID");
+        editDiv.className = "panel loginbox popupdiv edit";
+        if ($scope.colsInt <= 5) {
+            editDiv.className += " editPopupFive";
+        }
+        else if($scope.colsInt == 6) {
+            editDiv.className += " editPopupSix";
+        }
+        else if($scope.colsInt == 7) {
+            editDiv.className += " editPopupSeven";
+        }
+        else if($scope.colsInt == 8) {
+            editDiv.className += " editPopupEight";
+        }
+        
         $scope.popup_show("editPopUp");
     });
     

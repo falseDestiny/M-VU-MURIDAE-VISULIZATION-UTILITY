@@ -17,74 +17,74 @@
 			<!-- CONTENT PANEL -->
 			<div class="col-xs-12 col-md-8 col-lg-9">
 				<div class="panel">
-                    <!--GENERIC POPUP STARTS HERE -->
-                    <div id="genericPopUp">
-		                <div class="panel loginbox popupdiv">
-		                	<h2 align="center">It's an empty pop up!</h2>
-		                </div>
-                    </div>
-                    <!--GENERIC POPUP ENDS HERE -->
-                    
-                    <!--DELETE POPUP STARTS HERE -->
-                    <div id="deletePopUp">
-                    	<div class="panel loginbox popupdiv">
-	                    	<h4 align="center"><br/>Are you sure you want to delete this data set? </h4>
-			                <div class="btn-group btn-flex">
-		                        <button type="button" class="btn btn-default" ng-click="deleteSet()" >CONFIRM DELETE</button>
-		                    </div>
-		                    <div class="btn-group btn-flex">
-	                            <button type="button" class="btn btn-default" ng-click="cancelDelete()" >CANCEL</button>
-	                        </div>
-	                         <br />
-		                </div>
-                    </div>
-                    <!--DELETE POPUP ENDS HERE -->
-                    
-                    <!--EDIT POPUP STARTS HERE -->
-                    <div id="editPopUp">
-                    	<div class="panel loginbox popupdiv wide-popupdiv" style="width:500px;">
-                    		<table class="table table-block table-responsive">
-										<tbody>
-											<tr ng-repeat="i in [] | range:rowsInt">
-												<td ng-repeat="j in [] | range:colsInt">
-													<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[$parent.$index][$index]" ng-change="checkEdit()" >
-														<option ng-repeat="rf in sensors" value="{% raw %}{{rf}}{% endraw %}">{% raw %}{{ rf }}{% endraw %}</option>
-													</select>
-												</td>
-											</tr>
-										</tbody>
-								</table>
-							<h3>Note all locations must be set to an RFID or '---', and no RFID may be duplicated.</h3>	
-							
-							<h3> Set subject labels </h3>
-			                <table class="table table-block table-responsive">
-								<tbody>
-									<tr ng-repeat="sub in subjectMap">
-										<td>
-											{% raw %} {{sub.subject}}{% endraw %}
-										</td>
-										<td>
-											<input name="{% raw %} {{sub.subject}}{% endraw %}" class="btn btn-default" ng-model="sub.label" ng-change="checkEdit()" >
-										</td>
-									</tr>
-								</tbody>
-							</table>
-							
-							<h3>Change the data set name</h3>
-		                	<h3>Note a data set name must be unique in the database.</h3>
-		                	<div class="btn-flex-submit">
-								<input type="text" id="fileNameButton" class="form-control" ng-model="tempName" ng-change="checkEdit()">
-							</div>
-	                		
-			                <div class="btn-group btn-flex">
-		                        <button type="button" id="saveEditsButton" class="btn btn-default" ng-click="saveEdits()" disabled="True">SAVE CHANGES</button>
-		                    </div>
-		                    <div class="btn-group btn-flex">
-	                            <button type="button" class="btn btn-default" ng-click="cancelEdit()" >CANCEL</button>
-	                        </div>
-	                         <br />
-		                </div>
+                <!--GENERIC POPUP STARTS HERE -->
+                <div id="genericPopUp">
+	                <div class="panel loginbox popupdiv">
+	                	<h2 align="center">It's an empty pop up!</h2>
 	                </div>
+                </div>
+                <!--GENERIC POPUP ENDS HERE -->
+                
+                <!--DELETE POPUP STARTS HERE -->
+                <div id="deletePopUp">
+                	<div class="panel loginbox popupdiv">
+                    	<h4 align="center"><br/>Are you sure you want to delete this data set? </h4>
+		                <div class="btn-group btn-flex">
+	                        <button type="button" class="btn btn-default" ng-click="deleteSet()" >CONFIRM DELETE</button>
+	                    </div>
+	                    <div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="cancelDelete()" >CANCEL</button>
+                        </div>
+                         <br />
+	                </div>
+                </div>
+                <!--DELETE POPUP ENDS HERE -->
+                
+                <!--EDIT POPUP STARTS HERE -->
+                <div id="editPopUp">
+                	<div id="editPopupID" class="panel loginbox popupdiv edit">
+                		<table class="table table-block table-responsive">
+									<tbody>
+										<tr ng-repeat="i in [] | range:rowsInt">
+											<td ng-repeat="j in [] | range:colsInt">
+												<select name="{% raw %}{{ i }} {%endraw%}--{%raw %}{{ j }} {% endraw%}" class="btn btn-default" ng-model="locationMap[$parent.$index][$index]" ng-change="checkEdit()" >
+													<option ng-repeat="rf in sensors" value="{% raw %}{{rf}}{% endraw %}">{% raw %}{{ rf }}{% endraw %}</option>
+												</select>
+											</td>
+										</tr>
+									</tbody>
+							</table>
+						<h3>Note all locations must be set to an RFID or '---', and no RFID may be duplicated.</h3>	
+						
+						<h3> Set subject labels </h3>
+		                <table class="table table-block table-responsive">
+							<tbody>
+								<tr ng-repeat="sub in subjectMap">
+									<td>
+										{% raw %} {{sub.subject}}{% endraw %}
+									</td>
+									<td>
+										<input name="{% raw %} {{sub.subject}}{% endraw %}" class="btn btn-default" ng-model="sub.label" ng-change="checkEdit()" >
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						
+						<h3>Change the data set name</h3>
+	                	<h3>Note a data set name must be unique in the database.</h3>
+	                	<div class="btn-flex-submit">
+							<input type="text" id="fileNameButton" class="form-control" ng-model="tempName" ng-change="checkEdit()">
+						</div>
+                		
+		                <div class="btn-group btn-flex">
+	                        <button type="button" id="saveEditsButton" class="btn btn-default" ng-click="saveEdits()" disabled="True">SAVE CHANGES</button>
+	                    </div>
+	                    <div class="btn-group btn-flex">
+                            <button type="button" class="btn btn-default" ng-click="cancelEdit()" >CANCEL</button>
+                        </div>
+                         <br />
+	                </div>
+                </div>
                 <!--EDIT POPUP ENDS HERE -->
                
                 <!--GRID OPTIONS POPUP STARTS HERE -->
@@ -162,7 +162,7 @@
 		                		<option value = "7">7</option>
 		                		<option value = "8">8</option>
 		                	</select>
-		                	<div class="btn-group btn-flex">
+		                	<div class="btn-group btn-flex btn-flex-last">
 		                            <button type="button" class="btn btn-default" ng-click="getGridSelector()" >DEFINE GRID</button>
 		                    </div>
                 	</div>
@@ -190,7 +190,7 @@
 						<div class="btn-group btn-flex">
                             <button id="checkedGrid" type="button" class="btn btn-default" ng-click="confirmGridDef()" disabled="True">CONTINUE</button>
                     	</div>
-	                	<div class="btn-group btn-flex">
+	                	<div class="btn-group btn-flex btn-flex-last">
                             <button type="button" class="btn btn-default" ng-click="cancelGridDef()" >CANCEL</button>
                     	</div>
                     	
@@ -200,7 +200,7 @@
                     
                 <!--FINALIZE UPLOAD STARTS HERE -->
                 <div id="finalizeUpload">
-	                <div class="panel loginbox popupdiv">
+	                <div class="panel loginbox popupdiv finalizePopup">
 	                	<table class="table table-block table-responsive">
 									<tbody>
 										<tr ng-repeat="i in [] | range:rowsInt">
@@ -220,18 +220,17 @@
 					<div class="btn-group btn-flex">
                         <button id="completeUpload" type="button" class="btn btn-default" ng-click="completeUpload()" disabled="True">Complete Upload</button>
                 	</div>
-                	<div class="btn-group btn-flex">
+                	<div class="btn-group btn-flex btn-flex-last">
                         <button type="button" class="btn btn-default" ng-click="dontFinalize()" >CANCEL</button>
                 	</div>
                 	
             	</div>
         	</div>
-            <!--FINALIZE UPLOAD ENDS HERE -->
+            	<!--FINALIZE UPLOAD ENDS HERE -->
             
-            
-            <!--LABEL SUBJECTS STARTS HERE -->
+            	<!--LABEL SUBJECTS STARTS HERE -->
                 <div id="subjectsPopUp">
-	                <div class="panel loginbox popupdiv extrawide-popupdiv">
+	                <div class="panel loginbox popupdiv subjectsPopup">
 	                	<h1> Set subject labels </h1>
 		                <table class="table table-block table-responsive">
 							<tbody>
@@ -245,12 +244,12 @@
 								</tr>
 							</tbody>
 						</table>
-						<div class="btn-group btn-flex">
+						<div class="btn-group btn-flex btn-flex-last">
                         	<button id="setSubjectLabels" ng-click="finalizeSubjectLabels()" type="button" class="btn btn-default" >Set Labels</button>
                 		</div>
                 	</div>
 	        	</div>
-            <!--LABEL SUBJECTS ENDS HERE -->
+            	<!--LABEL SUBJECTS ENDS HERE -->
                 
                 <!-- ##################### END POPUPS ###################### -->
                     
