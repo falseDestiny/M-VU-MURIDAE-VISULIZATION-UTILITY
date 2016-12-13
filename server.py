@@ -63,7 +63,8 @@ def connectToDB():
     try:
         return psycopg2.connect(connectionString)
     except:
-        print("Can't connect to database")
+        #print("Can't connect to database")
+        pass
 
 
 ################################################################################
@@ -408,20 +409,20 @@ def sendAccessCode():
     accessCode = ''.join(random.SystemRandom().choice(chars) for _ in range(10))
     globalAccess['accessCode'] = accessCode
     
-    print accessCode
+    #print accessCode
     session["accessCode"]=accessCode   
     if request.method == 'GET':
         return render_template('sendaccesscode.html', currentpage = 'sendaccesscode')
         
     # get email from form
     session["email"] = request.form['email']
-    print "User email is ."+session["email"]
+    #print "User email is ."+session["email"]
 
     # check to see if user exists
-    print "Checking username...."
+    #print "Checking username...."
     cur.execute("SELECT email FROM users WHERE email = %s;", (session["email"],))
     if cur.fetchone():
-        print "Checking message...."
+        #print "Checking message...."
             
         # prepare the email to be sent, include message with random access code  
         msg = Message('MVU Password', sender = 'mvuwebapp@yahoo.com', recipients = [session["email"]])
@@ -430,7 +431,7 @@ def sendAccessCode():
             "It does not indicate that the application is in any danger of being accessed by someone else.\n\n" + \
             "The access code to reset your password is: " +str(accessCode) 
         mail.send(msg)
-        print "Mail Sent."
+        #print "Mail Sent."
     else:
         return render_template('sendaccesscode.html', currentpage='sendaccesscode', bad_account='bademail', account_created='false')
             
@@ -447,9 +448,10 @@ def confirmAccessCode():
     inputcode = request.form['inputCode']
     
     # check to see codes match
-    print "Checking access code...."
+    #print "Checking access code...."
     if (inputcode == session["accessCode"]):
-        print "YAHYAYAYAY"
+        #print "YAHYAYAYAY"
+        pass
     else:
         return render_template('confirmaccesscode.html', currentpage='confirmaccesscode', email=session["email"], bad_account='badcode', access_code_match='false')
             
@@ -464,22 +466,22 @@ def createNewPassword():
         return render_template('createnewpassword.html', currentpage = 'confirmaccesscode')
     
     # get passwords from the form
-    print "Get matching passwords...."
+    #print "Get matching passwords...."
     password = request.form['password']
     retypepassword = request.form['retypepassword']
     
     # check to see if passwords match
-    print "Checking for matching passwords...."
+    #print "Checking for matching passwords...."
     if (password != retypepassword):
         return render_template('createnewpassword.html', currentpage='createnewpassword', bad_account='passwords_dont_match', account_created='false')
             
     # try to insert new password        
     try:
-        print("Inserting password...")
+        #print("Inserting password...")
         passwordInsertQuery = "UPDATE users SET password = crypt(%s, gen_salt('bf')) WHERE email = %s;"
         cur.execute(passwordInsertQuery, (password, session["email"]))
     except:
-        print("Error Inserting password...")
+        #print("Error Inserting password...")
         db.rollback()
     db.commit()
     
@@ -504,7 +506,8 @@ def uploadData(setData):
         mySimulation.setUp(dataUploadStorage[session["user_id"]]["data"])
         mySimulation.runNewSim()
     except:
-        print("Simulation failed.")
+        #print("Simulation failed.")
+        pass
     thesePaths = mySimulation.getAllPaths()
     theseHeatMaps = mySimulation.getAllHeatData()
     thisFileName = str(setData[0])
@@ -664,7 +667,8 @@ def getUsers():
         
         emit('returnUsers', userdata)
     else:
-        print("Error retrieving users from database...");
+        #print("Error retrieving users from database...");
+        pass
 
 @socketio.on('createDaUser', namespace='/heatmap')
 def createDaUser(formdata):
@@ -684,35 +688,35 @@ def createDaUser(formdata):
         usertype = "true"
     
     # Check for username
-    print("Checking username....")
+    #print("Checking username....")
     usernameExists = False
     checkUserQuery = "SELECT username FROM users WHERE username = %s;"
     cur.execute(checkUserQuery, (username,))
     if cur.fetchone():
         #username found - throw error
         error_message = "Sorry, the username '" + username + "' already exists!"
-        print(error_message)
+        #print(error_message)
         emit('loadMessageBox', error_message)
         usernameExists = True
     
     # Attempt to create user
     if not usernameExists:
         usernameInsertGood = True
-        print("Attempting to create user....")
+        #print("Attempting to create user....")
         try:
             createUserQuery = "INSERT INTO users (username, password, email, admin) VALUES (%s, crypt(%s, gen_salt('bf')), %s, %s);"
             cur.execute(createUserQuery, (username, password, email, usertype))
         except:
             usernameInsertGood = False
             errormessage = "Whoops! User Creation Failed!"
-            print(errormessage)
+            #print(errormessage)
             emit('loadMessageBox', errormessage)
             db.rollback()
         db.commit()
         
         # Check to see if user was created
         if usernameInsertGood:
-            print("Checking success of user creation....")
+            #print("Checking success of user creation....")
             cur.execute(checkUserQuery, (username,))
             if cur.fetchone():
                 # user created
@@ -721,7 +725,7 @@ def createDaUser(formdata):
                 emit('loadMessageBox', success_message)
             else:
                 errormessage = "Whoops! User Creation Failed!"
-                print(errormessage)
+                #print(errormessage)
                 emit('loadMessageBox', errormessage)
     
     cur.close()
@@ -737,35 +741,35 @@ def changeUserPassword(changeformdata):
     matchpassword = changeformdata['matchpassword']
     
     # Check to see if user exists
-    print("Checking for username....")
+    #print("Checking for username....")
     errorCheckPass = False
     checkUserQuery = "SELECT username FROM users WHERE username = %s;"
     cur.execute(checkUserQuery, (username,))
     if cur.fetchone():
-        print("Username found")
+        #print("Username found")
         errorCheckPass = True
     else:
         errorMessage = "ERROR: Username not found."
-        print(errorMessage)
+        #print(errorMessage)
         emit('loadMessageBox', errorMessage);
     
     # make sure passwords match
     if password != matchpassword:
         errorMessage = "ERROR: Passwords don't match."
-        print(errorMessage)
+        #print(errorMessage)
         emit('loadMessageBox', errorMessage);
         errorCheckPass = False
     
     # try to insert new password
     try:
-        print("Inserting password...")
+        #print("Inserting password...")
         passwordInsertQuery = "UPDATE users SET password = crypt(%s, gen_salt('bf')) WHERE username = %s;"
         cur.execute(passwordInsertQuery, (password, username))
         success_message = "Password changed!"
         emit('loadMessageBox', success_message)
     except:
         errorMessage = "ERROR: Problem updating password..."
-        print(errorMessage)
+        #print(errorMessage)
         emit('loadMessageBox', errorMessage)
         db.rollback()
     db.commit()
@@ -782,10 +786,11 @@ def deleteUser(username):
     savedUser = current_user
     
     # Make sure user exists in database
-    print("Checking for username in database....")
+    #print("Checking for username in database....")
     cur.execute("SELECT username FROM users WHERE username = %s;", (username,))
     if cur.fetchone():
-        print("Username is found.")
+        #print("Username is found.")
+        pass
     else:
         # send message alerting user to error
         message = "User '" + username + "' not found."
@@ -793,7 +798,7 @@ def deleteUser(username):
         testDeletion = False
         
     # Attempt to delete user
-    print("Attempting to delete user....")
+    #print("Attempting to delete user....")
     try:
         query = "DELETE FROM users WHERE username = %s;"
         
@@ -806,7 +811,7 @@ def deleteUser(username):
         # Check to see if more than one admin
         dontDeleteLastAdmin = False
         if selfdeletion:
-            print("CHECKING FOR ADMIN COUNT")
+            #print("CHECKING FOR ADMIN COUNT")
             cur.execute("SELECT admin FROM users WHERE admin = 't';")
             result = cur.fetchall()
             if len(result) < 2:
@@ -815,15 +820,15 @@ def deleteUser(username):
         if dontDeleteLastAdmin:
             # send message alerting user to last admin rule
             message = "You cannot delete the last Admin User."
-            print(message)
+            #print(message)
             emit('loadMessageBox', message)
             testDeletion = False
         else:
-            print(cur.mogrify(query, (username,)))
+            #print(cur.mogrify(query, (username,)))
             cur.execute(query, (username,))
             
     except:
-        print("Error deleting user...")
+        #print("Error deleting user...")
         if selfdeletion:
             login_user(savedUser, remember=True)
             
@@ -836,18 +841,18 @@ def deleteUser(username):
     
     if testDeletion:
         # Check to make sure user was deleted
-        print("Checking success of user deletion....")
+        #print("Checking success of user deletion....")
         cur.execute("SELECT username FROM users WHERE username = %s;", (username,))
         if cur.fetchone():
             # user not deleted
-            print("User not deleted")
+            #print("User not deleted")
             # send message alerting user to this fact
             message = "Error deleting user " + username + " from database."
             emit('loadMessageBox', message)
         else:
-            print("User deleted")
+            #print("User deleted")
             if selfdeletion:
-                print("I DELETED MYSELF")
+                #print("I DELETED MYSELF")
                 
                 # clear session variables
                 for key in session.keys():
@@ -897,7 +902,7 @@ def loadMice(dataset):
     cur.execute("SELECT heatdata, vectordata, locationmap, subjectmap FROM datasets WHERE datasetname = %s;", (dataset,))
     result = cur.fetchone()
     
-    print(result['subjectmap'])
+    #print(result['subjectmap'])
     
     emit('returnDataset', {
         'data': {
