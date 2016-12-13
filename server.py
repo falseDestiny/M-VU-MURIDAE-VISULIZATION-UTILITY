@@ -567,8 +567,8 @@ def loadSubMap(gridName):
     cur.close()
     db.close()
     
-@socketio.on('viewDataSet', namespace='/heatmap')
-def viewDataSet(setName):
+@socketio.on('viewHeatData', namespace='/heatmap')
+def viewHeatData(setName):
     db = connectToDB()
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT heatdata FROM datasets WHERE datasetname = '%s';" % (setName))
@@ -577,13 +577,21 @@ def viewDataSet(setName):
     finalResults = []
     finalResults.append(setName)
     finalResults.append(finalHeat)
+    cur.close()
+    db.close()
+    emit('returnViewHeatData', finalResults)
+    
+@socketio.on('viewVectorData', namespace='/heatmap')
+def viewVectorData(setName):
+    db = connectToDB()
+    cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT vectordata FROM datasets WHERE datasetname = '%s';" % (setName))
     result = cur.fetchone()
     finalvector = convertVectorString(result[0])
-    finalResults.append(finalvector)
-    emit('returnSetData', finalResults)
     cur.close()
     db.close()
+    emit('returnViewVectorData', finalvector)
+    
     
 @socketio.on('deleteSet', namespace='/heatmap')
 def deleteSet(setName):

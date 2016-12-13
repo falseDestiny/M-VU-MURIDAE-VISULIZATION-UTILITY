@@ -74,10 +74,10 @@ HeatmapApp.controller('HeatmapController', function($scope){
     socket.on('returnDataset', function(data) {
         subjectMap = [];
         
-        heatData = JSON.parse(data.data.heatdata);
-        vectorData = JSON.parse(data.data.vectdata);
-        mapping = JSON.parse(data.data.mapping);
-        subjectMap = JSON.parse(data.data.subjects);
+        heatData = JSON.parse(JSON.stringify(data.data.heatdata));
+        vectorData = JSON.parse(JSON.stringify(data.data.vectdata));
+        mapping = JSON.parse(JSON.stringify(data.data.mapping));
+        subjectMap = JSON.parse(JSON.stringify(data.data.subjects))
         
         // GET SIZE OF GRID (subtract rows and columns entries)
         size = Object.keys(mapping).length - 3;
@@ -773,7 +773,8 @@ HeatmapApp.controller('UploadController', function($scope){
     $scope.loadDataset = function loadDataset() {
         document.querySelector('#placeholder').style.display="none"; //hides the placeholder div
         $('.collapse').collapse("show");
-        socket.emit('viewDataSet', $scope.selection);
+        $scope.tempName = $scope.selection;
+        socket.emit('viewHeatData', $scope.selection);
     };
     
     $scope.showDelete = function showDelete(){
@@ -820,7 +821,7 @@ HeatmapApp.controller('UploadController', function($scope){
         
         document.querySelector('#placeholder').style.display="none"; //hides the placeholder div
         $('.collapse').collapse("show");
-        socket.emit('viewDataSet', $scope.tempName);
+        socket.emit('viewHeatData', $scope.tempName);
     };
         
     $scope.checkEdit = function checkEdit(){
@@ -929,34 +930,52 @@ HeatmapApp.controller('UploadController', function($scope){
     $scope.vectorData = [];
     $scope.displayName = "";
     
+    socket.on('returnViewHeatData', function(heatData){
+        $scope.heatData = [];
+        $scope.displayName = "";
+        $scope.displayName = heatData[0];
+        for(var key in heatData[1]){
+            for(var innerkey in heatData[1][key]){
+                var thisLine = [];
+                thisLine["subject"] = key;
+                thisLine["location"] = innerkey;
+                thisLine["time"] = heatData[1][key][innerkey];
+                $scope.heatData.push(thisLine);
+            }
+        }
+        socket.emit('viewVectorData', $scope.tempName);
+    });
+    
+    socket.on('returnViewVectorData', function(vectorData){
+        $scope.vectorData = [];
+        for (var key in vectorData){
+            for(var x = 0; x < vectorData[key].length; x++){
+                var thisLine = [];
+                thisLine["subject"] = key;
+                thisLine["location"] = vectorData[key][x][0];
+                thisLine["time"] = vectorData[key][x][1];
+                $scope.vectorData.push(thisLine);
+            }
+        }
+        $scope.$apply();
+    });
+    
+    
     socket.on('returnSetData', function(setData){
         $scope.heatData = [];
-        $scope.vectorData = [];
+        
         $scope.displayName = "";
         
         $scope.displayName = setData[0];
         
-        for(var key in setData[1]){
-            for(var innerkey in setData[1][key]){
-                var thisLine = [];
-                thisLine["subject"] = key;
-                thisLine["location"] = innerkey;
-                thisLine["time"] = setData[1][key][innerkey];
-                $scope.heatData.push(thisLine);
-            }
-        }
         
-        for (var key in setData[2]){
-            for(var x = 0; x < setData[2][key].length; x++){
-                var thisLine = [];
-                thisLine["subject"] = key;
-                thisLine["location"] = setData[2][key][x][0];
-                thisLine["time"] = setData[2][key][x][1];
-                $scope.vectorData.push(thisLine);
-            }
-        }
         
-        $scope.$apply();
+        
+        
+        
+        
+        
+        
     });
 });
 
