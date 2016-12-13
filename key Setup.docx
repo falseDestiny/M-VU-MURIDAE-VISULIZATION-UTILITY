@@ -1,0 +1,13 @@
+Run Key Setup
+
+1) In terminal change your directory to the directory containing the keySetup.sh file.  This can be done by typing “cd DESIRED DIRECTORY”. For example if the .sh file is on your desktop type “cd Desktop”.  Once your directory has been changed execute the file by typing “./keySetup.sh”.
+
+2) When prompted “Enter file in which to save the key”, press enter.
+
+3) If asked to overwrite say yes.
+
+4) When asked to enter a passphrase, leave it blank and press enter.
+
+5) You will now be asked to enter the password for the root user of the server.  Enter the password “password”.
+
+Now you will no longer be prompted for a password when you run the other scripts associated with the server.  You will also no longer have to enter a password when you ssh into it.
