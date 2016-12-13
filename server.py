@@ -63,7 +63,7 @@ def connectToDB():
     try:
         return psycopg2.connect(connectionString)
     except:
-        print("Can't connect to database")
+        #print("Can't connect to database")
 
 
 ################################################################################
@@ -143,7 +143,6 @@ def convertLocationString(longstring):
     final = {}
     done = False
     counter = 0
-   # print(longstring)
     while counter < len(longstring):
         if longstring[counter] == "{" or longstring[counter] == "}":
             counter += 1
@@ -155,11 +154,11 @@ def convertLocationString(longstring):
             while not done:
                 thiskey += longstring[counter]
                 counter += 1
-                if longstring[counter] == '"':
+                if longstring[counter] == "'":
                     done = True
             done = False
             counter += 4
-            while longstring[counter] != '"':
+            while longstring[counter] != "'":
                 thisvalue += longstring[counter]
                 counter += 1
             counter += 3
@@ -565,8 +564,8 @@ def getGridToMimic(gridName):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (gridName))
     result = cur.fetchone()
-    finalResult = convertLocationString(result[0])
-    emit('setMimicGrid', finalResult)
+    #finalResult = convertLocationString(result[0])
+    emit('setMimicGrid', json.dumps(result[0]))
     cur.close()
     db.close()
     
@@ -580,8 +579,9 @@ def loadGrid(gridName):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (gridName))
     result = cur.fetchone()
-    finalResult = convertLocationString(result[0])
-    emit('setLoadedGrid', encode(finalResult))
+#    finalResult = convertLocationString(str(result[0]))
+#    emit('setLoadedGrid', encode(finalResult))
+    emit('setLoadedGrid', encode(json.dumps(result[0])))
     cur.close()
     db.close()
     
@@ -591,8 +591,9 @@ def loadSubMap(gridName):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT subjectmap FROM datasets WHERE datasetname = '%s';" % (gridName))
     result = cur.fetchone()
-    finalResult = convertSubjectString(result[0])
-    emit('setLoadedSubMap', finalResult)
+#    finalResult = convertSubjectString(result[0])
+#    emit('setLoadedSubMap', finalResult)
+    emit('setLoadedSubMap', encode(json.dumps(result[0])))
     cur.close()
     db.close()
     
@@ -602,13 +603,14 @@ def viewHeatData(setName):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT heatdata FROM datasets WHERE datasetname = '%s';" % (setName))
     result = cur.fetchone()
-    finalHeat = convertHeatString(result[0])
+    #finalHeat = convertHeatString(result[0])
     finalResults = []
     finalResults.append(setName)
-    finalResults.append(finalHeat)
+    finalResults.append(json.dumps(result[0]))
+    emit('returnViewHeatData', finalResults)
     cur.close()
     db.close()
-    emit('returnViewHeatData', finalResults)
+    #emit('returnViewHeatData', finalResults)
     
 @socketio.on('viewVectorData', namespace='/heatmap')
 def viewVectorData(setName):
@@ -616,10 +618,10 @@ def viewVectorData(setName):
     cur = db.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT vectordata FROM datasets WHERE datasetname = '%s';" % (setName))
     result = cur.fetchone()
-    finalvector = convertVectorString(result[0])
+    #finalvector = convertVectorString(result[0])
     cur.close()
     db.close()
-    emit('returnViewVectorData', finalvector)
+    emit('returnViewVectorData', json.dumps(result[0]))
     
     
 @socketio.on('deleteSet', namespace='/heatmap')

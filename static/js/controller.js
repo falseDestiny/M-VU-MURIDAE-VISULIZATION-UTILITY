@@ -5,7 +5,7 @@ var HeatmapApp = angular.module('HeatmapApp', []);
 
 HeatmapApp.controller('HeatmapController', function($scope){
    
-    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
     
     // VARIABLES
     var heatmapChart = null;
@@ -504,7 +504,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
 
 HeatmapApp.controller('UploadController', function($scope){
     
-    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
   
     $scope.sensors=["---","RFID01","RFID02","RFID03","RFID04","RFID05","RFID06","RFID07","RFID08","RFID09","RFID10","RFID11","RFID12","RFID13","RFID14","RFID15","RFID16","RFID17","RFID18","RFID19","RFID20","RFID21","RFID22","RFID23","RFID24","RFID25","RFID26","RFID27","RFID28","RFID29","RFID30","RFID31","RFID32","RFID33","RFID34","RFID35","RFID36",];
     
@@ -579,7 +579,9 @@ HeatmapApp.controller('UploadController', function($scope){
         }
     });
     
-    socket.on('setMimicGrid', function(grid){
+    socket.on('setMimicGrid', function(data){
+       var grid = JSON.parse(data);
+       console.log(grid);
        $scope.colsInt = parseInt(grid["columns"], 10);
        $scope.rowsInt = parseInt(grid["rows"], 10);
        for(var i=0; i < $scope.rowsInt; i++){
@@ -770,6 +772,10 @@ HeatmapApp.controller('UploadController', function($scope){
         document.querySelector('#placeholder').style.display="none"; //hides the placeholder div
         $('.collapse').collapse("show");
         $scope.tempName = $scope.selection;
+	console.log($scope.tempName);
+        //$scope.$apply();
+        $scope.popup_show("processingPopUp")
+
         socket.emit('viewHeatData', $scope.selection);
     };
     
@@ -790,8 +796,8 @@ HeatmapApp.controller('UploadController', function($scope){
     };
     
     $scope.editSet = function editSet(){
-        $scope.tempName = $scope.displayName;
-        socket.emit("loadGrid", $scope.displayName);
+//        $scope.tempName = $scope.displayName;
+        socket.emit("loadGrid", $scope.tempName);
     };
     
     $scope.saveEdits = function saveEdits(){
@@ -885,9 +891,12 @@ HeatmapApp.controller('UploadController', function($scope){
     socket.on('setLoadedGrid', function(data){
         //console.log(data);
         //var grid = JSON.parse(JSON.stringify( (data.split("]"))[1]));
+	console.log(data);
        var grid = parseDict((data.split("]"))[1]);
+//       console.log(data);
        //var grid = decodeURI(data);
-       console.log(grid);
+//       console.log(grid);
+       //console.log(grid);
        //console.log(grid);
        $scope.colsInt = parseInt(grid["columns"], 10);
        $scope.rowsInt = parseInt(grid["rows"], 10);
@@ -896,15 +905,18 @@ HeatmapApp.controller('UploadController', function($scope){
            for(var j = 0; j < $scope.colsInt; j ++){
                var thisKey = ((i * $scope.colsInt) + j).toString();
                $scope.locationMap[i][j] = grid[thisKey];
+	       $scope.$apply();
            }
        }
-       $scope.$apply();
-       socket.emit("loadSubMap", $scope.displayName);
+       console.log($scope.locationMap);
+       socket.emit("loadSubMap", $scope.tempName);
     });
     
-    socket.on('setLoadedSubMap', function(grid){
+    socket.on('setLoadedSubMap', function(data){
         $scope.subjectMap = [];
-        
+        console.log(data);
+	var grid = parseSubject((data.split("]"))[1]);
+	console.log(grid);
         for (var line in grid) {
             if (grid.hasOwnProperty(line)) {
                 var thisItem = {};
@@ -949,8 +961,9 @@ HeatmapApp.controller('UploadController', function($scope){
     $scope.vectorData = [];
     $scope.displayName = "";
     
-    socket.on('returnViewHeatData', function(heatData){
-        $scope.heatData = [];
+    socket.on('returnViewHeatData', function(data){
+        var heatData = parseHeatLines(data);
+	$scope.heatData = [];
         $scope.displayName = "";
         $scope.displayName = heatData[0];
         for(var key in heatData[1]){
@@ -965,7 +978,8 @@ HeatmapApp.controller('UploadController', function($scope){
         socket.emit('viewVectorData', $scope.tempName);
     });
     
-    socket.on('returnViewVectorData', function(vectorData){
+    socket.on('returnViewVectorData', function(data){
+        var vectorData = parseVectorLines(data);
         $scope.vectorData = [];
         for (var key in vectorData){
             for(var x = 0; x < vectorData[key].length; x++){
@@ -976,24 +990,16 @@ HeatmapApp.controller('UploadController', function($scope){
                 $scope.vectorData.push(thisLine);
             }
         }
+        $scope.popup_hide("processingPopUp")
+
         $scope.$apply();
     });
     
     
     socket.on('returnSetData', function(setData){
         $scope.heatData = [];
-        
         $scope.displayName = "";
-        
         $scope.displayName = setData[0];
-        
-        
-        
-        
-        
-        
-        
-        
         
     });
 });
@@ -1003,13 +1009,57 @@ function parseDict(data){
     var dict = {};
     var trimEnds = data.substr(1, data.length - 2);
     var splitCells = trimEnds.split(", ");
-    for(var x = 0; x < splitCells.length; x ++){
+    for(var x = 0; x < splitCells.length - 2; x ++){
         var theseCells = splitCells[x].split(": ");
         var firstWord = theseCells[0].replace("'", "");
         var secondWord = theseCells[1].replace("'", "");
-        dict[firstWord.replace("'", "")] = secondWord.replace("'", "");
+	firstWord = firstWord.replace('"', '');
+	firstWord = firstWord.replace('"', '');
+	secondWord = secondWord.replace('"', '');
+	secondWord = secondWord.replace('"', '');
+//        console.log("First word " + firstWord);
+//        console.log("Second word " + secondWord);
+	if(!isNaN(firstWord.replace("'", ""))){
+            dict[parseInt(firstWord.replace("'", ""))] = secondWord.replace("'", "");
+	}
+    }
+    dict["columns"] = parseInt(data.substr(data.length -16, 1));
+    dict["rows"] = parseInt(data.substr(data.length - 3, 1));
+    return dict;
+}
+
+function parseSubject(data){
+    var dict = {};
+    var trimEnds = data.substr(1, data.length -2);
+    var splitCells = trimEnds.split(", ");
+    for(var x = 0; x < splitCells.length; x ++){
+	var theseCells = splitCells[x].split(": ");
+        var firstWord = theseCells[0].replace('"', '');
+	firstWord = firstWord.replace('"', '');
+	//firstWord.replace('"', '');
+        var secondWord = theseCells[1].replace('"', '');
+	secondWord = secondWord.replace('"', '');
+        dict[firstWord] = secondWord;
     }
     return dict;
+}
+
+function parseHeatLines(data){
+//    console.log(data);
+    var finalArray = []
+    var firstArray = JSON.parse(JSON.stringify(data));
+    finalArray.push(firstArray[0]);
+    finalArray.push(JSON.parse(firstArray[1]));
+//    console.log("Final data: " );
+//    console.log(finalArray);
+    return finalArray;
+}
+
+function parseVectorLines(data){
+//    console.log(data);
+    var final = JSON.parse(data);
+    console.log(final);
+    return final;
 }
 
 function decodeWebSocket (data){
@@ -1034,7 +1084,7 @@ function decodeWebSocket (data){
 
 HeatmapApp.controller('UserController', function($scope){
     
-    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
     
     $scope.users = [];
     $scope.MessageBoxMessage = "";
