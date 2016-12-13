@@ -5,7 +5,7 @@ var HeatmapApp = angular.module('HeatmapApp', []);
 
 HeatmapApp.controller('HeatmapController', function($scope){
    
-    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
     
     // VARIABLES
     var heatmapChart = null;
@@ -504,7 +504,7 @@ HeatmapApp.controller('HeatmapController', function($scope){
 
 HeatmapApp.controller('UploadController', function($scope){
     
-    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
   
     $scope.sensors=["---","RFID01","RFID02","RFID03","RFID04","RFID05","RFID06","RFID07","RFID08","RFID09","RFID10","RFID11","RFID12","RFID13","RFID14","RFID15","RFID16","RFID17","RFID18","RFID19","RFID20","RFID21","RFID22","RFID23","RFID24","RFID25","RFID26","RFID27","RFID28","RFID29","RFID30","RFID31","RFID32","RFID33","RFID34","RFID35","RFID36",];
     
@@ -1034,7 +1034,7 @@ function decodeWebSocket (data){
 
 HeatmapApp.controller('UserController', function($scope){
     
-    var socket = io.connect('https://' + document.domain + ':' + location.port + '/heatmap');
+    var socket = io.connect('http://' + document.domain + ':' + location.port + '/heatmap');
     
     $scope.users = [];
     $scope.MessageBoxMessage = "";
