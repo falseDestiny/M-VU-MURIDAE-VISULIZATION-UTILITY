@@ -283,6 +283,35 @@ def parseSubjectMap(data):
                 thisValue = str(entry[key])
         subjectMap[thisSubject] = thisValue
     return subjectMap
+    
+    
+    
+def encode(data):
+    bytesFormatted = []
+    bytesFormatted.append(129)
+
+    bytesRaw = (str(data)).encode()
+    bytesLength = len(bytesRaw)
+    if bytesLength <= 125 :
+        bytesFormatted.append(bytesLength)
+    elif bytesLength >= 126 and bytesLength <= 65535 :
+        bytesFormatted.append(126)
+        bytesFormatted.append( ( bytesLength >> 8 ) & 255 )
+        bytesFormatted.append( bytesLength & 255 )
+    else :
+        bytesFormatted.append( 127 )
+        bytesFormatted.append( ( bytesLength >> 56 ) & 255 )
+        bytesFormatted.append( ( bytesLength >> 48 ) & 255 )
+        bytesFormatted.append( ( bytesLength >> 40 ) & 255 )
+        bytesFormatted.append( ( bytesLength >> 32 ) & 255 )
+        bytesFormatted.append( ( bytesLength >> 24 ) & 255 )
+        bytesFormatted.append( ( bytesLength >> 16 ) & 255 )
+        bytesFormatted.append( ( bytesLength >>  8 ) & 255 )
+        bytesFormatted.append( bytesLength & 255 )
+
+    bytesFormatted = bytes(bytesFormatted)
+    bytesFormatted = bytesFormatted + bytesRaw
+    return bytesFormatted
 
 
 ################################################################################
@@ -552,7 +581,7 @@ def loadGrid(gridName):
     cur.execute("SELECT locationmap FROM datasets WHERE datasetname = '%s';" % (gridName))
     result = cur.fetchone()
     finalResult = convertLocationString(result[0])
-    emit('setLoadedGrid', finalResult)
+    emit('setLoadedGrid', encode(finalResult))
     cur.close()
     db.close()
     

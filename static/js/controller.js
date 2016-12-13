@@ -882,7 +882,13 @@ HeatmapApp.controller('UploadController', function($scope){
         }
     };
     
-    socket.on('setLoadedGrid', function(grid){
+    socket.on('setLoadedGrid', function(data){
+        //console.log(data);
+        //var grid = JSON.parse(JSON.stringify( (data.split("]"))[1]));
+       var grid = parseDict((data.split("]"))[1]);
+       //var grid = decodeURI(data);
+       console.log(grid);
+       //console.log(grid);
        $scope.colsInt = parseInt(grid["columns"], 10);
        $scope.rowsInt = parseInt(grid["rows"], 10);
        for(var i=0; i < $scope.rowsInt; i++){
@@ -991,6 +997,40 @@ HeatmapApp.controller('UploadController', function($scope){
         
     });
 });
+
+
+function parseDict(data){
+    var dict = {};
+    var trimEnds = data.substr(1, data.length - 2);
+    var splitCells = trimEnds.split(", ");
+    for(var x = 0; x < splitCells.length; x ++){
+        var theseCells = splitCells[x].split(": ");
+        var firstWord = theseCells[0].replace("'", "");
+        var secondWord = theseCells[1].replace("'", "");
+        dict[firstWord.replace("'", "")] = secondWord.replace("'", "");
+    }
+    return dict;
+}
+
+function decodeWebSocket (data){
+    console.log("Made it here ... ");
+    var datalength = data[1] & 127;
+    var indexFirstMask = 2;
+    if (datalength == 126) {
+        indexFirstMask = 4;
+    } else if (datalength == 127) {
+        indexFirstMask = 10;
+    }
+    var masks = data.slice(indexFirstMask,indexFirstMask + 4);
+    var i = indexFirstMask + 4;
+    var index = 0;
+    var output = "";
+    while (i < data.length) {
+        output += String.fromCharCode(data[i++] ^ masks[index++ % 4]);
+        console.log(output);
+    }
+    return output;
+}
 
 HeatmapApp.controller('UserController', function($scope){
     
