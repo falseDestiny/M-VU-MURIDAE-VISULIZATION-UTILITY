@@ -30,7 +30,94 @@ The Muridae Visulization Utility (M-VU) is a web application designed to provide
 - Digital Ocean server using Ubuntu 16.04
 
 ## Installation:
-add stuff here
+
+### DigitalOcean setup
+
+#### Create Droplet
+Once a user has created an account on DigitalOcean they will be able to create what is called a droplet.
+* Click on the green button at the top right of the screen labeled “Create Droplet”
+* The default settings for the droplet are already in place. 
+* The only setting that should be modified is the “Choose a size” setting. 
+  * This should be switched to $5 a month. 
+  * This can be done by clicking the box labeled $5. 
+  * After this change has been made click on the green submit button at the bottom of the page that is labeled “Create”.
+  
+#### Modify user account on the droplet
+Now that the droplet has been created you will be taken to the droplet screen, and you are ready to begin installing the packages that are necessary for running the web application.  
+
+* Click on your new droplet that is located under the name field of the page.
+* You are now presented with the droplets data activity.  
+  * To the upper right there are two green buttons.  
+  * They are called “Create Droplet” and “ON”.  
+  * Just below the two of them there is a button that says “Console”.  
+  * To the far right of this button you will see “ipv4:” followed by a string of numbers separated by period.  
+  * Write down this number.  
+* Now click on the button labeled “Console”.
+* When you first enter the Console window you will be asked for a username.  
+  * The default username is “root”.  
+* Type “root” and press enter.  
+* You will now be prompted for a password.  
+  * This password has been emailed to the email address that was used when creating the DigitalOcean account.  
+* Enter this password now.
+* After you enter the password that was emailed to you you will be prompted to enter the same password again.  
+* Enter this password once again and press enter.
+* Now you will be prompted to enter a new password.  
+* Please enter a password that is easily remembered by you.
+
+#### Run keySetup.sh
+* Open the file called “keySetup.sh”.
+* On line 4 you will see “root@162.243.186.124”.  
+* Change the numbers after root to the numbers you wrote down that were after the text “ipv4”.
+* In terminal change your directory to the directory containing the keySetup.sh file.  
+  * This can be done by typing “cd DESIRED DIRECTORY”. 
+  * For example if the .sh file is on your desktop type “cd Desktop”.  
+* Once your directory has been changed execute the file by typing “./keySetup.sh”.
+* When prompted “Enter file in which to save the key”, press enter.
+* If asked to overwrite say yes.
+* When asked to enter a passphrase, leave it blank and press enter.
+* You will now be asked to enter the password for the root user of the server.  
+* Enter the password you chose earlier that was used to replace the password that was emailed to you.
+
+#### Install packages onto the server
+* Open the file called “installPackages.sh”.
+* On line 3 you will see “SERVERS="162.243.186.124”.  
+* Changes the numbers after “SERVERS” to the numbers you wrote down that were after the text “ipv4”.
+* In terminal change your directory to the directory containing the installPackages.sh file.  
+  * This can be done by typing “cd DESIRED DIRECTORY”. 
+  * For example if the .sh file is on your desktop type “cd Desktop”.  
+* Once your directory has been changed execute the file by typing “./installPackages.sh”.
+* All appropriate packages have now been installed
+
+#### Setup the database
+* Open terminal and execute this command-“ssh root@162.243.186.124” where the long string of numbers after “root@“ is replaced by the numbers you wrote down that were after the text “ipv4”.
+* enter the command “cd mvu” then press enter.  
+  * This will change your directory to mvu.
+* enter the command “sudo sudo -u postgres psql”.  
+  * This will allow you to enter postgres.
+* Enter the command “\password postgres”. 
+  * This will allow you to create a new postgres password.  
+* After entering your new password press enter.  
+* Next enter the command “\quit”.
+* Now you are back into the “mvu” directory. 
+* Enter the command “psql -U postgres -h localhost”.
+* After entering postgres the second time you will be able to setup the database with the necessary tables.  
+* Enter the command “\i mouseDB.sql”.  
+  * The needed database has now been created.
+
+#### Setup the Hosting Service
+* Open the file called “restartServer.sh”.
+* On line 3 you will see “SERVERS="45.55.254.5”.  
+* Change the numbers after “SERVERS” to the numbers you wrote down that were after the text “ipv4”.
+* In terminal change your directory to the directory containing the restartServer.sh file.  
+  * This can be done by typing “cd DESIRED DIRECTORY”. 
+  * For example if the .sh file is on your desktop type “cd Desktop”.  
+* Once your directory has been changed execute the file by typing “./restartServer.sh”.  
+
+#### View the website
+* Open up a web browser.
+* In the address bar enter the string of numbers that you wrote down that were after the text “ipv4”.
+
+#### Congratulations! You have setup a web server, give yourself a pat on the back:)
 
 ## Common Features:
 ### Login:
