@@ -75,3 +75,41 @@ dataset file - must be a valid file format
 dataset name - cannot be a duplicate of existing dataset  
 subject names - no limitations  
 
+## Files:
+- HTML
+ - /templates/layout.html - provides common html code accross site
+ - /templates/login.html - handles login page html 
+ - /templates/index.html - handles main page html 
+ - /templates/maps.html - handles map page html 
+ - /templates/data.html - handles data page html 
+ - /templates/users.html - handles users page html 
+ - /templates/sendaccesscode.html - handles send access code html
+ - /templates/confirmaccesscode.html - handles confirm access code html
+ - /templates/createnewpassword.html - handles create new password html
+- CSS
+ - /static/css/main.css - provides the custom CSS for the web application
+- JavaScript
+ - /static/js/controller.js - Provides the AngularJS controller for the application
+ - /static/js/heatmap.js - The Heatmap Utility used to display heatmaps
+ - /static/js/vectormap.js - The Vectormap Utility to display vectormaps
+- Scripts
+ - Python
+  - server.py - Main server script to run the applacation and handle database queries
+  - mouse.py - the object for mice in the simulation
+  - parse.py - parses the data file for use in the simulation
+  - sim.py - simulates the mouse objects and constructs the heatmap and vectormap data
+ - Shell
+  - installPackages.sh - installs necessary packages for running the web application
+  - keySetup.sh - setups user key to elminate the necessity of entering passwords during server interaction
+  - restartServer.sh - restarts the server
+- SQL
+ - mouseDB.sql - creates the postgres database for the application 
+
+- 3rd Party Code
+ - CSS
+  - /static/css/bootstrap-switch.css - provides CSS for the bootstrap switch utility
+  - /static/css/dropdowns-enhancemnet.min.css - provides CSS changes for bootstrap dropdowns
+ - JavaScript
+  - /static/js/bootstrap-switch.min.js - provides JavaScript for the bootstrap switch utility
+  - /static/js/dropdowns-enhancement.js - provides JavaScript changes for bootsstrap dropdowns
+  - /static/js/rainbowvis.js - provides color gradients for the Heatmap utility
