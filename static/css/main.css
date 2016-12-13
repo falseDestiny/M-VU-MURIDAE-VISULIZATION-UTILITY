@@ -682,7 +682,9 @@ hr {
 
 /* START USER MANAGEMENT */
 /* POPUP BOX */
-#deleteUserPopup, #createUserPopup, #changePasswordPopup, #headerHide, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp, #deletePopUp, #editPopUp, #subjectsPopUp, #processingPopUp {
+#deleteUserPopup, #createUserPopup, #changePasswordPopup, #headerHide, #MessageBox, 
+#genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, 
+#mimicGridPopUp, #deletePopUp, #editPopUp, #subjectsPopUp, #processingPopUp { 
 	position: fixed;
 	width: 100%;
 	top: 0;
@@ -696,7 +698,9 @@ hr {
 	overflow:auto;
 }
 
-#deleteUserPopup, #createUserPopup, #changePasswordPopup, #MessageBox, #genericPopUp, #gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, #mimicGridPopUp, #deletePopUp, #editPopUp, #subjectsPopUp, #processingPopUp {
+#deleteUserPopup, #createUserPopup, #changePasswordPopup, #MessageBox, #genericPopUp, 
+#gridOptionPopUp, #setDimensionsPopUp, #defineGridPopUp, #finalizeUpload, 
+#mimicGridPopUp, #deletePopUp, #editPopUp, #subjectsPopUp, #processingPopUp {
 	height: 100%;
 	z-index:1000;
 }
@@ -732,10 +736,43 @@ hr {
 	}
 }
 
+.finalizePopup {
+	width: 700px;
+	margin-left: -350px;
+	padding: 10px 50px 0 50px;
+}
+
+.subjectsPopup {
+	width: 600px;
+	margin-left: -300px;
+	padding: 0 50px 0 50px;
+}
+
+.edit {
+	transition-duration: 0s;
+	padding: 0 50px 0 50px;
+}
+.editPopupEight {
+	width: 1000px;
+	margin-left: -500px;
+}
+.editPopupSeven {
+	width: 900px;
+	margin-left: -450px;
+}
+.editPopupSix {
+	width: 800px;
+	margin-left: -400px;
+}
+.editPopupFive {
+	width: 700px;
+	margin-left: -350px;
+}
+
 .extrawide-popupdiv{
 	width: 1000px;
-	margin-left: -300px;
-	padding: 10 50px 10 50px;
+	margin-left: -500px;
+	padding: 0 50px 0 50px;
 }
 
 .createUser-flex {
