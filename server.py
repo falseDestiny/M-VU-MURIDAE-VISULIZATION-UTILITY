@@ -63,7 +63,7 @@ def connectToDB():
     try:
         return psycopg2.connect(connectionString)
     except:
-        #print("Can't connect to database")
+        print("Can't connect to database")
 
 
 ################################################################################
