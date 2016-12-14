@@ -1,6 +1,6 @@
 #!/bin/bash
 # Linux/UNIX box with ssh key based login
-SERVERS="45.55.254.5"
+SERVERS="162.243.184.113"
 # Set user variable
 user="root"
 # Clear the screen
